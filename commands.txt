@@ -1,0 +1,15 @@
+## Deploying to Cloud Run on GCP 🍀
+####################################
+
+## 🌺 🌺 🌺 Build container image for cloud run
+gcloud builds submit --tag gcr.io/paymentplatform-33/anchor
+
+OR (BEST PRACTICE and faster cold starts ...)
+##  🌺 🌺 🌺 use Jib to create container image - see plugin in pom.xml (name of image defined here)
+./mvnw compile jib:build
+
+
+#  🌼  🌼  🌼 Deploy container
+gcloud run deploy --image gcr.io/paymentplatform-33/anchor --platform managed
+
+
