@@ -217,7 +217,7 @@ public class PaymentService {
         if (anchor != null) {
             return;
         }
-        Toml toml = tomlService.getToml(anchorId);
+        Toml toml = tomlService.getAnchorToml(anchorId);
         if (toml == null) {
             throw new Exception("anchor.toml has not been found. upload the file from your computer");
         } else {

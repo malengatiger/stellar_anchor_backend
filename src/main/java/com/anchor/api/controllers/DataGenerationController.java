@@ -41,9 +41,11 @@ public class DataGenerationController {
     private DemoDataGenerator demoDataGenerator;
     @Value("${status}")
     private String status;
+    @Value("${anchorName}")
+    private String anchorName;
 
     @GetMapping(value = "/generateAnchor", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Anchor generateAnchor(@RequestParam String anchorName) throws Exception {
+    public Anchor generateAnchor() throws Exception {
         LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 StellarAnchorApplication /generateAnchor ...");
         Anchor anchor = demoDataGenerator.startAnchor(anchorName);
         LOGGER.info(Emoji.DICE.concat(Emoji.DICE.concat(Emoji.DICE)
@@ -51,6 +53,8 @@ public class DataGenerationController {
                 .concat(G.toJson(anchor))));
         LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C GenerateDemoData:generateAnchor completed and returning external caller... "
                 + new Date().toString() + " \uD83D\uDC99 \uD83D\uDC9C STATUS: " + status);
+        String result = generateDemo(anchor.getAnchorId());
+        LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C GenerateDemoData:generateAnchor, demo completed ... " + result);
         return anchor;
     }
     @GetMapping(value = "/generateDemo", produces = MediaType.TEXT_PLAIN_VALUE)
@@ -58,6 +62,12 @@ public class DataGenerationController {
         LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 StellarAnchorApplication /generateDemo ...");
         demoDataGenerator.startGeneration(anchorId);
         return "\uD83D\uDC99 \uD83D\uDC9C GenerateDemoData completed ... "
+                + new Date().toString() + " \uD83D\uDC99 \uD83D\uDC9C STATUS: " + status;
+    }
+    @GetMapping(value = "/generateAgentClients", produces = MediaType.TEXT_PLAIN_VALUE)
+    public String generateAgentClients(@RequestParam String anchorId, @RequestParam int count) throws Exception {
+        demoDataGenerator.generateAgentClients(anchorId, count);
+        return "\uD83D\uDC99 \uD83D\uDC9C generateAgentClients completed ... "
                 + new Date().toString() + " \uD83D\uDC99 \uD83D\uDC9C STATUS: " + status;
     }
     @GetMapping(value = "/generateLoans", produces = MediaType.TEXT_PLAIN_VALUE)

@@ -15,6 +15,7 @@ import org.springframework.boot.Banner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.env.Environment;
@@ -24,6 +25,7 @@ import java.io.PrintStream;
 import java.util.Calendar;
 
 @SpringBootApplication
+@RefreshScope
 @EnableScheduling
 public class AnchorBackendApplication implements ApplicationListener<ApplicationReadyEvent> {
 	public static final Logger LOGGER = LoggerFactory.getLogger(AnchorBackendApplication.class.getSimpleName());
@@ -68,16 +70,20 @@ public class AnchorBackendApplication implements ApplicationListener<Application
 	@Value("${status}")
 	private String status;
 
+	@Value("${spring.profiles.active}")
+	private String activeProfile;
+
 	@Autowired
 	private Scheduler scheduler;
 
 	@Override
 	public void onApplicationEvent(ApplicationReadyEvent event) {
-		LOGGER.info("\uD83C\uDF3C \uD83C\uDF3C onApplicationEvent: " +
+		LOGGER.info("\uD83C\uDF3C \uD83C\uDF3C AnchorBackendApplication: onApplicationEvent: " +
 				"ApplicationReadyEvent fired: \uD83C\uDF3C \uD83C\uDF3C app is ready to initialize Firebase .... ");
 		LOGGER.info("\uD83C\uDF3C \uD83C\uDF3C onApplicationEvent: DEVELOPMENT STATUS: " +
 				"\uD83C\uDF51 " + status + " \uD83C\uDF51 ");
-		LOGGER.info("\uD83C\uDF3C \uD83C\uDF3C onApplicationEvent: DEVELOPMENT STATUS: \uD83C\uDF51 " + status + " \uD83C\uDF51 ");
+		LOGGER.info("\uD83C\uDF3C \uD83C\uDF3C onApplicationEvent: ACTIVE PROFILE : " +
+				"\uD83C\uDF51 " + activeProfile + " \uD83C\uDF51 ");
 		accountService.printStellarHorizonServer();
 
 		Calendar cal = Calendar.getInstance();
@@ -86,10 +92,11 @@ public class AnchorBackendApplication implements ApplicationListener<Application
 		LOGGER.info(Emoji.SKULL.concat(Emoji.SKULL) + "Last Date of the current month = " + res);
 
 		try {
-			firebaseService.initializeDatabase();
+			//
 			accountService.listenForTransactions();
 			AnchorController controller = context.getBean(AnchorController.class);
 			controller.getStellarToml();
+			firebaseService.initializeFirebase();
 		} catch (Exception e) {
 			LOGGER.info(" \uD83C\uDF45 Firebase initialization FAILED");
 			e.printStackTrace();

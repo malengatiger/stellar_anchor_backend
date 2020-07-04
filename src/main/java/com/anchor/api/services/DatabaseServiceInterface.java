@@ -14,7 +14,6 @@ import org.stellar.sdk.responses.operations.OperationResponse;
 import java.util.List;
 
 public interface DatabaseServiceInterface {
-    public void initializeDatabase() throws Exception;
     public List<Anchor> getAnchors() throws Exception;
     public Agent getAgent(String agentId) throws Exception;
     public String addLoanApplication(LoanApplication application) throws Exception;

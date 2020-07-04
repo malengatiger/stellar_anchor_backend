@@ -332,53 +332,67 @@ public class AgentService {
     private Anchor anchor;
 
     private void setAnchor(String anchorId) throws Exception {
-        if (anchor != null) {
-            return;
-        }
-        LOGGER.info(".......... Anchor about to be set from toml file: ".concat(anchorId));
-        Toml toml = tomlService.getToml(anchorId);
-        if (toml == null) {
-            throw new Exception("anchor.toml has not been found. upload the file from your computer");
-        } else {
-            String id = toml.getString("anchorId");
-            anchor = firebaseService.getAnchor(id);
-            if (anchor == null) {
-                LOGGER.info(Emoji.NOT_OK.concat(Emoji.ERROR).concat("setAnchor: Anchor is missing"));
-                throw new Exception("AgentService:\uD83D\uDE21 \uD83D\uDE21 anchor is missing");
+        if (anchor == null) {
+            LOGGER.info("\n\n\uD83D\uDE21 \uD83D\uDE21 \uD83D\uDE21 ..........AgentService:  Anchor about to be set from toml file: ".concat(anchorId));
+            Toml toml = tomlService.getAnchorToml(anchorId);
+            if (toml == null) {
+                LOGGER.info(Emoji.PEPPER + Emoji.PEPPER + Emoji.PEPPER + "....... Failed to get anchor.toml file from encrypted storage." +
+                        " solve this by uploading anchor.toml file via AnchorController.uploadTOML \uD83D\uDE21 \uD83D\uDE21 \uD83D\uDE21 ");
+                throw new Exception("anchor.toml has not been found. upload the file from your computer");
+            } else {
+                String id = toml.getString("anchorId");
+                LOGGER.info(Emoji.RAIN_DROP + Emoji.RAIN_DROP + Emoji.RAIN_DROP + "....... Anchor ID from anchor.toml: " + id
+                        + "  \uD83D\uDE21 \uD83D\uDE21 \uD83D\uDE21 ");
+                anchor = firebaseService.getAnchor(id);
+                if (anchor == null) {
+                    LOGGER.info(Emoji.NOT_OK.concat(Emoji.ERROR).concat("setAnchor: Anchor is missing"));
+                    throw new Exception("AgentService:\uD83D\uDE21 \uD83D\uDE21 anchor is missing");
+                }
             }
+        } else {
+            LOGGER.info(Emoji.RAIN_DROP + Emoji.RAIN_DROP + Emoji.RAIN_DROP + "....... Anchor is set to: " + anchor.getName()
+                    + "  \uD83D\uDE21 \uD83D\uDE21 \uD83D\uDE21 ");
         }
+
 
     }
-
+    Toml toml;
     public Client createClient(Client client) throws Exception {
 
-        LOGGER.info(Emoji.LEMON + Emoji.LEMON + "....... creating Client ....... ");
-
-        Toml toml = tomlService.getToml(client.getAnchorId());
+        LOGGER.info(Emoji.LEMON + Emoji.LEMON + Emoji.LEMON + " ....... creating Client (check client duplicates) ....... " + client.getFullName());
         if (toml == null) {
-            throw new Exception("Anchor Settings not found");
+            toml = tomlService.getAnchorToml(client.getAnchorId());
+            if (toml == null) {
+                throw new Exception("Anchor Settings not found");
+            }
+            LOGGER.info(Emoji.RAIN_DROP + Emoji.RAIN_DROP + Emoji.RAIN_DROP + " ....... Anchor TOML file: " + toml.toString()
+                    + "  \uD83D\uDE21 \uD83D\uDE21 \uD83D\uDE21 ");
         }
         setAnchor(client.getAnchorId());
-        String fiatLimit = toml.getString("fiatLimit");
-        String clientStartingBalance = toml.getString("clientStartingBalance");
-        String startingFiatBalance = toml.getString("startingFiatBalance");
-        if (clientStartingBalance == null) {
-            clientStartingBalance = "100";
-        }
-        if (startingFiatBalance == null) {
-            startingFiatBalance = "0.01";
-        }
-        //Agent agent = firebaseService.getAgent(client.getAgentIds().get(0));
         if (anchor == null) {
             throw new Exception("Missing anchor");
         }
+        String fiatLimit = toml.getDouble("fiatLimit").toString();
+        String clientStartingBalance = toml.getLong("clientStartingBalance").toString();
+        String startingFiatBalance = toml.getDouble("startingFiatBalance").toString();
+        if (clientStartingBalance.equalsIgnoreCase("0")) {
+            clientStartingBalance = "100";
+        }
+        if (startingFiatBalance.equalsIgnoreCase("0")) {
+            startingFiatBalance = "0.01";
+        }
+        //Agent agent = firebaseService.getAgent(client.getAgentIds().get(0));
+
+        //todo - refine validation rules .....
         Client mClient = firebaseService.getClientByNameAndAnchor(anchor.getAnchorId(),
                 client.getPersonalKYCFields().getFirst_name(), client.getPersonalKYCFields().getLast_name());
 
         if (mClient != null) {
-            LOGGER.info(Emoji.ERROR
-                    + "Client already exists for this Anchor: ".concat(anchor.getName()).concat(Emoji.ERROR));
-            throw new Exception(Emoji.ERROR + "Client already exists for this Anchor");
+            LOGGER.info(Emoji.ERROR + Emoji.ERROR + Emoji.ERROR
+                    + "Client already exists for this Anchor: ".concat(anchor.getName()).concat(Emoji.ERROR)
+            .concat(" ").concat(client.getPersonalKYCFields().getFirst_name().concat(" ").concat(client.getPersonalKYCFields().getLast_name())));
+            //throw new Exception(Emoji.ERROR + "Client already exists for this Anchor");
+            return mClient;
         }
 
         AccountResponseBag bag = accountService.createAndFundUserAccount(client.getAnchorId(), clientStartingBalance,
@@ -397,10 +411,8 @@ public class AgentService {
 
         }
 
-        firebaseService.addClient(client);
         encryptAndSave(client, bag);
-        client.setSecretSeed(bag.getSecretSeed());
-        LOGGER.info(Emoji.BLUE_BIRD + Emoji.BLUE_BIRD + "....... Client created ....... " + G.toJson(client));
+        LOGGER.info(Emoji.BLUE_BIRD + Emoji.BLUE_BIRD + " ....... Client created ....... " + client.getFullName());
         return client;
     }
 
@@ -408,21 +420,30 @@ public class AgentService {
         // create firebase auth user
         UserRecord record = firebaseService.createUser(client.getFullName(),
                 client.getPersonalKYCFields().getEmail_address(), client.getPassword());
+        LOGGER.info(Emoji.BLUE_BIRD + Emoji.BLUE_BIRD + " Firebase auth user created, uid:  ".concat(record.getUid()));
         client.setClientId(record.getUid());
+        client.setSecretSeed(null);
+        client.setAccount(bag.getAccountResponse().getAccountId());
+        client.setExternalAccountId("To Be Determined");
         client.setDateRegistered(new DateTime().toDateTimeISO().toString());
         client.setDateUpdated(new DateTime().toDateTimeISO().toString());
         // handle seed encryption
         cryptoService.encrypt(bag.getAccountResponse().getAccountId(), bag.getSecretSeed());
-        client.setAccount(bag.getAccountResponse().getAccountId());
-        client.setExternalAccountId("Not Known Yet");
         String savePassword = client.getPassword();
         client.setPassword(null);
+
+        LOGGER.info(Emoji.BLUE_BIRD + Emoji.BLUE_BIRD + "....... adding Client to Firestore ....  ");
         firebaseService.addClient(client);
+        client.setSecretSeed(bag.getSecretSeed());
         sendEmail(client);
+        //reset "private" data...
         client.setPassword(savePassword);
         client.setSecretSeed(bag.getSecretSeed());
+
         LOGGER.info(
-                (Emoji.BLUE_DOT + Emoji.BLUE_DOT + "Client has been added to Firestore ").concat(client.getFullName()));
+                (Emoji.BLUE_DOT + Emoji.BLUE_DOT + Emoji.BLUE_DOT + Emoji.BLUE_DOT +
+                        " \uD83C\uDF4E \uD83C\uDF4E Client has been added to Firestore. ").concat(client.getFullName())
+        .concat(Emoji.BLUE_DOT + Emoji.BLUE_DOT));
     }
 
     public String updateAgent(Agent agent) throws Exception {
@@ -433,7 +454,8 @@ public class AgentService {
 
     public Agent createAgent(Agent agent) throws Exception {
         // todo - create Stellar account; add to Firestore;
-        LOGGER.info(Emoji.YELLOW_STAR + Emoji.YELLOW_STAR + Emoji.YELLOW_STAR + "....... creating Agent ....... ");
+        LOGGER.info(Emoji.YELLOW_STAR + Emoji.YELLOW_STAR + Emoji.YELLOW_STAR + "....... creating Agent ....... "
+                .concat(agent.getPersonalKYCFields().getFirst_name()));
         setAnchor(agent.getAnchorId());
         if (anchor == null) {
             anchor = firebaseService.getAnchor(agent.getAnchorId());
@@ -444,7 +466,7 @@ public class AgentService {
             LOGGER.info(Emoji.ERROR.concat(anchor.getName()).concat(" ").concat(Emoji.ERROR));
             throw new Exception(Emoji.ERROR + "Agent already exists for this Anchor");
         }
-
+        LOGGER.info(Emoji.YELLOW_STAR + Emoji.YELLOW_STAR + Emoji.YELLOW_STAR + "....... Agent Stellar Account about to be created ....... ");
         AccountResponseBag bag = accountService.createAndFundUserAccount(agent.getAnchorId(), agentStartingBalance,
                 agent.getFiatBalance(), agent.getFiatLimit());
         LOGGER.info(Emoji.RED_APPLE + Emoji.RED_APPLE + "Agent Stellar account has been created and funded with ... "
@@ -499,9 +521,6 @@ public class AgentService {
 
     private void sendEmail(Agent agent) throws IOException {
 
-        LOGGER.info(Emoji.PLANE + Emoji.PLANE + "Sending registration email to user: "
-                + agent.getPersonalKYCFields().getEmail_address());
-
         // todo - finish registration email composition, links and all, html etc.
         StringBuilder sb = new StringBuilder();
         sb.append("Hi Anchor Admin,\n");
@@ -513,12 +532,11 @@ public class AgentService {
         LOGGER.info(Emoji.RAIN_DROPS + Emoji.RAIN_DROP + "SendGrid: send mail from: " + fromMail);
 
         Email from = new Email(fromMail);
-        String subject = "Welcome to Anchor registration";
+        String subject = "Welcome to Anchor Agent registration";
         Email to = new Email(agent.getPersonalKYCFields().getEmail_address());
         Content content = new Content("text/plain", sb.toString());
         Mail mail = new Mail(from, subject, to, content);
         // 🌼
-        LOGGER.info(Emoji.FLOWER_YELLOW + Emoji.FLOWER_YELLOW + "SendGrid apiKey: " + sendgridAPIKey);
         SendGrid sg = new SendGrid(sendgridAPIKey);
         Request request = new Request();
         try {
@@ -529,8 +547,6 @@ public class AgentService {
             LOGGER.info(
                     Emoji.BLUE_DISC + Emoji.BLUE_DISC + "Registration email sent to Anchor user: " + Emoji.BLUE_THINGY
                             + agent.getFullName() + Emoji.PANDA + " status code: " + response.getStatusCode());
-            LOGGER.info(Emoji.FLOWER_YELLOW + Emoji.FLOWER_YELLOW + "SendGrid: " + " response headers: "
-                    + response.getHeaders());
 
         } catch (IOException ex) {
             throw ex;
@@ -540,26 +556,19 @@ public class AgentService {
 
     private void sendEmail(Client agent) throws IOException {
 
-        LOGGER.info("\uD83C\uDF3C \uD83C\uDF3C Sending registration email to user: "
-                + agent.getPersonalKYCFields().getEmail_address());
-
-        // todo - finish registration email composition, links and all, html etc.
         StringBuilder sb = new StringBuilder();
-        sb.append("Hi Anchor Admin,\n");
+        sb.append("Hi Anchor Client,\n");
         sb.append("Welcome to The Anchor Network\n");
         sb.append("Click on this link to complete the registration\n");
         sb.append("\nRegards,\n");
         sb.append("Anchor Network Team");
 
-        LOGGER.info("\uD83C\uDF3C \uD83C\uDF3C SendGrid: send mail from: " + fromMail);
-
         Email from = new Email(fromMail);
-        String subject = "Welcome to Anchor registration";
+        String subject = "Welcome to Anchor Client registration";
         Email to = new Email(agent.getPersonalKYCFields().getEmail_address());
         Content content = new Content("text/plain", sb.toString());
         Mail mail = new Mail(from, subject, to, content);
 
-        LOGGER.info("\uD83C\uDF3C \uD83C\uDF3C SendGrid apiKey: " + sendgridAPIKey);
         SendGrid sg = new SendGrid(sendgridAPIKey);
         Request request = new Request();
         try {
@@ -569,7 +578,6 @@ public class AgentService {
             Response response = sg.api(request);
             LOGGER.info("\uD83C\uDF3C \uD83C\uDF3C Registration email sent to Anchor user: \uD83E\uDD66  "
                     + agent.getFullName() + " \uD83E\uDD66 status code: " + response.getStatusCode());
-            LOGGER.info("\uD83C\uDF3C \uD83C\uDF3C SendGrid: " + " response headers: " + response.getHeaders());
 
         } catch (IOException ex) {
             throw ex;

@@ -47,7 +47,7 @@ public class CryptoService {
     private String cryptoKeyId;
     /**
      *  Creates a new key ring with the given id
-     * @return
+     * @return string
      * @throws IOException
      */
     public String createKeyRing()
@@ -133,15 +133,15 @@ public class CryptoService {
     public void uploadFile(String id) throws IOException {
         Storage storage = StorageOptions.newBuilder().setProjectId(projectId)
                 .build().getService();
-        BlobId blobId = BlobId.of(bucketName, objectName.concat("_").concat(id));
+        BlobId blobId = BlobId.of(bucketName, id);
         BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
 
         storage.create(blobInfo, Files.readAllBytes(Paths.get(FILE_PATH.concat(id))));
         Files.delete(Paths.get(FILE_PATH.concat(id)));
         LOGGER.info(
                 "... \uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 Yebo!! \uD83C\uDF4E " +
-                        "Encrypted Seed File " + FILE_PATH.concat(id) + " uploaded to \uD83C\uDF3C " +
-                        "bucket " + bucketName + " \uD83C\uDF3C as " + objectName);
+                        "Encrypted Seed File \uD83C\uDF4E \uD83C\uDF4E " + FILE_PATH.concat(id) + " \uD83C\uDF4E \uD83C\uDF4E uploaded to \uD83C\uDF3C " +
+                        "bucketName: " + bucketName + " \uD83C\uDF3C as object: " + id);
     }
     public static final String DOWNLOAD_PATH = "downloaded_seed";
 
@@ -151,19 +151,22 @@ public class CryptoService {
         return decrypt(bytes);
     }
     private void downloadSeedFile(String accountId) throws Exception {
-        LOGGER.info(Emoji.YELLOW_BIRD.concat(Emoji.YELLOW_BIRD).concat(" .... about to download seed file for: "
-                .concat(accountId).concat(" bucket: ").concat(bucketName).concat(Emoji.RED_APPLE)
+        LOGGER.info(Emoji.YELLOW_BIRD.concat(Emoji.YELLOW_BIRD).concat(" .... about to download seed file for accountId: "
+                .concat(accountId).concat(" bucketName: ").concat(bucketName).concat( " " + Emoji.RED_APPLE)
         .concat(" object: ".concat(objectName)).concat(" ").concat(Emoji.RED_APPLE)));
         Path destFilePath = Paths.get(DOWNLOAD_PATH.concat(accountId));
         Storage storage = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
         LOGGER.info(Emoji.YELLOW_BIRD.concat(Emoji.YELLOW_BIRD)
                 .concat(" serviceAccount email: ")
                 .concat(storage.getServiceAccount(projectId).getEmail()));
-        Blob blob = storage.get(BlobId.of(bucketName, objectName.concat("_").concat(accountId)));
+        Blob blob = storage.get(BlobId.of(bucketName, accountId));
         if (blob == null) {
-            LOGGER.info(Emoji.NOT_OK.concat(Emoji.NOT_OK).concat("Blob for downloading is fucking NULL? WTF?"));
+            LOGGER.info(Emoji.NOT_OK.concat(Emoji.NOT_OK).concat(Emoji.PEPPER).concat("Blob for downloading is fucking NULL? \uD83D\uDE21 WTF? \uD83D\uDE21 name: "
+            .concat(accountId).concat(" in bucket: ".concat(bucketName))));
             throw new Exception(Emoji.NOT_OK + "KMS Blob for downloading is fucking NULL? WTF?");
         }
         blob.downloadTo(destFilePath);
+        LOGGER.info(Emoji.YELLOW_BIRD.concat(Emoji.YELLOW_BIRD)
+                .concat(" seed file has been downloaded OK into ").concat(destFilePath.toAbsolutePath().toString()));
     }
 }

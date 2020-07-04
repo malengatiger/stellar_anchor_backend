@@ -30,8 +30,8 @@ public class DemoDataGenerator {
         LOGGER.info(Emoji.RED_CAR.concat(Emoji.RED_CAR) + "Demo data DemoDataGenerator ready and able!");
     }
 
-    public static final String FUNDING_ACCOUNT = "GDFUXGDTRZPCII5BPTA2Z2ZJ3ZZ74TPXOY7KG5QIKZJ5VGPV6SEKHSEG",
-            FUNDING_SEED = "SDD2DIGVHCWEPRUW2HVNLMFWWLWJ3QZCYOBNO42TASFAGGH5GVSXPU6B";
+    public static final String FUNDING_ACCOUNT = "GAB5V625U7UZQ3WGUKDAISESE2VLURBIAFMSGBN32DGI6DXMNYV43AKK",
+            FUNDING_SEED = "SALPI3SUHSIWX2TUSDX6MLV7I73AHTWEW7XBJ5PU5W7UPXOSMERPT3AR";
     @Autowired
     private ApplicationContext context;
     @Autowired
@@ -84,15 +84,16 @@ public class DemoDataGenerator {
         File file = new File("anchor.toml");
         LOGGER.info("\uD83C\uDFBD \uD83C\uDFBD Do We Have A File? check path needed ...".concat(file.getAbsolutePath()));
         if (file.exists()) {
-            tomlService.encryptAndUploadFile(anchor.getAnchorId(), file);
+            tomlService.encryptAndUploadAnchorFile(anchor.getAnchorId(), file);
             LOGGER.info("\uD83C\uDF4E \uD83C\uDF4E \uD83C\uDF4E anchor.toml has been encrypted and uploaded via KMS \n"
                     + "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ANCHOR TOML uploaded OK!\n");
         } else {
             String msg = Emoji.NOT_OK.concat(Emoji.ERROR).concat((" .... anchor.toml file not found. " +
                     "\uD83C\uDF3C CREATE in project root ").concat(Emoji.ERROR));
-            throw new Exception(msg);
+            LOGGER.info(msg);
+            //throw new Exception(msg);
         }
-        LOGGER.info("\n\n" + Emoji.HEART_BLUE.concat(Emoji.HEART_BLUE)
+        LOGGER.info("\n\n" + Emoji.HEART_BLUE.concat(Emoji.HEART_BLUE).concat(Emoji.HEART_BLUE).concat(Emoji.HEART_BLUE)
                 + "........ Start Demo Data Generation ........".concat(Emoji.HEART_BLUE.concat(Emoji.HEART_BLUE)));
         //
 
@@ -139,7 +140,7 @@ public class DemoDataGenerator {
         if (anchor != null) {
             return;
         }
-        Toml toml = tomlService.getToml(anchorId);
+        Toml toml = tomlService.getAnchorToml(anchorId);
         if (toml == null) {
             throw new Exception("anchor.toml has not been found. upload the file from your computer");
         } else {
@@ -626,6 +627,8 @@ public class DemoDataGenerator {
     private List<Agent> agents = new ArrayList<>();
 
     private void addAgents() throws Exception {
+        LOGGER.info(Emoji.ALIEN.concat(Emoji.ALIEN.concat(Emoji.LEAF))
+                + " - \uD83D\uDC26 Creating agents .....");
         Agent agent1 = buildAgent();
         agent1.getPersonalKYCFields().setFirst_name("Tiger");
         agent1.getPersonalKYCFields().setLast_name("Wannamaker");
@@ -642,6 +645,8 @@ public class DemoDataGenerator {
     }
 
     public void generateAgentClients(String anchorId, int count) throws Exception {
+        LOGGER.info(Emoji.ALIEN.concat(Emoji.ALIEN.concat(Emoji.LEAF))
+                + " - \uD83D\uDC26 Creating clients for the agents .....");
         setFirstNames();
         setLastNames();
         agents = firebaseService.getAgents(anchorId);
@@ -649,12 +654,8 @@ public class DemoDataGenerator {
         for (Agent agent : agents) {
             for (int i = 0; i < count; i++) {
                 Client c1 = buildClient(agent.getAgentId());
-                int index1 = rand.nextInt(firstNames.size() - 1);
-                int index2 = rand.nextInt(lastNames.size() - 1);
-                c1.getPersonalKYCFields().setFirst_name(firstNames.get(index1));
-                c1.getPersonalKYCFields().setLast_name(lastNames.get(index2));
                 Client result = agentService.createClient(c1);
-                LOGGER.info(Emoji.LEMON.concat(Emoji.LEMON).concat("..........Client created: ")
+                LOGGER.info(Emoji.LEMON.concat(Emoji.LEMON).concat(".......... agent Client created: ")
                         .concat(result.getFullName()));
             }
         }
@@ -671,7 +672,9 @@ public class DemoDataGenerator {
         c.setStartingFiatBalance("0.01");
         PersonalKYCFields fields = new PersonalKYCFields();
         fields.setMobile_number("+27998001212");
-        fields.setEmail_address("c" + System.currentTimeMillis() + "@anchor.com");
+        fields.setEmail_address("client" + System.currentTimeMillis() + "@anchor.com");
+        fields.setFirst_name(firstNames.get(rand.nextInt(firstNames.size() - 1)));
+        fields.setLast_name(lastNames.get(rand.nextInt(lastNames.size() - 1)));
         c.setPersonalKYCFields(fields);
         return c;
     }

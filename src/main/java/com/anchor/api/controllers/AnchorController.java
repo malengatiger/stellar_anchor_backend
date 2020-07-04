@@ -73,18 +73,42 @@ public class AnchorController {
      * @return byte[] - bytes from the file
      * @throws Exception upload failed
      */
-    @PostMapping(value = "/uploadTOML", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public byte[] uploadTOML(@RequestParam("anchorId") String anchorId,
+    @PostMapping(value = "/uploadAnchorTOML", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public byte[] uploadAnchorTOML(@RequestParam("anchorId") String anchorId,
                              @RequestParam("file") MultipartFile multipartFile) throws Exception {
 
-        LOGGER.info(Emoji.RAIN_DROPS.concat(Emoji.RAIN_DROPS) + "AnchorController:uploadTOML...");
+        LOGGER.info(Emoji.RAIN_DROPS.concat(Emoji.RAIN_DROPS) + "AnchorController:uploadAnchorTOML...");
         byte[] bytes = multipartFile.getBytes();
         File mFile = new File("file_" + System.currentTimeMillis());
         Path path = Paths.get(mFile.getAbsolutePath());
         Files.write(path, bytes);
         LOGGER.info("....... multipart TOML file received: \uD83C\uDFBD "
                 .concat(" length: " + mFile.length() + " bytes"));
-        tomlService.encryptAndUploadFile(anchorId, mFile);
+        tomlService.encryptAndUploadAnchorFile(anchorId, mFile);
+        Files.delete(path);
+        LOGGER.info("\uD83C\uDFBD \uD83C\uDFBD \uD83C\uDFBD Returned from upload .... OK!");
+        return bytes;
+    }
+    /**
+     * Upload the Anchor properties in anchor.toml nee stellar. This file has private properties
+     * that the Anchor needs for proper operation
+     * @param anchorId anchor identifier
+     * @param multipartFile  toml file with anchor properties
+     * @return byte[] - bytes from the file
+     * @throws Exception upload failed
+     */
+    @PostMapping(value = "/uploadStellarTOML", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public byte[] uploadStellarTOML(@RequestParam("anchorId") String anchorId,
+                             @RequestParam("file") MultipartFile multipartFile) throws Exception {
+
+        LOGGER.info(Emoji.RAIN_DROPS.concat(Emoji.RAIN_DROPS) + "AnchorController:uploadStellarTOML...");
+        byte[] bytes = multipartFile.getBytes();
+        File mFile = new File("file_" + System.currentTimeMillis());
+        Path path = Paths.get(mFile.getAbsolutePath());
+        Files.write(path, bytes);
+        LOGGER.info("....... multipart StellarTOML file received: \uD83C\uDFBD "
+                .concat(" length: " + mFile.length() + " bytes"));
+        tomlService.encryptAndUploadStellarFile(anchorId, mFile);
         Files.delete(path);
         LOGGER.info("\uD83C\uDFBD \uD83C\uDFBD \uD83C\uDFBD Returned from upload .... OK!");
         return bytes;
@@ -93,14 +117,23 @@ public class AnchorController {
     /*
         Get the Anchor's properties from anchor.toml
      */
-    @GetMapping(value = "/getTOML", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Map<String, Object> getTOML(@RequestParam("anchorId") String anchorId) throws Exception {
+    @GetMapping(value = "/getAnchorTOML", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Map<String, Object> getAnchorTOML(@RequestParam("anchorId") String anchorId) throws Exception {
 
-        LOGGER.info(Emoji.RAIN_DROPS.concat(Emoji.RAIN_DROPS) + "AnchorController:getTOML...");
-        Toml toml = tomlService.getToml(anchorId);
+        LOGGER.info(Emoji.RAIN_DROPS.concat(Emoji.RAIN_DROPS) + "AnchorController:getAnchorTOML...");
+        Toml toml = tomlService.getAnchorToml(anchorId);
         LOGGER.info("\uD83C\uDFBD \uD83C\uDFBD \uD83C\uDFBD Returned TOML from download .... "
                 .concat(" databaseUrl: ")
                 .concat(toml.getString("databaseUrl")));
+        return toml.toMap();
+    }
+    @GetMapping(value = "/getStellarTOML", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Map<String, Object> getStellarTOML(@RequestParam("anchorId") String anchorId) throws Exception {
+
+        LOGGER.info(Emoji.RAIN_DROPS.concat(Emoji.RAIN_DROPS) + "AnchorController:getStellarTOML...");
+        Toml toml = tomlService.getStellarToml(anchorId);
+        LOGGER.info("\uD83C\uDFBD \uD83C\uDFBD \uD83C\uDFBD Returned TOML from download .... "
+        .concat(toml.toMap().toString()));
         return toml.toMap();
     }
 
@@ -108,22 +141,8 @@ public class AnchorController {
     @GetMapping(value = "/.well-known/stellar.toml", produces = MediaType.TEXT_PLAIN_VALUE)
     public byte[] getStellarToml() throws Exception {
         LOGGER.info(em + " get stellar.toml file and return to caller...");
-        ClassLoader classLoader = getClass().getClassLoader();
-        File file = new File(Objects.requireNonNull(classLoader.getResource("_well-known/stellar.toml")).getFile());
-        if (file.exists()) {
-            LOGGER.info(em + " ... stellar.toml File has been found \uD83C\uDF45 " + file.getAbsolutePath());
-            Toml toml = new Toml().read(file);
-            List<HashMap> currencies = toml.getList("CURRENCIES");
-            for (HashMap currency : currencies) {
-                LOGGER.info(em + "  stellar.toml: \uD83C\uDF3C Currency: ".concat((currency.get("code").toString())
-                .concat(" \uD83D\uDE21 issuer: ").concat(currency.get("issuer").toString())));
-            }
-
-            return IOUtils.toByteArray(new FileInputStream(file));
-        } else {
-            LOGGER.info(em + "  stellar.toml : File NOT found. this is where .toml needs to go;  \uD83C\uDF45 ");
-            throw new Exception("stellar.toml not found");
-        }
+//        Map<String, Object> msp = getStellarTOML("");
+        return getStellarTomlToo();
 
     }
     @GetMapping(value = "/.stellar.toml", produces = MediaType.TEXT_PLAIN_VALUE)
@@ -231,7 +250,7 @@ public class AnchorController {
         File file = new File("anchor.toml");
         LOGGER.info("We have a file? ...".concat(file.getAbsolutePath()));
         if (file.exists()) {
-            tomlService.encryptAndUploadFile(anchor.getAnchorId(), file);
+            tomlService.encryptAndUploadAnchorFile(anchor.getAnchorId(), file);
         }
         LOGGER.info(Emoji.LEAF + " ANCHOR CREATED: ".concat(G.toJson(anchor)));
         return anchor;

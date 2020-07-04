@@ -99,7 +99,7 @@ public class AccountService {
         if (anchor != null) {
             return;
         }
-        final Toml toml = tomlService.getToml(anchorId);
+        final Toml toml = tomlService.getAnchorToml(anchorId);
         if (toml == null) {
             throw new Exception("anchor.toml has not been found. upload the file from your computer");
         } else {
@@ -204,7 +204,7 @@ public class AccountService {
             TX_UNDER_FUNDED = "AAAAAAAAAGT/////AAAAAQAAAAAAAAAA/////gAAAAA=";
 
     public AccountResponseBag createAndFundUserAccount(final String anchorId, final String startingXLMBalance,
-            final String startingFiatBalance, final String fiatLimit) throws Exception {
+                                                       final String startingFiatBalance, final String fiatLimit) throws Exception {
         LOGGER.info(Emoji.PEAR.concat(Emoji.PEAR) + "\uD83D\uDC99 ... ... ... ... createAndFundAgentAccount starting "
                 + "....... startingXLMBalance: " + startingXLMBalance + " startingFiatBalance:" + startingFiatBalance
                 + " fiatLimit: " + fiatLimit);
@@ -212,11 +212,14 @@ public class AccountService {
         setAnchor(anchorId);
 
         try {
+            LOGGER.info(Emoji.PEAR.concat(Emoji.PEAR.concat("Getting encrypted seed (BaseAccount AccountId)from storage; \uD83C\uDF4E \uD83C\uDF4E will decrypt and use ...")));
             final String baseSeed = cryptoService.getDecryptedSeed(anchor.getBaseAccount().getAccountId());
             final KeyPair agentKeyPair = KeyPair.random();
             final KeyPair sourceKeyPair = KeyPair.fromSecretSeed(baseSeed);
 
             final AccountResponse baseAccount = server.accounts().account(sourceKeyPair.getAccountId());
+
+            LOGGER.info(Emoji.PEAR.concat(Emoji.PEAR.concat("Getting encrypted seed (DistributionAccount AccountId)from storage; \uD83C\uDF4E \uD83C\uDF4E will decrypt and use ...")));
 
             final String distributionSeed = cryptoService
                     .getDecryptedSeed(anchor.getDistributionAccount().getAccountId());
@@ -228,21 +231,22 @@ public class AccountService {
                     .addMemo(Memo.text("CreateAccount Tx")).setTimeout(180).setBaseFee(100).build();
 
             transaction.sign(sourceKeyPair);
-            LOGGER.info(Emoji.RED_CAR + "Submit tx with CreateAccountOperation ");
+            LOGGER.info(Emoji.RED_CAR + Emoji.RED_CAR + Emoji.RED_CAR + " ... Submit tx with CreateAccountOperation to Stellar ... ");
             final SubmitTransactionResponse submitTransactionResponse = server.submitTransaction(transaction);
             if (submitTransactionResponse.isSuccess()) {
                 // add trustlines and first payment for all fiat tokens
-                LOGGER.info(Emoji.LEAF + "Stellar account created: ".concat(Emoji.LEAF).concat(" ")
-                        .concat(agentKeyPair.getAccountId()).concat(" ... about to start creating trustlines"));
+                LOGGER.info(Emoji.LEAF.concat(Emoji.LEAF).concat(Emoji.LEAF).concat(Emoji.LEAF)
+                        + "Stellar account created: ".concat(Emoji.LEAF).concat(Emoji.LEAF).concat(" ")
+                        .concat(agentKeyPair.getAccountId()).concat(" ... about to start creating trustlines ..."));
                 final AccountResponseBag agentAccountResponseBag = addTrustlinesAndOriginalBalances(fiatLimit,
                         startingFiatBalance, agentKeyPair, distributionKeyPair);
                 LOGGER.info(Emoji.LEAF.concat(Emoji.LEAF.concat(Emoji.LEAF))
-                        + "It is indeed possible that everything worked. WTF?");
+                        + " .......... It is indeed possible that everything worked. \uD83D\uDE21 WTF?");
                 final String secret = new String(agentKeyPair.getSecretSeed());
                 agentAccountResponseBag.setSecretSeed(secret);
                 return agentAccountResponseBag;
             } else {
-                LOGGER.warning(Emoji.NOT_OK + "CreateAccountOperation ERROR: \uD83C\uDF45 resultXdr: "
+                LOGGER.warning(Emoji.NOT_OK + Emoji.NOT_OK + " CreateAccountOperation ERROR: \uD83C\uDF45 resultXdr: "
                         + submitTransactionResponse.getResultXdr().get());
                 if (submitTransactionResponse.getResultXdr().get()
                         .equalsIgnoreCase("AAAAAAAAAGT/////AAAAAQAAAAAAAAAA/////gAAAAA=")) {
@@ -265,7 +269,7 @@ public class AccountService {
         LOGGER.info(Emoji.PEAR.concat(Emoji.PEAR)
                 .concat(("addTrustlinesAndOriginalBalances: "
                         + "Building transaction with trustline operations ... FIAT ASSETS: " + assetBags.size())
-                                .concat(Emoji.RED_DOT)));
+                        .concat(Emoji.RED_DOT)));
         final AccountResponse account = server.accounts().account(userKeyPair.getAccountId());
         final Transaction.Builder trustlineTxBuilder = new Transaction.Builder(account, network);
         for (final AssetBag assetBag : assetBags) {
@@ -316,8 +320,8 @@ public class AccountService {
         LOGGER.info(Emoji.BLUE_BIRD.concat(Emoji.BLUE_BIRD)
                 .concat("sendFiatPayments: Creating payment transaction ... " + assetBags.size()
                         + " FIAT assets to be paid; destinationAccount: ".concat(destinationKeyPair.getAccountId())
-                                .concat(" sourceAccount: ").concat(sourceKeyPair.getAccountId()).concat(Emoji.FIRE)
-                                .concat(Emoji.FIRE))
+                        .concat(" sourceAccount: ").concat(sourceKeyPair.getAccountId()).concat(Emoji.FIRE)
+                        .concat(Emoji.FIRE))
                 .concat(" ----- check AMOUNT: ").concat(amount));
 
         setServerAndNetwork();
@@ -337,7 +341,7 @@ public class AccountService {
         final SubmitTransactionResponse payTransactionResponse = server.submitTransaction(paymentTx);
         if (payTransactionResponse.isSuccess()) {
             final String msg = Emoji.LEAF.concat(Emoji.LEAF.concat(Emoji.LEAF)
-                    .concat("Payment Transaction is successful. Check fiat balances on user account"));
+                    .concat("Payment Transaction is successful. \uD83D\uDE21 Check fiat balances on user account \uD83D\uDE21"));
             LOGGER.info(msg);
             final AccountResponse userAccountResponse = server.accounts().account(destinationKeyPair.getAccountId());
             final String seed = new String(destinationKeyPair.getSecretSeed());
@@ -352,6 +356,7 @@ public class AccountService {
                 request.setSourceAccount(sourceKeyPair.getAccountId());
                 request.setDestinationAccount(destinationKeyPair.getAccountId());
                 request.setLedger(payTransactionResponse.getLedger());
+                request.setPaymentRequestId(UUID.randomUUID().toString());
                 firebaseService.addPaymentRequest(request);
             }
             return bag;
@@ -380,11 +385,11 @@ public class AccountService {
      * individuals, small businesses, local communities, nonprofits, organizations,
      * etc. Any type of financial institution–a bank, a payment processor–can be an
      * anchor.
-     * 
+     *
      * 🍎 Each anchor has an issuing account from which it issues the asset.
-     * 
+     *
      * 🔺🔺🔺🔺🔺 ChangeTrustOperation Possible errors:
-     * 
+     *
      * Error Code Description CHANGE_TRUST_MALFORMED -1 The input to this operation
      * is invalid. CHANGE_TRUST_NO_ISSUER -2 The issuer of the asset cannot be
      * found. CHANGE_TRUST_INVALID_LIMIT -3 The limit is not sufficient to hold the
@@ -460,14 +465,21 @@ public class AccountService {
         }
         if (TOML_FILE.exists()) {
             LOGGER.info(
-                    "\uD83C\uDF3C \uD83C\uDF3C ... stellar.toml File has been found: " + TOML_FILE.getAbsolutePath());
+                    "\uD83C\uDF3C \uD83C\uDF3C ... stellar.toml File has been found: \uD83C\uDF3C \uD83C\uDF3C : "
+                            + " issuingAccount: ".concat(issuingAccount).concat(" toml path: ")
+                            + TOML_FILE.getAbsolutePath());
             final Toml toml = new Toml().read(TOML_FILE);
             final List<HashMap> currencies = toml.getList("CURRENCIES");
+            LOGGER.info(
+                    "\uD83C\uDF3C \uD83C\uDF3C ... currencies from stellar.toml: \uD83C\uDF3C \uD83C\uDF3C : " + currencies.size());
             for (final HashMap currency : currencies) {
-                if (issuingAccount.equalsIgnoreCase(currency.get("issuer").toString())) {
-                    final String code = currency.get("code").toString();
-                    mList.add(new AssetBag(code, Asset.createNonNativeAsset(code, issuingAccount)));
-                }
+                LOGGER.info(G.toJson(currency));
+                LOGGER.info(
+                        "\uD83C\uDF3C \uD83C\uDF3C ... currency from stellar.toml: \uD83C\uDF3C \uD83C\uDF3C : " + currency.values().toString());
+//                if (issuingAccount.equalsIgnoreCase(currency.get("issuer").toString())) {
+                final String code = currency.get("code").toString();
+                mList.add(new AssetBag(code, Asset.createNonNativeAsset(code, issuingAccount)));
+//                }
             }
         } else {
             LOGGER.info(" \uD83C\uDF45 stellar.toml : File NOT found. this is where .toml needs to go;  \uD83C\uDF45 ");
@@ -515,7 +527,7 @@ public class AccountService {
         }
 
         public String getAssetCode() {
-            
+
             return assetCode;
         }
 

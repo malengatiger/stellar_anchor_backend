@@ -16,7 +16,6 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.*;
 import com.google.firebase.cloud.FirestoreClient;
-import com.google.firebase.tasks.Task;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
@@ -30,7 +29,6 @@ import org.stellar.sdk.responses.operations.OperationResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 @Service
 public class FirebaseService implements DatabaseServiceInterface {
@@ -44,38 +42,44 @@ public class FirebaseService implements DatabaseServiceInterface {
     @Value("${databaseUrl}")
     private String databaseUrl;
 
-    @Override
-    public void initializeDatabase() throws Exception {
-        LOGGER.info("\uD83C\uDFBD \uD83C\uDFBD \uD83C\uDFBD \uD83C\uDFBD  FirebaseService initializeDatabase ... \uD83C\uDF4F" +
-                ".... \uD83D\uDC99 DEV STATUS: " + Emoji.HEART_PURPLE + " " + Emoji.HEART_BLUE + Emoji.HEART_BLUE);
+    private boolean isInitialized = false;
+    public void initializeFirebase() throws Exception {
+        LOGGER.info("\uD83C\uDFBD \uD83C\uDFBD \uD83C\uDFBD \uD83C\uDFBD  FirebaseService: initializeFirebase: ... \uD83C\uDF4F" +
+                ".... \uD83D\uDC99 \uD83D\uDC99 isInitialized: " + isInitialized + " \uD83D\uDC99 \uD83D\uDC99 FIREBASE URL: "
+                + Emoji.HEART_PURPLE + " " + databaseUrl + " " + Emoji.HEART_BLUE + Emoji.HEART_BLUE);
 
         FirebaseApp app;
         try {
-            FirebaseOptions prodOptions = new FirebaseOptions.Builder()
-                    .setCredentials(GoogleCredentials.getApplicationDefault())
-                    .setDatabaseUrl(databaseUrl)
-                    .build();
+            if (!isInitialized) {
+                FirebaseOptions prodOptions = new FirebaseOptions.Builder()
+                        .setCredentials(GoogleCredentials.getApplicationDefault())
+                        .setDatabaseUrl(databaseUrl)
+                        .build();
 
-            app = FirebaseApp.initializeApp(prodOptions);
+                app = FirebaseApp.initializeApp(prodOptions);
+                isInitialized = true;
+                LOGGER.info(Emoji.HEART_BLUE + Emoji.HEART_BLUE + "Firebase has been set up and initialized. " +
+                        "\uD83D\uDC99 URL: " + app.getOptions().getDatabaseUrl() + Emoji.HAPPY);
+                LOGGER.info(Emoji.HEART_BLUE + Emoji.HEART_BLUE + "Firebase has been set up and initialized. " +
+                        "\uD83E\uDD66 Name: " + app.getName() + Emoji.HEART_ORANGE + Emoji.HEART_GREEN);
+                Firestore fs = FirestoreClient.getFirestore();
+                int cnt = 0;
+                for (CollectionReference listCollection : fs.listCollections()) {
+                    cnt++;
+                    LOGGER.info(Emoji.RAIN_DROPS + Emoji.RAIN_DROPS + "Collection: #" + cnt + " \uD83D\uDC99 collection: " + listCollection.getId());
+                }
+                List<Anchor> list = getAnchors();
+                LOGGER.info(Emoji.HEART_BLUE + Emoji.HEART_BLUE +
+                        "Firebase Initialization complete; ... anchors found: " + list.size());
+            }
         } catch (Exception e) {
             String msg = "Unable to initialize Firebase";
             LOGGER.info(msg);
             throw new Exception(msg, e);
         }
-        LOGGER.info(Emoji.HEART_BLUE + Emoji.HEART_BLUE + "Firebase has been set up and initialized. " +
-                "\uD83D\uDC99 URL: " + app.getOptions().getDatabaseUrl() + Emoji.HAPPY);
-        LOGGER.info(Emoji.HEART_BLUE + Emoji.HEART_BLUE + "Firebase has been set up and initialized. " +
-                "\uD83E\uDD66 Name: " + app.getName() + Emoji.HEART_ORANGE + Emoji.HEART_GREEN);
 
-        Firestore fs = FirestoreClient.getFirestore();
-        int cnt = 0;
-        for (CollectionReference listCollection : fs.listCollections()) {
-            cnt++;
-            LOGGER.info(Emoji.RAIN_DROPS + Emoji.RAIN_DROPS + "Collection: #" + cnt + " \uD83D\uDC99 " + listCollection.getId());
-        }
-        List<Anchor> list = getAnchors();
-        LOGGER.info(Emoji.HEART_BLUE + Emoji.HEART_BLUE +
-                "Firebase Initialization complete; ... anchors found: " + list.size());
+
+
     }
 
     @Override
