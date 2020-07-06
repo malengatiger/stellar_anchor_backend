@@ -44,7 +44,7 @@ public class AgentController {
      *
      * @param agent agent
      * @return A new Agent
-     * @throws Exception
+     * @throws Exception exception thrown
      */
     @PostMapping(value = "/createAgent", produces = MediaType.APPLICATION_JSON_VALUE)
     public Agent createAgent(@RequestBody Agent agent) throws Exception {

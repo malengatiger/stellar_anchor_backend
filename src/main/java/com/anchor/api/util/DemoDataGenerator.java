@@ -1,5 +1,6 @@
 package com.anchor.api.util;
 
+import com.anchor.api.controllers.AnchorController;
 import com.anchor.api.data.PaymentRequest;
 import com.anchor.api.data.anchor.*;
 import com.anchor.api.data.stokvel.Member;
@@ -30,8 +31,8 @@ public class DemoDataGenerator {
         LOGGER.info(Emoji.RED_CAR.concat(Emoji.RED_CAR) + "Demo data DemoDataGenerator ready and able!");
     }
 
-    public static final String FUNDING_ACCOUNT = "GAB5V625U7UZQ3WGUKDAISESE2VLURBIAFMSGBN32DGI6DXMNYV43AKK",
-            FUNDING_SEED = "SALPI3SUHSIWX2TUSDX6MLV7I73AHTWEW7XBJ5PU5W7UPXOSMERPT3AR";
+    public static final String FUNDING_ACCOUNT = "GCBDDYILFQ6K3S27TSPBLOBW3BQMLOAURGLC46DERXFKDGPC2F33TIVS",
+            FUNDING_SEED = "SBYEOWMFFNCLKJJISVVYBRP224NXUXKBRAUTH522KFPCGXSOYZLJVTHN";
     @Autowired
     private ApplicationContext context;
     @Autowired
@@ -615,10 +616,8 @@ public class DemoDataGenerator {
         mAnchor.setDate(new DateTime().toDateTimeISO().toString());
 
         bag.setAnchor(mAnchor);
-        anchor = anchorAccountService.createAnchorAccounts(mAnchor, bag.getPassword(), bag.getAssetAmount(),
-                bag.getFundingSeed(), bag.getStartingBalance());
-        LOGGER.info(Emoji.LEAF.concat(Emoji.LEAF.concat(Emoji.LEAF))
-                .concat("Anchor created OK: ".concat(mAnchor.getName())));
+        AnchorController controller = context.getBean(AnchorController.class);
+        controller.createAnchor(bag);
 
         return anchor;
 

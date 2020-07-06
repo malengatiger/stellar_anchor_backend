@@ -85,7 +85,6 @@ public class AnchorController {
         LOGGER.info("....... multipart TOML file received: \uD83C\uDFBD "
                 .concat(" length: " + mFile.length() + " bytes"));
         tomlService.encryptAndUploadAnchorFile(anchorId, mFile);
-        Files.delete(path);
         LOGGER.info("\uD83C\uDFBD \uD83C\uDFBD \uD83C\uDFBD Returned from upload .... OK!");
         return bytes;
     }
@@ -109,7 +108,6 @@ public class AnchorController {
         LOGGER.info("....... multipart StellarTOML file received: \uD83C\uDFBD "
                 .concat(" length: " + mFile.length() + " bytes"));
         tomlService.encryptAndUploadStellarFile(anchorId, mFile);
-        Files.delete(path);
         LOGGER.info("\uD83C\uDFBD \uD83C\uDFBD \uD83C\uDFBD Returned from upload .... OK!");
         return bytes;
     }
@@ -138,31 +136,19 @@ public class AnchorController {
     }
 
 
-    @GetMapping(value = "/.well-known/stellar.toml", produces = MediaType.TEXT_PLAIN_VALUE)
-    public byte[] getStellarToml() throws Exception {
+    @GetMapping(value = "/.well-known/stellar.toml", produces = MediaType.APPLICATION_JSON_VALUE)
+    public  Map<String, Object> getStellarToml() throws Exception {
         LOGGER.info(em + " get stellar.toml file and return to caller...");
-//        Map<String, Object> msp = getStellarTOML("");
-        return getStellarTomlToo();
-
-    }
-    @GetMapping(value = "/.stellar.toml", produces = MediaType.TEXT_PLAIN_VALUE)
-    public byte[] getStellarTomlToo() throws Exception {
-        LOGGER.info(em + " get stellar.toml file and return to caller...");
-        ClassLoader classLoader = getClass().getClassLoader();
-        File file = new File(Objects.requireNonNull(classLoader.getResource("_well-known/stellar.toml")).getFile());
-        if (file.exists()) {
-            LOGGER.info(" \uD83C\uDF45 ... stellar.tomlFile has been found \uD83C\uDF45 " + file.getAbsolutePath());
-            Toml toml = new Toml().read(file);
-            List<HashMap> currencies = toml.getList("CURRENCIES");
-            for (HashMap currency : currencies) {
-                LOGGER.info("\uD83C\uDF3C stellar.toml: \uD83C\uDF3C Currency: ".concat((currency.get("code").toString())));
-            }
-            return IOUtils.toByteArray(new FileInputStream(file));
+        List<Anchor> anchors = firebaseService.getAnchors();
+        if (!anchors.isEmpty()) {
+            Anchor anchor = anchors.get(0);
+            Toml toml = tomlService.getStellarToml(anchor.getAnchorId());
+            return toml.toMap();
         } else {
-            LOGGER.info(em + "  stellar.toml : File NOT found. this is where .toml needs to go;  \uD83C\uDF45 ");
-            throw new Exception("stellar.toml not found");
+            throw new Exception("TOML file not found");
         }
     }
+
     @GetMapping(value = "/ping", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<String> ping() throws Exception {
         LOGGER.info(em + " Pinging StellarAnchorApplication and getting anchors...");
@@ -246,13 +232,8 @@ public class AnchorController {
 
         LOGGER.info(Emoji.LEAF + " AnchorAccountService returns Anchor: \uD83C\uDF4E "
                 + anchor.getName() + "  \uD83C\uDF4E anchorId: " + anchor.getAnchorId());
-        //todo - upload file toml
-        File file = new File("anchor.toml");
-        LOGGER.info("We have a file? ...".concat(file.getAbsolutePath()));
-        if (file.exists()) {
-            tomlService.encryptAndUploadAnchorFile(anchor.getAnchorId(), file);
-        }
-        LOGGER.info(Emoji.LEAF + " ANCHOR CREATED: ".concat(G.toJson(anchor)));
+        LOGGER.info(Emoji.LEAF +Emoji.LEAF +Emoji.LEAF +Emoji.LEAF +
+                " ANCHOR CREATED: ".concat(G.toJson(anchor)));
         return anchor;
     }
 

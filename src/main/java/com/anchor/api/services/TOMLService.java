@@ -57,16 +57,22 @@ public class TOMLService {
     public void encryptAndUploadAnchorFile(String anchorId, File file) throws IOException {
         LOGGER.info(Emoji.HASH.concat(Emoji.HASH).concat(Emoji.HASH).concat("encryptAndUploadAnchorFile for ".concat(anchorId)));
         byte[] bytes = getBytes(file);
-        byte[] encrypted = cryptoService.encrypt(ANCHOR_TOML + anchorId, new String(bytes));
-        LOGGER.info(Emoji.SKULL.concat(Emoji.SKULL.concat("ANCHOR_TOML File has been encrypted and uploaded to cloud storage\n"
+        cryptoService.encrypt(ANCHOR_TOML + anchorId, new String(bytes));
+        LOGGER.info(Emoji.SKULL.concat(Emoji.SKULL.concat("ANCHOR_TOML File has been encrypted and uploaded to cloud storage" +
+                " from ".concat(file.getAbsolutePath())
                )));
+        boolean deleted = file.delete();
+        LOGGER.info(Emoji.SKULL.concat(Emoji.SKULL.concat("temporary File has been deleted: " + deleted + " \uD83D\uDC4C\uD83C\uDFFE")));
     }
     public void encryptAndUploadStellarFile(String anchorId, File file) throws IOException {
         LOGGER.info(Emoji.HASH.concat(Emoji.HASH).concat(Emoji.HASH).concat("encryptAndUploadStellarFile for ".concat(anchorId)));
         byte[] bytes = getBytes(file);
-        byte[] encrypted = cryptoService.encrypt(STELLAR_TOML + anchorId, new String(bytes));
-        LOGGER.info(Emoji.SKULL.concat(Emoji.SKULL.concat("STELLAR_TOML File has been encrypted  and uploaded to cloud storage\n"
+        cryptoService.encrypt(STELLAR_TOML + anchorId, new String(bytes));
+        LOGGER.info(Emoji.SKULL.concat(Emoji.SKULL.concat("STELLAR_TOML File has been encrypted  and uploaded to cloud storage" +
+                        " from ".concat(file.getAbsolutePath())
                 )));
+        boolean deleted = file.delete();
+        LOGGER.info(Emoji.SKULL.concat(Emoji.SKULL.concat("temporary File has been deleted: " + deleted + " \uD83D\uDC4C\uD83C\uDFFE")));
     }
 
     private byte[] getBytes(File file) throws IOException {
@@ -75,7 +81,7 @@ public class TOMLService {
     }
 
 
-    public Toml getStellarToml(String anchorId) throws Exception {
+    public Toml getStellarToml(String anchorId) {
         if (stellarToml != null) {
             return stellarToml;
         }
@@ -92,13 +98,14 @@ public class TOMLService {
         }
         return stellarToml;
     }
-    public Toml getAnchorToml(String anchorId) throws Exception {
+    public Toml getAnchorToml(String anchorId) {
         if (anchorToml != null) {
             return anchorToml;
         }
         try {
             String data = cryptoService.getDecryptedSeed(ANCHOR_TOML + anchorId);
             LOGGER.info(Emoji.LEAF.concat(Emoji.LEAF).concat("data: ".concat(data)));
+
             Path mPath = Files.write(Paths.get(DOWNLOAD_PATH.concat(anchorId)), data.getBytes());
             anchorToml = new Toml().read(mPath.toFile());
             LOGGER.info(Emoji.PRESCRIPTION + Emoji.PRESCRIPTION + Emoji.PRESCRIPTION + "....... anchor.toml file found from encrypted storage.");
@@ -111,33 +118,4 @@ public class TOMLService {
     }
     public static final String DOWNLOAD_PATH = "downloaded_toml", UPLOAD_PATH = "upload_toml";
 
-//
-//    public void uploadStellarTOMLFile(String anchorId) throws IOException {
-//        File file = new File(UPLOAD_PATH.concat(STELLAR_TOML + anchorId));
-//        Storage storage = StorageOptions.newBuilder().setProjectId(projectId)
-//                .build().getService();
-//        BlobId blobId = BlobId.of(bucketName, STELLAR_TOML + anchorId);
-//        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
-//
-//        storage.create(blobInfo, Files.readAllBytes(Paths.get(file.getAbsolutePath())));
-//        Files.delete(Paths.get(file.getAbsolutePath()));
-//        LOGGER.info(
-//                "... \uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 Yebo!! \uD83C\uDF4E " +
-//                        "Encrypted STELLAR TOML File " + file.getAbsolutePath() + " uploaded to \uD83C\uDF3C " +
-//                        "bucket " + bucketName + " \uD83C\uDF3C as " + tomlObject);
-//    }
-//    public void uploadAnchorTOMLFile(String anchorId) throws IOException {
-//        File file = new File(UPLOAD_PATH.concat(ANCHOR_TOML + anchorId));
-//        Storage storage = StorageOptions.newBuilder().setProjectId(projectId)
-//                .build().getService();
-//        BlobId blobId = BlobId.of(bucketName, ANCHOR_TOML + anchorId);
-//        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
-//
-//        storage.create(blobInfo, Files.readAllBytes(Paths.get(file.getAbsolutePath())));
-//        Files.delete(Paths.get(file.getAbsolutePath()));
-//        LOGGER.info(
-//                "... \uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 Yebo!! \uD83C\uDF4E " +
-//                        "Encrypted ANCHOR TOML File " + file.getAbsolutePath() + " uploaded to \uD83C\uDF3C " +
-//                        "bucket " + bucketName + " \uD83C\uDF3C as " + tomlObject);
-//    }
 }

@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 
 @Service
 public class StokvelService {
-    public static final Logger LOGGER = Logger.getLogger(StokvelService.class.getSimpleName());
+    private static final Logger LOGGER = Logger.getLogger(StokvelService.class.getSimpleName());
     private static final Gson G = new GsonBuilder().setPrettyPrinting().create();
     @Autowired
     private AccountService accountService;
@@ -35,7 +35,7 @@ public class StokvelService {
     private PaymentService paymentService;
 
     @Value("${sendgrid}")
-    private String sendgridAPIKey;
+    private String sendGridAPIKey;
 
     @Value("${fromMail}")
     private String fromMail;
@@ -55,6 +55,7 @@ public class StokvelService {
         .concat("StokvelService up and ready for gig! ".concat(Emoji.RAIN_DROP)));
     }
     private Anchor anchor;
+
     public Stokvel createStokvel(Stokvel stokvel) throws Exception {
         LOGGER.info(Emoji.YELLOW_BIRD + Emoji.YELLOW_BIRD + Emoji.YELLOW_BIRD +
                 "....... creating Stokvel ....... ");
@@ -109,7 +110,6 @@ public class StokvelService {
         }
         return stokvel;
     }
-
     public Member createMember(Member member) throws Exception {
         LOGGER.info(Emoji.BLUE_BIRD + Emoji.BLUE_BIRD + Emoji.BLUE_BIRD +
                 "....... creating Member ....... ");

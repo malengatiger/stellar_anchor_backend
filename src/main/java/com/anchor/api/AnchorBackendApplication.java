@@ -94,20 +94,14 @@ public class AnchorBackendApplication implements ApplicationListener<Application
 		try {
 			//
 			accountService.listenForTransactions();
+			firebaseService.initializeFirebase();
 			AnchorController controller = context.getBean(AnchorController.class);
 			controller.getStellarToml();
-			firebaseService.initializeFirebase();
 		} catch (Exception e) {
 			LOGGER.info(" \uD83C\uDF45 Firebase initialization FAILED");
 			e.printStackTrace();
 		}
-		LOGGER.info(Emoji.PIG.concat(Emoji.PIG).concat(Emoji.PIG) + "Cleaning up left over files ...");
-		try {
-			scheduler.fileCleanUp();
-		} catch (Exception e) {
-			LOGGER.info(" \uD83C\uDF45 File CleanUp  FAILED");
-			e.printStackTrace();
-		}
+
 	}
 }
 //11140

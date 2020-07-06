@@ -4,11 +4,13 @@ import com.anchor.api.util.Emoji;
 import com.google.cloud.kms.v1.*;
 import com.google.cloud.storage.*;
 import com.google.protobuf.ByteString;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -154,6 +156,7 @@ public class CryptoService {
         LOGGER.info(Emoji.YELLOW_BIRD.concat(Emoji.YELLOW_BIRD).concat(" .... about to download seed file for accountId: "
                 .concat(accountId).concat(" bucketName: ").concat(bucketName).concat( " " + Emoji.RED_APPLE)
         .concat(" object: ".concat(objectName)).concat(" ").concat(Emoji.RED_APPLE)));
+        String name = getPath(accountId);
         Path destFilePath = Paths.get(DOWNLOAD_PATH.concat(accountId));
         Storage storage = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
         LOGGER.info(Emoji.YELLOW_BIRD.concat(Emoji.YELLOW_BIRD)
@@ -168,5 +171,18 @@ public class CryptoService {
         blob.downloadTo(destFilePath);
         LOGGER.info(Emoji.YELLOW_BIRD.concat(Emoji.YELLOW_BIRD)
                 .concat(" seed file has been downloaded OK into ").concat(destFilePath.toAbsolutePath().toString()));
+    }
+
+    @NotNull
+    private String getPath(String anchorId) throws Exception {
+        File dir = new File("seed");
+        if (!dir.exists()) {
+            boolean ok = dir.mkdir();
+            if (!ok) {
+                LOGGER.info(Emoji.ERROR+Emoji.ERROR+Emoji.ERROR+" Unable to create directory");
+                throw new Exception("Unable to create directory");
+            }
+        }
+        return dir.getAbsolutePath().concat("/").concat(DOWNLOAD_PATH).concat(anchorId);
     }
 }

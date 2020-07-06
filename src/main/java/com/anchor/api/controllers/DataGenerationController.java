@@ -6,10 +6,12 @@ import com.anchor.api.data.stokvel.Stokvel;
 import com.anchor.api.services.AccountService;
 import com.anchor.api.services.AgentService;
 import com.anchor.api.services.AnchorAccountService;
+import com.anchor.api.services.TOMLService;
 import com.anchor.api.util.DemoDataGenerator;
 import com.anchor.api.util.Emoji;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.moandjiezana.toml.Toml;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,13 +41,14 @@ public class DataGenerationController {
     private AccountService accountService;
     @Autowired
     private DemoDataGenerator demoDataGenerator;
+    @Autowired
+    private TOMLService tomlService;
     @Value("${status}")
     private String status;
-    @Value("${anchorName}")
-    private String anchorName;
+
 
     @GetMapping(value = "/generateAnchor", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Anchor generateAnchor() throws Exception {
+    public Anchor generateAnchor(String anchorName) throws Exception {
         LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 StellarAnchorApplication /generateAnchor ...");
         Anchor anchor = demoDataGenerator.startAnchor(anchorName);
         LOGGER.info(Emoji.DICE.concat(Emoji.DICE.concat(Emoji.DICE)
@@ -53,19 +56,38 @@ public class DataGenerationController {
                 .concat(G.toJson(anchor))));
         LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C GenerateDemoData:generateAnchor completed and returning external caller... "
                 + new Date().toString() + " \uD83D\uDC99 \uD83D\uDC9C STATUS: " + status);
-        String result = generateDemo(anchor.getAnchorId());
-        LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C GenerateDemoData:generateAnchor, demo completed ... " + result);
+
+        LOGGER.info("\n\n \uD83C\uDF4E \uD83C\uDF4E \uD83C\uDF4E \uD83C\uDF4E");
+        LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C ################################################################## \uD83D\uDC99 \uD83D\uDC9C");
+        LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C PREPARE STELLAR.TOML and ANCHOR.TOML - edit ANCHOR ID, ISSUING ACCOUNTS etc.  \uD83D\uDC99 \uD83D\uDC9C");
+        LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C UPLOAD STELLAR.TOML and ANCHOR.TOML to cloud storage               \uD83D\uDC99 \uD83D\uDC9C");
+        LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C Retrieve account info from Firestore or logs                       \uD83D\uDC99 \uD83D\uDC9C");
+        LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C ################################################################## \uD83D\uDC99 \uD83D\uDC9C");
+        LOGGER.info("\n\n \uD83C\uDF4E \uD83C\uDF4E \uD83C\uDF4E \uD83C\uDF4E");
+
         return anchor;
     }
     @GetMapping(value = "/generateDemo", produces = MediaType.TEXT_PLAIN_VALUE)
     public String generateDemo(@RequestParam String anchorId) throws Exception {
         LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 StellarAnchorApplication /generateDemo ...");
+        checkTOML(anchorId);
         demoDataGenerator.startGeneration(anchorId);
-        return "\uD83D\uDC99 \uD83D\uDC9C GenerateDemoData completed ... "
+        return "\n\n\uD83D\uDC99 \uD83D\uDC9C GenerateDemoData completed ... "
                 + new Date().toString() + " \uD83D\uDC99 \uD83D\uDC9C STATUS: " + status;
     }
+
+    private void checkTOML(@RequestParam String anchorId) throws Exception {
+        Toml toml = tomlService.getAnchorToml(anchorId);
+        if (toml == null) {
+            LOGGER.severe(Emoji.ERROR+Emoji.ERROR+Emoji.ERROR+ " Missing anchor.toml, QUITTING! - " +
+                    "Please upload an anchor.toml first before trying this again. " + Emoji.ERROR+Emoji.ERROR);
+            throw new Exception("anchor.toml file missing");
+        }
+    }
+
     @GetMapping(value = "/generateAgentClients", produces = MediaType.TEXT_PLAIN_VALUE)
     public String generateAgentClients(@RequestParam String anchorId, @RequestParam int count) throws Exception {
+        checkTOML(anchorId);
         demoDataGenerator.generateAgentClients(anchorId, count);
         return "\uD83D\uDC99 \uD83D\uDC9C generateAgentClients completed ... "
                 + new Date().toString() + " \uD83D\uDC99 \uD83D\uDC9C STATUS: " + status;
@@ -90,6 +112,7 @@ public class DataGenerationController {
     public String generateClients(@RequestParam String anchorId, @RequestParam int count) throws Exception {
         LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 StellarAnchorApplication /generateClients ..." +
                 "" + anchorId + "  count: " + count);
+        checkTOML(anchorId);
         demoDataGenerator.generateAgentClients(anchorId, count);
         String msg =  "\uD83D\uDC99 \uD83D\uDC9C generateAgentClients completed ... \uD83C\uDF3C \uD83C\uDF3C "
                 + anchorId + " \uD83D\uDC99 \uD83D\uDC9C STATUS: " + status;

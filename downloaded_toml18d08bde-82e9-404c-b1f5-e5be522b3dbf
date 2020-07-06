@@ -10,8 +10,8 @@ TRANSFER_SERVER="https://api.domain.com"
 SIGNING_KEY="GBBHQ7H4V6RRORKYLHTCAWP6MOHNORRFJSDPXDFYDGJB2LPZUFPXUEW3"
 HORIZON_URL="https://horizon.domain.com"
 ACCOUNTS=[
-"GD5DJQDDBKGAYNEAXU562HYGOOSYAEOO6AS53PZXBOZGCP5M2OPGMZV3",
-"GAENZLGHJGJRCMX5VCHOLHQXU3EMCU5XWDNU4BGGJFNLI2EL354IVBK7",
+"GB4CZ3M3EJ77KE5SCFUR4V5XT75PORQKS4XDDCHAOMZC72QA2QMWTCKN",
+"GCMWNDBFSYQIVWNYWAKWGKLXKSPRHUDHWYTUL6ZZI7J3PB62OBJ6CV4D",
 "GAOO3LWBC4XF6VWRP5ESJ6IBHAISVJMSBTALHOQM2EZG7Q477UWA6L7U"
 ]
 
@@ -51,12 +51,12 @@ HISTORY=[
 
 # 💧 Organization Details 💧
 [DOCUMENTATION]
-ORG_NAME="StellarAnchor"
+ORG_NAME="StellarAnchor LLC"
 ORG_DBA="Organization DBA"
 ORG_URL="https://www.domain.com"
 ORG_LOGO="https://www.domain.com/awesomelogo.png"
 ORG_DESCRIPTION="Description of issuer"
-ORG_PHYSICAL_ADDRESS="123 Sesame Street, New York, NY 12345, United States"
+ORG_PHYSICAL_ADDRESS="123 East 44th Street, New York, NY 12345, United States"
 ORG_PHYSICAL_ADDRESS_ATTESTATION="https://www.domain.com/address_attestation.jpg"
 ORG_PHONE_NUMBER="1 (123)-456-7890"
 ORG_PHONE_NUMBER_ATTESTATION="https://www.domain.com/phone_attestation.jpg"
@@ -81,32 +81,32 @@ verification_photo_hash="016ba8c4cfde65af99cb5fa8b8a37e2eb73f481b3ae34991666df2e
 #   Can be used by wallets and clients to trust anchors by domain name
 [[CURRENCIES]]
 code="USD"
-issuer="GDFN7ELA5333B6RAZE6KC46LLLWLDHE6M6CFTOR5EJGSYUZ3JQSP5MKS"
+issuer="GAXKVBGEIWSQ5R6REBKE7PZYCHYXJDNIXBD2PU5KD7WGJ2JMNMTXSTZJ"
 display_decimals=2 # Specifies how many decimal places should be displayed by clients to end users.
 
 [[CURRENCIES]]
 code="EUR"
-issuer="GDFN7ELA5333B6RAZE6KC46LLLWLDHE6M6CFTOR5EJGSYUZ3JQSP5MKS"
+issuer="GAXKVBGEIWSQ5R6REBKE7PZYCHYXJDNIXBD2PU5KD7WGJ2JMNMTXSTZJ"
 display_decimals=2 # Specifies how many decimal places should be displayed by clients to end users.
 
-[[CURRENCIES]]
-code="CHF"
-issuer="GDFN7ELA5333B6RAZE6KC46LLLWLDHE6M6CFTOR5EJGSYUZ3JQSP5MKS"
-display_decimals=2 # Specifies how many decimal places should be displayed by clients to end users.
+#[[CURRENCIES]]
+#code="CHF"
+#issuer="GDFN7ELA5333B6RAZE6KC46LLLWLDHE6M6CFTOR5EJGSYUZ3JQSP5MKS"
+#display_decimals=2 # Specifies how many decimal places should be displayed by clients to end users.
 
-[[CURRENCIES]]
-code="CNY"
-issuer="GDFN7ELA5333B6RAZE6KC46LLLWLDHE6M6CFTOR5EJGSYUZ3JQSP5MKS"
-display_decimals=2 # Specifies how many decimal places should be displayed by clients to end users.
+#[[CURRENCIES]]
+#code="CNY"
+#issuer="GDFN7ELA5333B6RAZE6KC46LLLWLDHE6M6CFTOR5EJGSYUZ3JQSP5MKS"
+#display_decimals=2 # Specifies how many decimal places should be displayed by clients to end users.
 
 [[CURRENCIES]]
 code="ZAR"
-issuer="GDFN7ELA5333B6RAZE6KC46LLLWLDHE6M6CFTOR5EJGSYUZ3JQSP5MKS"
+issuer="GAXKVBGEIWSQ5R6REBKE7PZYCHYXJDNIXBD2PU5KD7WGJ2JMNMTXSTZJ"
 display_decimals=2 # Specifies how many decimal places should be displayed by clients to end users.
 
 [[CURRENCIES]]
 code="GBP"
-issuer="GDFN7ELA5333B6RAZE6KC46LLLWLDHE6M6CFTOR5EJGSYUZ3JQSP5MKS"
+issuer="GAXKVBGEIWSQ5R6REBKE7PZYCHYXJDNIXBD2PU5KD7WGJ2JMNMTXSTZJ"
 display_decimals=2 # Specifies how many decimal places should be displayed by clients to end users.
 
 #[[CURRENCIES]]
