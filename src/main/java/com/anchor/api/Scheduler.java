@@ -34,7 +34,7 @@ public class Scheduler {
                 "Scheduler constructed. Waiting to be triggered ".concat(Emoji.YELLOW_BIRD));
     }
 
-    @Scheduled(fixedRate = 1000 * 60 * 30)
+    @Scheduled(fixedRate = 1000 * 60 * 60)
 //    @Scheduled(fixedRate = 1000 * 15)
     public void fixedRateScheduled() throws Exception {
         LOGGER.info(Emoji.PRETZEL.concat(Emoji.PRETZEL).concat(Emoji.PRETZEL) + "Fixed Rate scheduler; " +
@@ -75,7 +75,7 @@ public class Scheduler {
     public void fileCleanUp() {
 
         File directory = new File("/");
-        File test = new File("newfile.txt");
+        File test = new File(directory,"newFile.txt");
         LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C test file: "+  test.getAbsolutePath() +
                 "  \uD83D\uDC99 \uD83D\uDC9C");
         if (directory.exists()) {

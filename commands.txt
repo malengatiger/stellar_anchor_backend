@@ -17,3 +17,7 @@ gcloud run deploy --image gcr.io/paymentplatform-33/anchor --platform managed
 sudo lsof -i :8084
 sudo kill -9 <PID>
 
+gcloud kms keyrings create "aubsKeyRing"  --location "global"
+
+gcloud kms keys create "stellarKey"  --location "global"  --keyring "aubsKeyRing"  --purpose "encryption"
+

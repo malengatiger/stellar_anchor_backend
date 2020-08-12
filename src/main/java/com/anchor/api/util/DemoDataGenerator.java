@@ -31,8 +31,11 @@ public class DemoDataGenerator {
         LOGGER.info(Emoji.RED_CAR.concat(Emoji.RED_CAR) + "Demo data DemoDataGenerator ready and able!");
     }
 
-    public static final String FUNDING_ACCOUNT = "GCBDDYILFQ6K3S27TSPBLOBW3BQMLOAURGLC46DERXFKDGPC2F33TIVS",
-            FUNDING_SEED = "SBYEOWMFFNCLKJJISVVYBRP224NXUXKBRAUTH522KFPCGXSOYZLJVTHN";
+    /*
+    🛎 🛎 🛎 🛎 UPDATE FUNDING SEED FROM STELLAR LAB .... 🛎 BEFORE THE RUN OF ANCHOR START
+     */
+    public static final String FUNDING_ACCOUNT = "GCXRMCU4O7QVSOLQ46TMMZ5Q3AB7467ZDZFTFI7HAKD5PQ7KOLR44W3I",
+            FUNDING_SEED = "SB2SEQEA7KJJIPIL7INY35T2EFPGRJQMT5SCJWXYRF5LKYUJHXXWGTK4";
     @Autowired
     private ApplicationContext context;
     @Autowired
@@ -52,21 +55,24 @@ public class DemoDataGenerator {
     Anchor anchor;
     //todo - document this shit somewhere ....
     /*
-    Steps to recreate demo AnchorBank environment:
-    1. Run startAnchor - store anchorId
-    2. Run uploadTOML - upload and encrypt anchor.toml
-    3. Run startGeneration with the new anchorId
-
+    🛎🛎🛎 this is the BEGINNING OF ALL WISDOM ..... 🛎 🛎 🛎
+        Steps to recreate demo AnchorBank environment:
+            0. Obtain funding seed from Stellar Friend in Lab
+            1. Run startAnchor - store anchorId in anchor.toml
+            2. Run uploadTOML - upload and encrypt anchor.toml
+            3. Run startGeneration with the new anchorId
+    🛎🛎🛎
      */
 
-    public Anchor startAnchor(String anchorName) throws Exception {
+    public Anchor createNewAnchor(String anchorName) throws Exception {
         if (!status.equalsIgnoreCase("dev")) {
             throw new Exception(Emoji.NOT_OK + "Demo Data Generation may not be run in PRODUCTION");
         }
         deleteFirebaseArtifacts();
         Anchor mAnchor = addAnchor(anchorName);
         LOGGER.info(Emoji.FERN.concat(Emoji.FIRE.concat(Emoji.FIRE))
-                + "Start Anchor complete. Complete generation after copying anchorId to anchor.toml");
+                + "Start Anchor complete. Complete generation after copying anchorId to anchor.toml \uD83D\uDECE AND STELLAR.TOML");
+        LOGGER.info(Emoji.RED_APPLE+Emoji.RED_APPLE+ G.toJson(mAnchor));
         return mAnchor;
     }
 
@@ -212,14 +218,8 @@ public class DemoDataGenerator {
                 sendPaymentAndSaveOnFuckingDatabase(application, client, clientSeed, payment);
             } catch (Exception e) {
                 e.printStackTrace();
-                LOGGER.info(Emoji.NOT_OK.concat(Emoji.NOT_OK) + "This MONTHLY payment did not happen: "
-                        + e.getMessage() == null ? "" : e.getMessage());
-                if (e instanceof PaymentService.UnderFundedException) {
-                    LOGGER.info("\n\n\n".concat(Emoji.PIG
-                            .concat(Emoji.PIG.concat(Emoji.PIG) + "Client ".concat(client.getFullName()).concat(
-                                    " has run out of MONTHLY money.  \uD83C\uDFB2 SUCKS!! .... \uD83D\uDD35 "))));
-                }
-                break;
+                LOGGER.info(e.getMessage());
+
             }
 
         }
@@ -291,11 +291,6 @@ public class DemoDataGenerator {
                 e.printStackTrace();
                 LOGGER.info(Emoji.PIG.concat(Emoji.PIG.concat(Emoji.PIG))
                         .concat("This WEEKLY payment failed ".concat(e.getMessage() == null ? "" : e.getMessage())));
-                if (e instanceof PaymentService.UnderFundedException) {
-                    LOGGER.info("\n\n\n".concat(Emoji.PIG
-                            .concat(Emoji.PIG.concat(Emoji.PIG) + "Client ".concat(client.getFullName()).concat(
-                                    " has run out of WEEKLY money.  \uD83C\uDF51 SUCKS!! .... \uD83D\uDD35 "))));
-                }
                 break;
             }
 

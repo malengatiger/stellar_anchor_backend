@@ -20,7 +20,7 @@ public class FileService {
     public static final Logger LOGGER = Logger.getLogger(FileService.class.getSimpleName());
     private static final Gson G = new GsonBuilder().setPrettyPrinting().create();
 
-    @Value("${projectId}")
+    @Value("${stellarProjectId}")
     private String projectId;
 
     @Value("${bucketName}")
@@ -47,15 +47,19 @@ public class FileService {
     public void uploadIDFront(String id, File file) throws Exception {
         uploadFile(id, file, TYPE_ID_FRONT);
     }
+
     public void uploadIDBack(String id, File file) throws Exception {
         uploadFile(id, file, TYPE_ID_BACK);
     }
+
     public void uploadProofOfResidence(String id, File file) throws Exception {
         uploadFile(id, file, TYPE_PROOF_OF_RESIDENCE);
     }
+
     public void uploadSelfie(String id, File file) throws Exception {
         uploadFile(id, file, TYPE_SELFIE);
     }
+
     private void uploadFile(String id, File file, String type) throws IOException {
 
         Storage storage = StorageOptions.newBuilder().setProjectId(projectId)
@@ -73,25 +77,30 @@ public class FileService {
                 .concat(file.getAbsolutePath()).concat(" ".concat(Emoji.PEPPER)));
 
     }
+
     public File downloadIDFront(String id) throws Exception {
         return downloadFile(id, TYPE_ID_FRONT);
     }
+
     public File downloadIDBack(String id) throws Exception {
         return downloadFile(id, TYPE_ID_BACK);
     }
+
     public File downloadProofOfResidence(String id) throws Exception {
         return downloadFile(id, TYPE_PROOF_OF_RESIDENCE);
     }
+
     public File downloadSelfie(String id) throws Exception {
         return downloadFile(id, TYPE_SELFIE);
     }
+
     private File downloadFile(String id, String type) throws Exception {
         LOGGER.info(Emoji.YELLOW_BIRD.concat(Emoji.YELLOW_BIRD).concat(" .... about to download file for: "
                 .concat(id).concat(" bucket: ").concat(bucketName).concat(Emoji.RED_APPLE)
                 .concat(" object: ".concat(type)).concat(" ").concat(Emoji.RED_APPLE)));
 
         File dir = getDirectory();
-        File mFile = new File(dir, "download_".concat(id));
+        File mFile = new File(dir, DOWNLOAD_PATH.concat(id));
         Path destFilePath = Paths.get(mFile.getAbsolutePath());
         Storage storage = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
 
@@ -107,6 +116,7 @@ public class FileService {
 
         return destFilePath.toFile();
     }
+
     private File getDirectory() {
         File dir = new File(ClientController.DIRECTORY);
         if (!dir.exists()) {

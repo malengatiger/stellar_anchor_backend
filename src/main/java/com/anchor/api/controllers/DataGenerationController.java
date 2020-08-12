@@ -50,7 +50,7 @@ public class DataGenerationController {
     @GetMapping(value = "/generateAnchor", produces = MediaType.APPLICATION_JSON_VALUE)
     public Anchor generateAnchor(String anchorName) throws Exception {
         LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 StellarAnchorApplication /generateAnchor ...");
-        Anchor anchor = demoDataGenerator.startAnchor(anchorName);
+        Anchor anchor = demoDataGenerator.createNewAnchor(anchorName);
         LOGGER.info(Emoji.DICE.concat(Emoji.DICE.concat(Emoji.DICE)
                 .concat("New Anchor Returned")
                 .concat(G.toJson(anchor))));
@@ -64,6 +64,7 @@ public class DataGenerationController {
         LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C Retrieve account info from Firestore or logs                       \uD83D\uDC99 \uD83D\uDC9C");
         LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C ################################################################## \uD83D\uDC99 \uD83D\uDC9C");
         LOGGER.info("\n\n \uD83C\uDF4E \uD83C\uDF4E \uD83C\uDF4E \uD83C\uDF4E");
+        LOGGER.info(G.toJson(anchor));
 
         return anchor;
     }

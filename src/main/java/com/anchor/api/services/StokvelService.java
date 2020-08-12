@@ -80,7 +80,7 @@ public class StokvelService {
         LOGGER.info(Emoji.WARNING.concat(Emoji.WARNING) + "createStokvel:.... Creating Stokvel Fiat Asset Balances .... userSeed: "
                 .concat(bag.getSecretSeed()));
         for (AccountService.AssetBag assetBag : assetBags) {
-            accountService.createTrustLine(anchor.getIssuingAccount().getAccountId(),bag.getSecretSeed(),fiatLimit,
+            accountService.changeTrustLine(anchor.getIssuingAccount().getAccountId(),bag.getSecretSeed(),fiatLimit,
                     assetBag.assetCode);
             accountService.createAsset(issuingAccountSeed,anchor.getDistributionAccount().getAccountId(),
                     assetBag.assetCode, "0.01");
@@ -139,7 +139,7 @@ public class StokvelService {
                 .concat(bag.getSecretSeed()));
 
         for (AccountService.AssetBag assetBag : assetBags) {
-            accountService.createTrustLine(anchor.getIssuingAccount().getAccountId(),bag.getSecretSeed(),fiatLimit,
+            accountService.changeTrustLine(anchor.getIssuingAccount().getAccountId(),bag.getSecretSeed(),fiatLimit,
                     assetBag.assetCode);
             accountService.createAsset(issuingAccountSeed,anchor.getDistributionAccount().getAccountId(),
                     assetBag.assetCode, "0.01");

@@ -41,19 +41,19 @@ public class CryptoService {
 
     @Value("${locationId}")
     private String locationId;
-    @Value("${projectId}")
+    @Value("${stellarProjectId}")
     private String projectId;
-    @Value("${keyRingId}")
+    @Value("${stellarKeyRingId}")
     private String keyRingId;
-    @Value("${cryptoKeyId}")
+    @Value("${stellarCryptoKeyId}")
     private String cryptoKeyId;
     /**
      *  Creates a new key ring with the given id
      * @return string
-     * @throws IOException
+     * @throws Exception error
      */
     public String createKeyRing()
-            throws IOException {
+            throws Exception {
         LOGGER.info("\uD83D\uDD11 \uD83D\uDD11 \uD83D\uDD11 createKeyRing: ".concat(keyRingId));
         listKeyRings();
         try (KeyManagementServiceClient client = KeyManagementServiceClient.create()) {
@@ -109,7 +109,7 @@ public class CryptoService {
         }
     }
 
-    @Value("${bucketName}")
+    @Value("${stellarBucketName}")
     private String bucketName;
     @Value("${objectName}")
     private String objectName;

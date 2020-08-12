@@ -136,16 +136,33 @@ public class AnchorController {
     }
 
 
-    @GetMapping(value = "/.well-known/stellar.toml", produces = MediaType.APPLICATION_JSON_VALUE)
-    public  Map<String, Object> getStellarToml() throws Exception {
-        LOGGER.info(em + " get stellar.toml file and return to caller...");
+    @GetMapping(value = "/.well-known/stellar.toml", produces = MediaType.TEXT_PLAIN_VALUE)
+    public  String getWellKnownStellarToml() throws Exception {
+        LOGGER.info(em + " get stellar.toml file and return to caller ...");
         List<Anchor> anchors = firebaseService.getAnchors();
         if (!anchors.isEmpty()) {
             Anchor anchor = anchors.get(0);
             Toml toml = tomlService.getStellarToml(anchor.getAnchorId());
-            return toml.toMap();
+            if (toml == null) {
+                LOGGER.info(Emoji.NOT_OK+Emoji.NOT_OK + "stellar.toml not found " + Emoji.NOT_OK);
+                throw new Exception("stellar.toml not found");
+            }
+            return toml.toMap().toString();
         } else {
-            throw new Exception("TOML file not found");
+            throw new Exception("Anchor not found");
+        }
+
+    }
+    @GetMapping(value = "/getAnchor", produces = MediaType.APPLICATION_JSON_VALUE)
+    public  Anchor getAnchor() throws Exception {
+        LOGGER.info(em + " get active anchor...");
+        List<Anchor> anchors = firebaseService.getAnchors();
+        if (!anchors.isEmpty()) {
+            Anchor anchor = anchors.get(0);
+            LOGGER.info(em.concat("ACTIVE ANCHOR: ".concat(G.toJson(anchor))));
+            return anchor;
+        } else {
+            throw new Exception("ANCHOR not found");
         }
     }
 
@@ -198,18 +215,6 @@ public class AnchorController {
         return mBalances;
     }
 
-
-    @GetMapping(value = "/getAnchor", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Anchor getAnchor(@RequestParam String anchorId) throws Exception {
-        LOGGER.info(em + " AnchorController:getAnchor ..."
-        .concat(anchorId));
-        Anchor response = firebaseService.getAnchor(anchorId);
-        LOGGER.info( Emoji.LEAF.concat(Emoji.LEAF) + " AnchorController getAnchor returned: "
-                + response.getName());
-
-        return response;
-    }
-
     @Autowired
     private FirebaseService firebaseService;
     @GetMapping(value = "/getAnchorClients", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -222,6 +227,15 @@ public class AnchorController {
         LOGGER.info(em + " AnchorController:createAnchor ...");
         if (anchorBag.getFundingSeed() == null) {
             throw new Exception("Funding Account Seed missing");
+        }
+        if (anchorBag.getAnchor() == null) {
+            throw new Exception("Anchor missing");
+        }
+        if (anchorBag.getAssetAmount() == null) {
+            throw new Exception("Asset Amount missing");
+        }
+        if (anchorBag.getStartingBalance() == null) {
+            throw new Exception("StartingBalance  missing");
         }
         Anchor anchor = anchorAccountService.createAnchorAccounts(
                 anchorBag.getAnchor(),
@@ -284,6 +298,8 @@ public class AnchorController {
         return Util.createTestInfo();
     }
     private static final String em ="\uD83C\uDF4E \uD83C\uDF4E \uD83C\uDF4E \uD83C\uDF4E ";
+
+    //
     public static class Balances {
         List<AccountResponse.Balance> balances;
         String account, date;

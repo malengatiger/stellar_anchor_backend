@@ -3,6 +3,7 @@ package com.anchor.api.controllers;
 import com.anchor.api.data.Fee;
 import com.anchor.api.data.GetTransactionsResponse;
 import com.anchor.api.data.account.Options;
+import com.anchor.api.data.anchor.Anchor;
 import com.anchor.api.data.anchor.Client;
 import com.anchor.api.data.info.Info;
 import com.anchor.api.data.transfer.sep10.AnchorSep10Challenge;
@@ -15,6 +16,7 @@ import com.anchor.api.data.transfer.sep26.WithdrawRequestParameters;
 import com.anchor.api.data.transfer.sep27.InfoServerResponse;
 import com.anchor.api.services.AccountService;
 import com.anchor.api.services.FirebaseService;
+import com.anchor.api.services.TOMLService;
 import com.anchor.api.util.Emoji;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -28,6 +30,7 @@ import org.stellar.sdk.responses.SubmitTransactionResponse;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 @CrossOrigin(maxAge = 3600)
@@ -225,6 +228,69 @@ public class TransferController {
         }
     }
 
+    /* 🔵🔵🔵🔵🔵 /info
+    Allows an anchor to communicate basic info about what their TRANSFER_SERVER_SEP0024 supports to wallets and clients.
+
+        Request
+        GET TRANSFER_SERVER_SEP0024/info
+        Request parameters:
+
+        🍎
+        Name	Type	Description
+        lang	string	(optional) Defaults to en. Language code specified using ISO 639-1. description fields in the response should be in this language.
+
+        🍎 🍎 Response
+        The response should be a JSON object like:
+
+        {
+          "deposit": {
+            "USD": {
+              "enabled": true,
+              "fee_fixed": 5,
+              "fee_percent": 1,
+              "min_amount": 0.1,
+              "max_amount": 1000
+            },
+            "ETH": {
+              "enabled": true,
+              "fee_fixed": 0.002,
+              "fee_percent": 0
+            }
+          },
+          "withdraw": {
+            "USD": {
+              "enabled": true,
+              "fee_minimum": 5,
+              "fee_percent": 0.5,
+              "min_amount": 0.1,
+              "max_amount": 1000
+            },
+            "ETH": {
+              "enabled": false
+            }
+          },
+          "fee": {
+            "enabled": false
+          }
+        }
+     */
+
+    @Autowired
+    private TOMLService tomlService;
+    @GetMapping("/info")
+    public Map<String, Object> info() throws Exception {
+        LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 TransferController:info ... get info object ");
+        Anchor anchor;
+        List<Anchor> anchors = firebaseService.getAnchors();
+        if (!anchors.isEmpty()) {
+            anchor = anchors.get(0);
+            accountService.getAnchorCurrencies(anchor.getAnchorId());
+        } else {
+            throw new Exception("Anchor Missing");
+        }
+        return null;
+    }
+
     public static final String emm = Emoji.BLUE_DOT + Emoji.BLUE_DOT + Emoji.BLUE_DOT + Emoji.BLUE_DOT ;
     /*
         🌼 One of id, 🥏 stellar_transaction_id or 🥏 external_transaction_id is required.
@@ -245,18 +311,12 @@ public class TransferController {
             }
      */
     @GetMapping("/transaction")
-    public ResponseEntity<GetTransactionsResponse> transaction(@RequestParam String id,
-                                                               @RequestParam String stellar_transaction_id,
-                                                               @RequestParam String external_transaction_id) throws NotFoundException {
+    public ResponseEntity transaction(@RequestParam String id,
+                                      @RequestParam String stellar_transaction_id,
+                                      @RequestParam String external_transaction_id) throws NotFoundException {
         LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 TransferController:transaction ...");
         GetTransactionsResponse transactionsResponse = null;
-        ResponseEntity<GetTransactionsResponse> responseEntity = null;
-        if (responseEntity == null) {
-            responseEntity = new ResponseEntity("Transaction not found", HttpStatus.NOT_FOUND);
-        } else {
-            responseEntity = new ResponseEntity<>(transactionsResponse, HttpStatus.OK);
-        }
-        return responseEntity;
+        return new ResponseEntity("Transaction not found", HttpStatus.NOT_FOUND);
     }
 
     /*

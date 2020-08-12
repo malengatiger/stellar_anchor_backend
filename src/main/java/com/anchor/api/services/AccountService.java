@@ -16,10 +16,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.stellar.sdk.*;
+import org.stellar.sdk.Asset;
+import org.stellar.sdk.Memo;
+import org.stellar.sdk.Transaction;
 import org.stellar.sdk.requests.EventListener;
 import org.stellar.sdk.responses.AccountResponse;
 import org.stellar.sdk.responses.RootResponse;
 import org.stellar.sdk.responses.SubmitTransactionResponse;
+import org.stellar.sdk.xdr.*;
 import shadow.com.google.common.base.Optional;
 
 import java.io.File;
@@ -170,6 +174,18 @@ public class AccountService {
             transaction.sign(sourceKeyPair);
 
             final SubmitTransactionResponse submitTransactionResponse = server.submitTransaction(transaction);
+            TransactionResult transactionResult = submitTransactionResponse.getDecodedTransactionResult().get();
+            CreateAccountResult createAccountResult = null;
+            for (OperationResult result : transactionResult.getResult().getResults()) {
+                if (result.getTr().getCreateAccountResult() != null) {
+                    createAccountResult = result.getTr().getCreateAccountResult();
+                }
+            }
+            if (createAccountResult == null) {
+                throw  new Exception("CreateAccountOperation failed");
+            }
+            LOGGER.info(Emoji.DICE.concat(Emoji.DICE.concat(Emoji.DICE)) + "createAccountResult: ".concat(G.toJson(createAccountResult)));
+
             if (submitTransactionResponse.isSuccess()) {
                 accountResponse = server.accounts().account(newAccountKeyPair.getAccountId());
                 LOGGER.info("\uD83D\uDC99  "
@@ -179,29 +195,36 @@ public class AccountService {
                         .concat(bag.getAccountResponse().getAccountId()));
                 return bag;
             } else {
-                LOGGER.warning(Emoji.NOT_OK + "CreateAccountOperation ERROR: \uD83C\uDF45 resultXdr: "
-                        + submitTransactionResponse.getResultXdr().get());
-                if (submitTransactionResponse.getResultXdr().get().equalsIgnoreCase(TX_UNDER_FUNDED)) {
-                    LOGGER.info("\uD83C\uDF45 \uD83C\uDF45 transaction is UNDER FUNDED");
-                    throw new AccountUnderfundedException(sourceAccount.getAccountId().concat(" is UNDER FUNDED"));
-                }
-                if (submitTransactionResponse.getResultXdr().get().equalsIgnoreCase(TX_MALFORMED)) {
-                    LOGGER.info("\uD83C\uDF45 \uD83C\uDF45 transaction is MALFORMED");
-                    throw new AccountUnderfundedException(
-                            sourceAccount.getAccountId().concat(" transaction is MALFORMED"));
-                }
+                processAccountCreationError(createAccountResult);
 
-                throw new Exception("CreateAccountOperation transactionResponse is NOT success");
             }
 
         } catch (final IOException e) {
-            LOGGER.severe("Failed to create account - see below ...");
+            LOGGER.info(Emoji.ERROR+Emoji.ERROR + "Failed to create account - see below ...");
             throw new Exception("\uD83D\uDD34 Unable to create Account", e);
         }
+        return null;
     }
 
-    private static final String TX_MALFORMED = "AAAAAAAAAGT/////AAAAAQAAAAAAAAAA/////wAAAAA=",
-            TX_UNDER_FUNDED = "AAAAAAAAAGT/////AAAAAQAAAAAAAAAA/////gAAAAA=";
+    private void processAccountCreationError(CreateAccountResult createAccountResult) throws Exception {
+
+        switch (createAccountResult.getDiscriminant().getValue()) {
+            case -1:
+                LOGGER.info("\uD83C\uDF45 \uD83C\uDF45 transaction is MALFORMED");
+                throw new Exception("CREATE_ACCOUNT_MALFORMED");
+            case -2:
+                LOGGER.info("\uD83C\uDF45 \uD83C\uDF45 transaction is UNDER FUNDED");
+                throw new Exception("CREATE_ACCOUNT_UNDERFUNDED");
+            case -3:
+                LOGGER.info("\uD83C\uDF45 \uD83C\uDF45 transaction has ACCOUNT_LOW_RESERVE");
+                throw new Exception("CREATE_ACCOUNT_LOW_RESERVE");
+            case -4:
+                LOGGER.info("\uD83C\uDF45 \uD83C\uDF45 transaction ACCOUNT_ALREADY_EXISTS");
+                throw new Exception("CREATE_ACCOUNT_ALREADY_EXISTS");
+            default:
+                throw new Exception("CreateAccountOperation transactionResponse is NOT success");
+        }
+    }
 
     public AccountResponseBag createAndFundUserAccount(final String anchorId, final String startingXLMBalance,
                                                        final String startingFiatBalance, final String fiatLimit) throws Exception {
@@ -210,7 +233,7 @@ public class AccountService {
                 + " fiatLimit: " + fiatLimit);
         setServerAndNetwork();
         setAnchor(anchorId);
-
+        AccountResponseBag agentAccountResponseBag = null;
         try {
             LOGGER.info(Emoji.PEAR.concat(Emoji.PEAR.concat("Getting encrypted seed (BaseAccount AccountId)from storage; \uD83C\uDF4E \uD83C\uDF4E will decrypt and use ...")));
             final String baseSeed = cryptoService.getDecryptedSeed(anchor.getBaseAccount().getAccountId());
@@ -233,12 +256,23 @@ public class AccountService {
             transaction.sign(sourceKeyPair);
             LOGGER.info(Emoji.RED_CAR + Emoji.RED_CAR + Emoji.RED_CAR + " ... Submit tx with CreateAccountOperation to Stellar ... ");
             final SubmitTransactionResponse submitTransactionResponse = server.submitTransaction(transaction);
+
+            TransactionResult transactionResult = submitTransactionResponse.getDecodedTransactionResult().get();
+            CreateAccountResult createAccountResult = null;
+            for (OperationResult result : transactionResult.getResult().getResults()) {
+                if (result.getTr().getCreateAccountResult() != null) {
+                    createAccountResult = result.getTr().getCreateAccountResult();
+                }
+            }
+            if (createAccountResult == null) {
+                throw  new Exception("CreateAccountOperation failed");
+            }
             if (submitTransactionResponse.isSuccess()) {
                 // add trustlines and first payment for all fiat tokens
                 LOGGER.info(Emoji.LEAF.concat(Emoji.LEAF).concat(Emoji.LEAF).concat(Emoji.LEAF)
                         + "Stellar account created: ".concat(Emoji.LEAF).concat(Emoji.LEAF).concat(" ")
                         .concat(agentKeyPair.getAccountId()).concat(" ... about to start creating trustlines ..."));
-                final AccountResponseBag agentAccountResponseBag = addTrustlinesAndOriginalBalances(fiatLimit,
+               agentAccountResponseBag = addTrustlinesAndOriginalBalances(fiatLimit,
                         startingFiatBalance, agentKeyPair, distributionKeyPair);
                 LOGGER.info(Emoji.LEAF.concat(Emoji.LEAF.concat(Emoji.LEAF))
                         + " .......... It is indeed possible that everything worked. \uD83D\uDE21 WTF?");
@@ -246,20 +280,14 @@ public class AccountService {
                 agentAccountResponseBag.setSecretSeed(secret);
                 return agentAccountResponseBag;
             } else {
-                LOGGER.warning(Emoji.NOT_OK + Emoji.NOT_OK + " CreateAccountOperation ERROR: \uD83C\uDF45 resultXdr: "
-                        + submitTransactionResponse.getResultXdr().get());
-                if (submitTransactionResponse.getResultXdr().get()
-                        .equalsIgnoreCase("AAAAAAAAAGT/////AAAAAQAAAAAAAAAA/////gAAAAA=")) {
-                    throw new AccountUnderfundedException(baseAccount.getAccountId().concat(" is UNDER FUNDED"));
-                }
-
-                throw new Exception("CreateAccountOperation transactionResponse is NOT success");
+                processAccountCreationError(createAccountResult);
             }
 
         } catch (final IOException e) {
             LOGGER.severe("Failed to create account - see below ...");
             throw new Exception("\uD83D\uDD34 Unable to create Account", e);
         }
+        return null;
     }
 
     private AccountResponseBag addTrustlinesAndOriginalBalances(final String limit, final String startingFiatBalance,
@@ -289,30 +317,43 @@ public class AccountService {
         if (trustlineTransactionResponse.isSuccess()) {
             return sendFiatPayments(startingFiatBalance, userKeyPair, distributionKeyPair, assetBags);
         } else {
-            final String xdr = trustlineTransactionResponse.getResultXdr().get();
-            String msg = Emoji.NOT_OK
-                    .concat(Emoji.NOT_OK.concat(Emoji.ERROR).concat("Trustline Transaction Failed: xdr: ".concat(xdr)));
-            if (xdr.contains(TX_BadAuth)) {
-                msg = Emoji.NOT_OK.concat(Emoji.NOT_OK.concat(Emoji.ERROR)
-                        .concat("Bad Auth for Trustline Transaction Response; xdr: ".concat(xdr)));
+
+            TransactionResult transactionResult = trustlineTransactionResponse.getDecodedTransactionResult().get();
+            AllowTrustResult allowTrustResult = null;
+            for (OperationResult result : transactionResult.getResult().getResults()) {
+                if (result.getTr().getCreateAccountResult() != null) {
+                    allowTrustResult = result.getTr().getAllowTrustResult();
+                }
             }
-            if (xdr.contains(TX_ChangeTrustLowReserve)) {
-                msg = Emoji.NOT_OK.concat(
-                        Emoji.NOT_OK.concat(Emoji.ERROR).concat("ChangeTrustLowReserve Response; xdr: ".concat(xdr)));
+            if (allowTrustResult == null) {
+                throw  new Exception("AllowTrustOperation failed");
             }
-            LOGGER.info(msg);
-            throw new Exception(msg);
+            switch (allowTrustResult.getDiscriminant().getValue()) {
+                case -1:
+                    LOGGER.info(Emoji.NOT_OK+Emoji.NOT_OK+Emoji.NOT_OK + "ALLOW_TRUST_MALFORMED");
+                  throw new Exception("ALLOW_TRUST_MALFORMED");
+                case -2:
+                    LOGGER.info(Emoji.NOT_OK+Emoji.NOT_OK+Emoji.NOT_OK + "ALLOW_TRUST_NO_TRUST_LINE");
+                    throw new Exception("ALLOW_TRUST_NO_TRUST_LINE");
+                case -3:
+                    LOGGER.info(Emoji.NOT_OK+Emoji.NOT_OK+Emoji.NOT_OK + "ALLOW_TRUST_TRUST_NOT_REQUIRED");
+                    throw new Exception("ALLOW_TRUST_TRUST_NOT_REQUIRED");
+                case -4:
+                    LOGGER.info(Emoji.NOT_OK+Emoji.NOT_OK+Emoji.NOT_OK + "ALLOW_TRUST_CANT_REVOKE");
+                    throw new Exception("ALLOW_TRUST_CANT_REVOKE");
+                case -5:
+                    LOGGER.info(Emoji.NOT_OK+Emoji.NOT_OK+Emoji.NOT_OK + "ALLOW_TRUST_SELF_NOT_ALLOWED");
+                    throw new Exception("ALLOW_TRUST_SELF_NOT_ALLOWED");
+                default:
+                    String msg = Emoji.NOT_OK.concat(Emoji.NOT_OK.concat(Emoji.ERROR)
+                            .concat("Trustline Transaction failed "));
+                    LOGGER.info(msg);
+                    throw new Exception(msg);
+            }
+
         }
 
     }
-
-    public static final String TX_BadAuth = "AAAAAAAAAlj////6AAAAAA==",
-            TX_ChangeTrustSuccess = "AAAAAACYloD/////AAAAAQAAAAAAAAAGAAAAAAAAAAA=",
-            TX_ChangeTrustLowReserve = "AAAAAACYloD/////AAAAAQAAAAAAAAAG/////AAAAAA=",
-            TX_ChangeTrustInvalidLimit = "AAAAAACYloD/////AAAAAQAAAAAAAAAG/////QAAAAA=",
-            TX_ChangeTrustMalformed = "AAAAAACYloD/////AAAAAQAAAAAAAAAG/////wAAAAA=",
-            TX_ChangeTrustSelfNotAllowed = "AAAAAACYloD/////AAAAAQAAAAAAAAAG////+wAAAAA=",
-            TX_ChangeTrustNoIssuer = "AAAAAACYloD/////AAAAAQAAAAAAAAAG/////gAAAAA=";
 
     private AccountResponseBag sendFiatPayments(final String amount, final KeyPair destinationKeyPair,
                                                 final KeyPair sourceKeyPair, final List<AssetBag> assetBags) throws Exception {
@@ -361,18 +402,57 @@ public class AccountService {
             }
             return bag;
         } else {
-            final String xdr = payTransactionResponse.getResultXdr().get();
-            final String msg = Emoji.NOT_OK
-                    .concat(Emoji.NOT_OK.concat(Emoji.ERROR).concat("Payment Transaction Failed; xdr: ".concat(xdr)));
-            LOGGER.info(msg);
 
-            throw new Exception(msg);
+            processPaymentError(payTransactionResponse);
+
+
         }
+        return null;
     }
 
-    static class AccountUnderfundedException extends Exception {
-        public AccountUnderfundedException(final String message) {
-            super(message);
+    public static void processPaymentError(SubmitTransactionResponse payTransactionResponse) throws Exception {
+        TransactionResult transactionResult = payTransactionResponse.getDecodedTransactionResult().get();
+        PaymentResult paymentResult = null;
+        for (OperationResult result : transactionResult.getResult().getResults()) {
+            if (result.getTr().getCreateAccountResult() != null) {
+                paymentResult = result.getTr().getPaymentResult();
+            }
+        }
+        if (paymentResult == null) {
+            throw  new Exception("PaymentOperation failed");
+        }
+        final String msgx = Emoji.NOT_OK
+                .concat(Emoji.NOT_OK.concat(Emoji.ERROR).concat("Payment Transaction Failed : "));
+        switch (paymentResult.getDiscriminant().getValue()) {
+            case -1:
+                LOGGER.info(msgx + "PAYMENT_MALFORMED");
+                throw new Exception("PAYMENT_MALFORMED");
+            case -2:
+                LOGGER.info(msgx + "PAYMENT_UNDERFUNDED");
+                throw new Exception("PAYMENT_UNDERFUNDED");
+            case -3:
+                LOGGER.info(msgx + "PAYMENT_SRC_NO_TRUST");
+                throw new Exception("PAYMENT_SRC_NO_TRUST");
+            case -4:
+                LOGGER.info(msgx + "PAYMENT_SRC_NOT_AUTHORIZED");
+                throw new Exception("PAYMENT_SRC_NOT_AUTHORIZED");
+            case -5:
+                LOGGER.info(msgx + "PAYMENT_NO_DESTINATION");
+                throw new Exception("PAYMENT_NO_DESTINATION");
+            case -6:
+                LOGGER.info(msgx + "PAYMENT_NO_TRUST");
+                throw new Exception("PAYMENT_NO_TRUST");
+            case -7:
+                LOGGER.info(msgx + "PAYMENT_NOT_AUTHORIZED");
+                throw new Exception("PAYMENT_NOT_AUTHORIZED");
+            case -8:
+                LOGGER.info(msgx + "PAYMENT_LINE_FULL");
+                throw new Exception("PAYMENT_LINE_FULL");
+            case -9:
+                LOGGER.info(msgx + "PAYMENT_NO_ISSUER");
+                throw new Exception("PAYMENT_NO_ISSUER");
+            default:
+                throw new Exception(msgx + " UNKNOWN ERROR");
         }
     }
 
@@ -401,7 +481,7 @@ public class AccountService {
      * CHANGE_TRUST_SELF_NOT_ALLOWED -5 The source account attempted to create a
      * trustline for itself, which is not allowed.
      */
-    public SubmitTransactionResponse createTrustLine(final String issuingAccount, final String userSeed,
+    public SubmitTransactionResponse changeTrustLine(final String issuingAccount, final String userSeed,
                                                      final String limit, final String assetCode) throws Exception {
         LOGGER.info("\uD83C\uDF40 .......... createTrustLines ........ \uD83C\uDF40 " + " \uD83C\uDF40 code: "
                 + assetCode + " \uD83C\uDF40 limit: " + limit + " issuingAccount: " + issuingAccount);
@@ -430,16 +510,38 @@ public class AccountService {
                         + " \uD83C\uDF4E assetCode: ".concat(assetCode) + " \uD83C\uDF4E User account: "
                         + userAccountResponse.getAccountId());
             } else {
-                if (submitTransactionResponse.getResultXdr().get().contains(LIMIT_ERROR)) {
-                    final String msg = Emoji.NOT_OK.concat(Emoji.GOLD_BELL.concat(Emoji.GOLD_BELL)).concat(
-                            "The limit is not sufficient to hold the current balance of the trustline and still satisfy its buying liabilities.");
-                    LOGGER.info(msg);
-                    throw new Exception(msg);
+                TransactionResult transactionResult = submitTransactionResponse.getDecodedTransactionResult().get();
+                ChangeTrustResult changeTrustResult = null;
+                for (OperationResult result : transactionResult.getResult().getResults()) {
+                    if (result.getTr().getCreateAccountResult() != null) {
+                        changeTrustResult = result.getTr().getChangeTrustResult();
+                    }
                 }
-                LOGGER.warning("ChangeTrustOperation ERROR: \uD83C\uDF45 resultXdr: "
-                        + submitTransactionResponse.getResultXdr().get());
-                throw new Exception(
-                        "ChangeTrustOperation transactionResponse is \uD83C\uDF45 NOT success \uD83C\uDF45");
+                if (changeTrustResult == null) {
+                    throw  new Exception("ChangeTrustOperation failed");
+                }
+                final String msgx = Emoji.NOT_OK
+                        .concat(Emoji.NOT_OK.concat(Emoji.ERROR).concat("ChangeTrustOperation Failed : "));
+                switch (changeTrustResult.getDiscriminant().getValue()) {
+                    case -1:
+                        LOGGER.info(msgx + "CHANGE_TRUST_MALFORMED");
+                        throw new Exception("CHANGE_TRUST_MALFORMED");
+                    case -2:
+                        LOGGER.info(msgx + "CHANGE_TRUST_NO_ISSUER");
+                        throw new Exception("CHANGE_TRUST_NO_ISSUER");
+                    case -3:
+                        LOGGER.info(msgx + "CHANGE_TRUST_INVALID_LIMIT");
+                        throw new Exception("CHANGE_TRUST_INVALID_LIMIT");
+                    case -4:
+                        LOGGER.info(msgx + "CHANGE_TRUST_LOW_RESERVE");
+                        throw new Exception("CHANGE_TRUST_LOW_RESERVE");
+                    case -5:
+                        LOGGER.info(msgx + "CHANGE_TRUST_SELF_NOT_ALLOWED");
+                        throw new Exception("CHANGE_TRUST_SELF_NOT_ALLOWED");
+
+                    default:
+                        throw new Exception(msgx + " UNKNOWN ERROR");
+                }
             }
             return submitTransactionResponse;
         } catch (final Exception e) {
@@ -447,7 +549,6 @@ public class AccountService {
         }
     }
 
-    public static final String LIMIT_ERROR = "AAAAAAAAAGT/////AAAAAQAAAAAAAAAG/////QAAAAA=";
     private static File TOML_FILE;
 
     public List<AssetBag> getAnchorCurrencies(final String anchorId) throws Exception {
@@ -578,10 +679,9 @@ public class AccountService {
                 LOGGER.info("\uD83D\uDC99 \uD83D\uDC99 \uD83D\uDC99  "
                         + "Stellar createAsset: PaymentOperation has been executed OK: \uD83C\uDF4E \uD83C\uDF4E isSuccess: "
                         + submitTransactionResponse.isSuccess());
-
             } else {
-                LOGGER.info("ERROR: \uD83C\uDF45 resultXdr: " + submitTransactionResponse.getResultXdr().get());
-                throw new Exception("PaymentOperation transactionResponse is \uD83C\uDF45 NOT success \uD83C\uDF45");
+                LOGGER.info(Emoji.NOT_OK + "ERROR: \uD83C\uDF45 resultXdr: " + submitTransactionResponse.getResultXdr().get());
+                processPaymentError(submitTransactionResponse);
             }
             return submitTransactionResponse;
         } catch (final Exception e) {
@@ -682,12 +782,18 @@ public class AccountService {
         setServerAndNetwork();
         final KeyPair keyPair = KeyPair.fromSecretSeed(seed);
         final AccountResponse sourceAccount = server.accounts().account(keyPair.getAccountId());
-        final SetOptionsOperation operation = new SetOptionsOperation.Builder().setClearFlags(clearFlags)
-                .setHighThreshold(highThreshold).setLowThreshold(lowThreshold)
-                .setInflationDestination(inflationDestination).setSourceAccount(keyPair.getAccountId())
-                .setMasterKeyWeight(masterKeyWeight).setHomeDomain(domain).build();
+        final SetOptionsOperation operation = new SetOptionsOperation.Builder()
+                .setClearFlags(clearFlags)
+                .setHighThreshold(highThreshold)
+                .setLowThreshold(lowThreshold)
+                .setInflationDestination(inflationDestination)
+                .setSourceAccount(keyPair.getAccountId())
+                .setMasterKeyWeight(masterKeyWeight)
+                .setHomeDomain(domain)
+                .build();
 
-        final Transaction transaction = new Transaction.Builder(sourceAccount, network).addOperation(operation)
+        final Transaction transaction = new Transaction.Builder(sourceAccount, network)
+                .addOperation(operation)
                 .setTimeout(TIMEOUT_IN_SECONDS).setBaseFee(100).build();
         try {
             transaction.sign(keyPair);
@@ -696,7 +802,39 @@ public class AccountService {
                     + " \uD83D\uDC99 ");
             LOGGER.info(
                     response.isSuccess() ? "setOptions transaction is SUCCESSFUL" : "setOptions transaction failed");
-            return response;
+            TransactionResult transactionResult = response.getDecodedTransactionResult().get();
+            SetOptionsResult setOptionsResult = null;
+            for (OperationResult result : transactionResult.getResult().getResults()) {
+                if (result.getTr().getCreateAccountResult() != null) {
+                    setOptionsResult = result.getTr().getSetOptionsResult();
+                }
+            }
+            if (setOptionsResult == null) {
+                throw  new Exception("SetOptionsOperation failed");
+            }
+            final String msgx = Emoji.NOT_OK
+                    .concat(Emoji.NOT_OK.concat(Emoji.ERROR).concat("SetOptionsOperation Failed : "));
+            switch (setOptionsResult.getDiscriminant().getValue()) {
+                case -1:
+                    LOGGER.info(msgx + "SET_OPTIONS_LOW_RESERVE");
+                    throw new Exception("SET_OPTIONS_LOW_RESERVE");
+                case -2:
+                    LOGGER.info(msgx + "SET_OPTIONS_TOO_MANY_SIGNERS");
+                    throw new Exception("SET_OPTIONS_TOO_MANY_SIGNERS");
+                case -3:
+                    LOGGER.info(msgx + "SET_OPTIONS_BAD_FLAGS");
+                    throw new Exception("SET_OPTIONS_BAD_FLAGS");
+                case -4:
+                    LOGGER.info(msgx + "SET_OPTIONS_INVALID_INFLATION");
+                    throw new Exception("SET_OPTIONS_INVALID_INFLATION");
+                case -5:
+                    LOGGER.info(msgx + "SET_OPTIONS_CANT_CHANGE");
+                    throw new Exception("SET_OPTIONS_CANT_CHANGE");
+
+                default:
+                    return response;
+            }
+
         } catch (final Exception e) {
             final String msg = "Failed to setOptions: ";
             LOGGER.severe(msg + e.getMessage());

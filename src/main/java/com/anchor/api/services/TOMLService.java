@@ -31,7 +31,7 @@ public class TOMLService {
     @Value("${tomlObject}")
     private String tomlObject;
 
-    @Value("${projectId}")
+    @Value("${stellarProjectId}")
     private String projectId;
 
     @Value("${bucketName}")

@@ -3,6 +3,8 @@ VERSION="2.0.0"
 # 🎽 The endpoint which clients should query to resolve stellar addresses
 #   for users on your domain.
 
+# 🛎 🛎 🛎 🛎 UPDATE THIS FILE AFTER THE ANCHOR HAS BEEN CREATED; ACCOUNTS AND THE REST OF THE INFO REQUIRED 🛎 🛎
+
 NETWORK_PASSPHRASE="Public Global Stellar Network ; September 2015"
 FEDERATION_SERVER="https://api.domain.com/federation"
 AUTH_SERVER="https://api.domain.com/auth"
@@ -68,11 +70,11 @@ ORG_OFFICIAL_EMAIL="support@domain.com"
 
 # 💧 PRINCIPALS 💧  - more info
 [[PRINCIPALS]]
-name="Jane Jedidiah Johnson"
-email="jane@domain.com"
-keybase="crypto_jane"
-twitter="crypto_jane"
-github="crypto_jane"
+name="OneConnect FinTech"
+email="aubrey@aftarobot.com"
+keybase="oneconnect_fintech"
+twitter="oneconnect_fintech"
+github="https://github.com/malengatiger"
 id_photo_hash="be688838ca8686e5c90689bf2ab585cef1137c999b48c70b92f67a5c34dc15697b5d11c982ed6d71be1e1e7f7b4e0733884aa97c3f7a339a8ed03577cf74be09"
 verification_photo_hash="016ba8c4cfde65af99cb5fa8b8a37e2eb73f481b3ae34991666df2e04feb6c038666ebd1ec2b6f623967756033c702dde5f423f7d47ab6ed1827ff53783731f7"
 
@@ -81,12 +83,14 @@ verification_photo_hash="016ba8c4cfde65af99cb5fa8b8a37e2eb73f481b3ae34991666df2e
 #   Can be used by wallets and clients to trust anchors by domain name
 [[CURRENCIES]]
 code="USD"
-issuer="GAXKVBGEIWSQ5R6REBKE7PZYCHYXJDNIXBD2PU5KD7WGJ2JMNMTXSTZJ"
+issuer="GCT32IOZH5HAUVR3DGB7K4T7JKBJCHRT7RJMDOE2ZIA6LPGTZJEUUGZZ"
+anchor_asset_type="fiat"
 display_decimals=2 # Specifies how many decimal places should be displayed by clients to end users.
 
 [[CURRENCIES]]
 code="EUR"
-issuer="GAXKVBGEIWSQ5R6REBKE7PZYCHYXJDNIXBD2PU5KD7WGJ2JMNMTXSTZJ"
+issuer="GCT32IOZH5HAUVR3DGB7K4T7JKBJCHRT7RJMDOE2ZIA6LPGTZJEUUGZZ"
+anchor_asset_type="fiat"
 display_decimals=2 # Specifies how many decimal places should be displayed by clients to end users.
 
 #[[CURRENCIES]]
@@ -101,12 +105,14 @@ display_decimals=2 # Specifies how many decimal places should be displayed by cl
 
 [[CURRENCIES]]
 code="ZAR"
-issuer="GAXKVBGEIWSQ5R6REBKE7PZYCHYXJDNIXBD2PU5KD7WGJ2JMNMTXSTZJ"
+issuer="GCT32IOZH5HAUVR3DGB7K4T7JKBJCHRT7RJMDOE2ZIA6LPGTZJEUUGZZ"
+anchor_asset_type="fiat"
 display_decimals=2 # Specifies how many decimal places should be displayed by clients to end users.
 
 [[CURRENCIES]]
 code="GBP"
-issuer="GAXKVBGEIWSQ5R6REBKE7PZYCHYXJDNIXBD2PU5KD7WGJ2JMNMTXSTZJ"
+issuer="GCT32IOZH5HAUVR3DGB7K4T7JKBJCHRT7RJMDOE2ZIA6LPGTZJEUUGZZ"
+anchor_asset_type="fiat"
 display_decimals=2 # Specifies how many decimal places should be displayed by clients to end users.
 
 #[[CURRENCIES]]

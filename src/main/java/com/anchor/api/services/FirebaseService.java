@@ -20,6 +20,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.stellar.sdk.responses.AccountResponse;
@@ -39,7 +40,7 @@ public class FirebaseService implements DatabaseServiceInterface {
         LOGGER.info("\uD83C\uDF4F \uD83C\uDF4F FirebaseService constructed \uD83C\uDF4F");
     }
 
-    @Value("${databaseUrl}")
+    @Value("${stellarDatabaseUrl}")
     private String databaseUrl;
 
     private boolean isInitialized = false;
@@ -100,6 +101,28 @@ public class FirebaseService implements DatabaseServiceInterface {
         }
         return mList;
     }
+    @Autowired
+    private TOMLService tomlService;
+    public Anchor getAnchorByName(String name) throws Exception {
+        //tomlService.getAnchorToml()
+        Firestore fs = FirestoreClient.getFirestore();
+        ApiFuture<QuerySnapshot> future = fs.collection(Constants.ANCHORS)
+                .whereEqualTo("name", name)
+                .limit(1)
+                .get();
+        int cnt = 0;
+        Anchor anchor = null;
+        for (QueryDocumentSnapshot document : future.get().getDocuments()) {
+            Map<String, Object> map = document.getData();
+            String object = G.toJson(map);
+             anchor = G.fromJson(object, Anchor.class);
+            cnt++;
+            LOGGER.info("\uD83C\uDF51 \uD83C\uDF51 ANCHOR: #" + cnt +
+                    " \uD83D\uDC99 " + anchor.getName() + "  \uD83E\uDD66 anchorId: "
+                    + anchor.getAnchorId());
+        }
+        return anchor;
+    }
 
     @Override
     public Agent getAgent(String agentId) throws Exception {
@@ -158,6 +181,10 @@ public class FirebaseService implements DatabaseServiceInterface {
     @Override
     public String addAnchor(Anchor anchor) throws Exception {
         Firestore fs = FirestoreClient.getFirestore();
+        List<Anchor> mList = getAnchors();
+        if (!mList.isEmpty()) {
+            throw new Exception("One anchor already in database - cannot be more than one");
+        }
         ApiFuture<DocumentReference> future = fs.collection(Constants.ANCHORS).add(anchor);
         LOGGER.info("\uD83C\uDF4F \uD83C\uDF4F Anchor added at path: ".concat(future.get().getPath()));
         return "\uD83C\uDF4F Anchor added";
@@ -750,8 +777,10 @@ public class FirebaseService implements DatabaseServiceInterface {
         List<ExportedUserRecord> list = getAuthUsers();
         for (ExportedUserRecord exportedUserRecord : list) {
             FirebaseAuth.getInstance().deleteUser(exportedUserRecord.getUid());
-            LOGGER.info(Emoji.OK.concat(Emoji.RED_APPLE) + "Successfully deleted user: "
-                    .concat(exportedUserRecord.getDisplayName()));
+            if (exportedUserRecord.getDisplayName() != null) {
+                LOGGER.info(Emoji.OK.concat(Emoji.RED_APPLE) + "Successfully deleted user: "
+                        .concat(exportedUserRecord.getDisplayName()));
+            }
         }
     }
 

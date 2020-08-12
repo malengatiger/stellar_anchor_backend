@@ -98,23 +98,7 @@ public class PaymentService {
                     .concat(paymentRequest.getAssetCode().concat(" sourceAccount: ")
                     .concat(sourceKeyPair.getAccountId()));
             LOGGER.info(Emoji.NOT_OK.concat(Emoji.NOT_OK).concat(err));
-            LOGGER.info(Emoji.NOT_OK.concat(Emoji.NOT_OK).concat(" xdr: ")
-                    .concat(transactionResponse.getResultXdr().get()));
-
-            if (transactionResponse.getResultXdr().get().contains(TX_PAYMENT_NO_TRUST_ERROR)) {
-                String msg = "Payment No Trust Error";
-                LOGGER.info(Emoji.PIG.concat(Emoji.PIG) + msg.concat(" ")
-                        .concat(Emoji.PIG).concat(Emoji.PIG));
-                throw new PaymentNoTrustException(Emoji.NOT_OK.concat(msg));
-            }
-            if (transactionResponse.getResultXdr().get().contains(TX_PAYMENT_UNDERFUNDED)) {
-                String msg = "Payment Underfunded Error";
-                LOGGER.info(Emoji.RED_DOT.concat(Emoji.RED_DOT) + msg.concat(" ")
-                        .concat(Emoji.PIG).concat(Emoji.PIG));
-                throw new UnderFundedException(Emoji.NOT_OK.concat(msg));
-            }
-            throw new Exception(Emoji.NOT_OK.concat(err).concat(
-                    " xdr: ".concat(transactionResponse.getResultXdr().get())));
+            AccountService.processPaymentError(transactionResponse);
         }
         return paymentRequest;
 
@@ -167,29 +151,10 @@ public class PaymentService {
                     .concat(request.getAssetCode().concat(" sourceAccount: ")
                             .concat(sourceKeyPair.getAccountId()));
             LOGGER.info(Emoji.NOT_OK.concat(Emoji.NOT_OK).concat(err));
-            LOGGER.info(Emoji.NOT_OK.concat(Emoji.NOT_OK).concat(" xdr: ")
-                    .concat(transactionResponse.getResultXdr().get()));
-
-            if (transactionResponse.getResultXdr().get().contains(TX_PAYMENT_NO_TRUST_ERROR)) {
-                String msg = "Payment No Trust Error";
-                LOGGER.info(Emoji.PIG.concat(Emoji.PIG) + msg.concat(" ")
-                        .concat(Emoji.PIG).concat(Emoji.PIG));
-                throw new PaymentNoTrustException(Emoji.NOT_OK.concat(msg));
-            }
-            if (transactionResponse.getResultXdr().get().contains(TX_PAYMENT_UNDERFUNDED)) {
-                String msg = "Payment Underfunded Error";
-                LOGGER.info(Emoji.RED_DOT.concat(Emoji.RED_DOT) + msg.concat(" ")
-                        .concat(Emoji.PIG).concat(Emoji.PIG));
-                throw new UnderFundedException(Emoji.NOT_OK.concat(msg));
-            }
-            throw new Exception(Emoji.NOT_OK.concat(err).concat(
-                    " xdr: ".concat(transactionResponse.getResultXdr().get())));
+            AccountService.processPaymentError(transactionResponse);
         }
         return request;
     }
-
-    public static final String TX_PAYMENT_NO_TRUST_ERROR = "AAAAAAAAAGT/////AAAAAQAAAAAAAAAB////+gAAAAA=",
-    TX_PAYMENT_UNDERFUNDED = "AAAAAAAAAGT/////AAAAAQAAAAAAAAAB/////gAAAAA=";
 
     private void setServerAndNetwork() {
         if (server != null) {
@@ -231,15 +196,5 @@ public class PaymentService {
 
 
     }
-    public static class UnderFundedException extends Exception {
 
-        public UnderFundedException(String msg) {
-            super(msg);
-        }
-    }
-    public static class PaymentNoTrustException extends Exception {
-        public PaymentNoTrustException(String msg) {
-            super(msg);
-        }
-    }
 }

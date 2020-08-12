@@ -136,7 +136,7 @@ public class AnchorAccountService {
                     issuingAccount.getAccountResponse().getAccountId());
             // Create trustlines for all asset types
             for (AccountService.AssetBag assetBag : assets) {
-                SubmitTransactionResponse createTrustResponse = accountService.createTrustLine(
+                SubmitTransactionResponse createTrustResponse = accountService.changeTrustLine(
                         issuingAccount.getAccountResponse().getAccountId(),
                         distributionAccount.getSecretSeed(),
                         limit, assetBag.assetCode);

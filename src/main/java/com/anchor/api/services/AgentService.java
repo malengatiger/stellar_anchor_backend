@@ -151,7 +151,7 @@ public class AgentService {
 
     }
 
-    private static DecimalFormat currencyFormat = new DecimalFormat("#.00");
+    private static final DecimalFormat currencyFormat = new DecimalFormat("#.00");
 
     public LoanApplication addLoanApplication(LoanApplication application) throws Exception {
         // todo - check application for correctness prior to adding ...
@@ -406,7 +406,7 @@ public class AgentService {
         LOGGER.info(Emoji.WARNING.concat(Emoji.WARNING)
                 + "createClient:.... Creating Client Fiat TrustLines .... userSeed: ".concat(bag.getSecretSeed()));
         for (AccountService.AssetBag assetBag : assetBags) {
-            accountService.createTrustLine(anchor.getIssuingAccount().getAccountId(), bag.getSecretSeed(),
+            accountService.changeTrustLine(anchor.getIssuingAccount().getAccountId(), bag.getSecretSeed(),
                     fiatLimit, assetBag.assetCode);
 
         }
@@ -483,7 +483,7 @@ public class AgentService {
                 + "createAgent:.... Creating Agent Fiat Asset Balances .... userSeed: ".concat(bag.getSecretSeed()));
         // todo - what, exactly is limit?
         for (AccountService.AssetBag assetBag : assetBags) {
-            accountService.createTrustLine(anchor.getIssuingAccount().getAccountId(), bag.getSecretSeed(),
+            accountService.changeTrustLine(anchor.getIssuingAccount().getAccountId(), bag.getSecretSeed(),
                     agent.getFiatLimit(), assetBag.assetCode);
             accountService.createAsset(issuingAccountSeed, anchor.getDistributionAccount().getAccountId(),
                     assetBag.assetCode, agent.getFiatBalance());
