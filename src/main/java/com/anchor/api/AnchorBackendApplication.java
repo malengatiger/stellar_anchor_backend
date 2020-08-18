@@ -26,6 +26,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.util.Calendar;
+import java.util.Map;
 
 @SpringBootApplication
 @RefreshScope
@@ -134,7 +135,7 @@ public class AnchorBackendApplication implements ApplicationListener<Application
             }
             LOGGER.info("\n\n");
             AnchorController controller = context.getBean(AnchorController.class);
-            String tom = controller.getWellKnownStellarToml();
+            Map<String, Object> tom = controller.getWellKnownStellarToml();
             LOGGER.info(E.SKULL.concat(E.SKULL)
                     + E.SKULL.concat(E.SKULL)
                     + "  ------------ STELLAR TOML FILE ------------\n"

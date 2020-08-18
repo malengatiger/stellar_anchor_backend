@@ -180,10 +180,8 @@ public class CryptoService {
             throw new Exception(E.NOT_OK + "KMS Blob for downloading is fucking NULL? WTF?");
         }
         blob.downloadTo(destFilePath);
-        boolean del = destFilePath.toFile().delete();
         LOGGER.info(E.YELLOW_BIRD.concat(E.YELLOW_BIRD)
-                .concat(" seed file has been downloaded OK into ")
-                .concat(" temporary file deleted: " + del + " ")
+                .concat(" seed file has been downloaded OK into: ".concat(destFilePath.toString()))
                 .concat(destFilePath.toAbsolutePath().toString()));
     }
 

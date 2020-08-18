@@ -89,7 +89,7 @@ public class TOMLService {
             stellarToml = new Toml().read(mPath.toFile());
             LOGGER.info(E.PRESCRIPTION + E.PRESCRIPTION + E.PRESCRIPTION + "....... stellar.toml file found from encrypted storage.");
             boolean isDeleted = mPath.toFile().delete();
-            LOGGER.info(E.PRESCRIPTION + E.PRESCRIPTION + E.PRESCRIPTION + "....... temporary download file deleted: " + isDeleted);
+            LOGGER.info(E.BELL + E.BELL + E.BELL + "....... temporary download file deleted: " + isDeleted);
             LOGGER.info(stellarToml.toString());
         } catch (Exception e) {
             LOGGER.info(E.PEPPER + E.PEPPER + E.PEPPER + "....... Failed to get stellar.toml file from encrypted storage." +

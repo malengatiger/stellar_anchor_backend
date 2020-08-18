@@ -665,7 +665,7 @@ public class FirebaseService implements DatabaseServiceInterface {
         Firestore fs = FirestoreClient.getFirestore();
         List<Client> mList = new ArrayList<>();
         ApiFuture<QuerySnapshot> future = fs.collection(Constants.CLIENTS)
-                .whereEqualTo("agentId", agentId).get();
+                .whereArrayContains("agentIds", agentId).get();
         for (QueryDocumentSnapshot document : future.get().getDocuments()) {
             Map<String, Object> map = document.getData();
             String object = G.toJson(map);

@@ -131,8 +131,8 @@ public class AnchorController {
     }
 
 
-    @GetMapping(value = "/.well-known/stellar.toml", produces = MediaType.TEXT_PLAIN_VALUE)
-    public  String getWellKnownStellarToml() throws Exception {
+    @GetMapping(value = "/.well-known/stellar.toml", produces = MediaType.APPLICATION_JSON_VALUE)
+    public  Map<String, Object> getWellKnownStellarToml() throws Exception {
         LOGGER.info(em + " get stellar.toml file and return to caller ...");
 
             Toml toml = tomlService.getStellarToml();
@@ -140,7 +140,7 @@ public class AnchorController {
                 LOGGER.info(E.NOT_OK+ E.NOT_OK + "stellar.toml not found " + E.NOT_OK);
                 throw new Exception("stellar.toml not found");
             }
-            return toml.toMap().toString();
+            return toml.toMap();
 
 
     }
