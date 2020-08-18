@@ -8,7 +8,7 @@ import com.anchor.api.services.AgentService;
 import com.anchor.api.services.AnchorAccountService;
 import com.anchor.api.services.TOMLService;
 import com.anchor.api.util.DemoDataGenerator;
-import com.anchor.api.util.Emoji;
+import com.anchor.api.util.E;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.moandjiezana.toml.Toml;
@@ -51,7 +51,7 @@ public class DataGenerationController {
     public Anchor generateAnchor(String anchorName) throws Exception {
         LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 StellarAnchorApplication /generateAnchor ...");
         Anchor anchor = demoDataGenerator.createNewAnchor(anchorName);
-        LOGGER.info(Emoji.DICE.concat(Emoji.DICE.concat(Emoji.DICE)
+        LOGGER.info(E.DICE.concat(E.DICE.concat(E.DICE)
                 .concat("New Anchor Returned")
                 .concat(G.toJson(anchor))));
         LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C GenerateDemoData:generateAnchor completed and returning external caller... "
@@ -69,34 +69,34 @@ public class DataGenerationController {
         return anchor;
     }
     @GetMapping(value = "/generateDemo", produces = MediaType.TEXT_PLAIN_VALUE)
-    public String generateDemo(@RequestParam String anchorId) throws Exception {
+    public String generateDemo() throws Exception {
         LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 StellarAnchorApplication /generateDemo ...");
-        checkTOML(anchorId);
-        demoDataGenerator.startGeneration(anchorId);
+        checkTOML();
+        demoDataGenerator.startGeneration();
         return "\n\n\uD83D\uDC99 \uD83D\uDC9C GenerateDemoData completed ... "
                 + new Date().toString() + " \uD83D\uDC99 \uD83D\uDC9C STATUS: " + status;
     }
 
-    private void checkTOML(@RequestParam String anchorId) throws Exception {
-        Toml toml = tomlService.getAnchorToml(anchorId);
+    private void checkTOML() throws Exception {
+        Toml toml = tomlService.getAnchorToml();
         if (toml == null) {
-            LOGGER.severe(Emoji.ERROR+Emoji.ERROR+Emoji.ERROR+ " Missing anchor.toml, QUITTING! - " +
-                    "Please upload an anchor.toml first before trying this again. " + Emoji.ERROR+Emoji.ERROR);
+            LOGGER.severe(E.ERROR+ E.ERROR+ E.ERROR+ " Missing anchor.toml, QUITTING! - " +
+                    "Please upload an anchor.toml first before trying this again. " + E.ERROR+ E.ERROR);
             throw new Exception("anchor.toml file missing");
         }
     }
 
     @GetMapping(value = "/generateAgentClients", produces = MediaType.TEXT_PLAIN_VALUE)
-    public String generateAgentClients(@RequestParam String anchorId, @RequestParam int count) throws Exception {
-        checkTOML(anchorId);
-        demoDataGenerator.generateAgentClients(anchorId, count);
+    public String generateAgentClients( @RequestParam int count) throws Exception {
+        checkTOML();
+        demoDataGenerator.generateAgentClients(count);
         return "\uD83D\uDC99 \uD83D\uDC9C generateAgentClients completed ... "
                 + new Date().toString() + " \uD83D\uDC99 \uD83D\uDC9C STATUS: " + status;
     }
     @GetMapping(value = "/generateLoans", produces = MediaType.TEXT_PLAIN_VALUE)
-    public String generateLoans(@RequestParam String anchorId) throws Exception {
+    public String generateLoans() throws Exception {
         LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 StellarAnchorApplication /generateLoans ...");
-        demoDataGenerator.generateLoanApplications(anchorId);
+        demoDataGenerator.generateLoanApplications();
         return "\uD83D\uDC99 \uD83D\uDC9C GenerateLoans completed ... "
                 + new Date().toString() + " \uD83D\uDC99 \uD83D\uDC9C STATUS: " + status;
     }
@@ -110,13 +110,13 @@ public class DataGenerationController {
         return stokvel;
     }
     @GetMapping(value = "/generateClients", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String generateClients(@RequestParam String anchorId, @RequestParam int count) throws Exception {
+    public String generateClients( @RequestParam int count) throws Exception {
         LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 StellarAnchorApplication /generateClients ..." +
-                "" + anchorId + "  count: " + count);
-        checkTOML(anchorId);
-        demoDataGenerator.generateAgentClients(anchorId, count);
+                 "  count: " + count);
+        checkTOML();
+        demoDataGenerator.generateAgentClients( count);
         String msg =  "\uD83D\uDC99 \uD83D\uDC9C generateAgentClients completed ... \uD83C\uDF3C \uD83C\uDF3C "
-                + anchorId + " \uD83D\uDC99 \uD83D\uDC9C STATUS: " + status;
+               + " \uD83D\uDC99 \uD83D\uDC9C STATUS: " + status;
         LOGGER.info(msg);
         return msg;
     }
@@ -130,9 +130,9 @@ public class DataGenerationController {
         return stokvel;
     }
     @GetMapping(value = "/generateAgentFunding", produces = MediaType.TEXT_PLAIN_VALUE)
-    public String generateAgentFunding(@RequestParam String anchorId) throws Exception {
+    public String generateAgentFunding() throws Exception {
         LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 StellarAnchorApplication /generateAgentFunding ...");
-        demoDataGenerator.generateAgentFunding(anchorId);
+        demoDataGenerator.generateAgentFunding();
         return "\uD83D\uDC99 \uD83D\uDC9C GenerateAgentFunding completed ... "
                 + new Date().toString() + " \uD83D\uDC99 \uD83D\uDC9C STATUS: " + status;
     }
@@ -144,9 +144,9 @@ public class DataGenerationController {
                 + new DateTime().toDateTimeISO().toString() + " \uD83D\uDC99 STATUS: " + status;
     }
     @GetMapping(value = "/generatePayments", produces = MediaType.TEXT_PLAIN_VALUE)
-    public String generatePayments(@RequestParam String anchorId) throws Exception {
+    public String generatePayments() throws Exception {
         LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 StellarAnchorApplication /generatePayments ...");
-        demoDataGenerator.generatePayments(anchorId);
+        demoDataGenerator.generatePayments();
         return "\uD83D\uDC99 \uD83D\uDC9C GeneratePayments completed ... "
                 + new DateTime().toDateTimeISO().toString() + " \uD83D\uDC99 STATUS: " + status;
     }

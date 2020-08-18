@@ -8,7 +8,7 @@ import com.anchor.api.data.info.Info;
 import com.anchor.api.data.stokvel.Member;
 import com.anchor.api.data.stokvel.Stokvel;
 import com.anchor.api.util.Constants;
-import com.anchor.api.util.Emoji;
+import com.anchor.api.util.E;
 import com.google.api.core.ApiFuture;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.*;
@@ -18,6 +18,7 @@ import com.google.firebase.auth.*;
 import com.google.firebase.cloud.FirestoreClient;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.moandjiezana.toml.Toml;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +48,7 @@ public class FirebaseService implements DatabaseServiceInterface {
     public void initializeFirebase() throws Exception {
         LOGGER.info("\uD83C\uDFBD \uD83C\uDFBD \uD83C\uDFBD \uD83C\uDFBD  FirebaseService: initializeFirebase: ... \uD83C\uDF4F" +
                 ".... \uD83D\uDC99 \uD83D\uDC99 isInitialized: " + isInitialized + " \uD83D\uDC99 \uD83D\uDC99 FIREBASE URL: "
-                + Emoji.HEART_PURPLE + " " + databaseUrl + " " + Emoji.HEART_BLUE + Emoji.HEART_BLUE);
+                + E.HEART_PURPLE + " " + databaseUrl + " " + E.HEART_BLUE + E.HEART_BLUE);
 
         FirebaseApp app;
         try {
@@ -59,18 +60,18 @@ public class FirebaseService implements DatabaseServiceInterface {
 
                 app = FirebaseApp.initializeApp(prodOptions);
                 isInitialized = true;
-                LOGGER.info(Emoji.HEART_BLUE + Emoji.HEART_BLUE + "Firebase has been set up and initialized. " +
-                        "\uD83D\uDC99 URL: " + app.getOptions().getDatabaseUrl() + Emoji.HAPPY);
-                LOGGER.info(Emoji.HEART_BLUE + Emoji.HEART_BLUE + "Firebase has been set up and initialized. " +
-                        "\uD83E\uDD66 Name: " + app.getName() + Emoji.HEART_ORANGE + Emoji.HEART_GREEN);
+                LOGGER.info(E.HEART_BLUE + E.HEART_BLUE + "Firebase has been set up and initialized. " +
+                        "\uD83D\uDC99 URL: " + app.getOptions().getDatabaseUrl() + E.HAPPY);
+                LOGGER.info(E.HEART_BLUE + E.HEART_BLUE + "Firebase has been set up and initialized. " +
+                        "\uD83E\uDD66 Name: " + app.getName() + E.HEART_ORANGE + E.HEART_GREEN);
                 Firestore fs = FirestoreClient.getFirestore();
                 int cnt = 0;
                 for (CollectionReference listCollection : fs.listCollections()) {
                     cnt++;
-                    LOGGER.info(Emoji.RAIN_DROPS + Emoji.RAIN_DROPS + "Collection: #" + cnt + " \uD83D\uDC99 collection: " + listCollection.getId());
+                    LOGGER.info(E.RAIN_DROPS + E.RAIN_DROPS + "Collection: #" + cnt + " \uD83D\uDC99 collection: " + listCollection.getId());
                 }
                 List<Anchor> list = getAnchors();
-                LOGGER.info(Emoji.HEART_BLUE + Emoji.HEART_BLUE +
+                LOGGER.info(E.HEART_BLUE + E.HEART_BLUE +
                         "Firebase Initialization complete; ... anchors found: " + list.size());
             }
         } catch (Exception e) {
@@ -116,6 +117,26 @@ public class FirebaseService implements DatabaseServiceInterface {
             Map<String, Object> map = document.getData();
             String object = G.toJson(map);
              anchor = G.fromJson(object, Anchor.class);
+            cnt++;
+            LOGGER.info("\uD83C\uDF51 \uD83C\uDF51 ANCHOR: #" + cnt +
+                    " \uD83D\uDC99 " + anchor.getName() + "  \uD83E\uDD66 anchorId: "
+                    + anchor.getAnchorId());
+        }
+        return anchor;
+    }
+    public Anchor getAnchorById(String anchorId) throws Exception {
+        //tomlService.getAnchorToml()
+        Firestore fs = FirestoreClient.getFirestore();
+        ApiFuture<QuerySnapshot> future = fs.collection(Constants.ANCHORS)
+                .whereEqualTo("anchorId", anchorId)
+                .limit(1)
+                .get();
+        int cnt = 0;
+        Anchor anchor = null;
+        for (QueryDocumentSnapshot document : future.get().getDocuments()) {
+            Map<String, Object> map = document.getData();
+            String object = G.toJson(map);
+            anchor = G.fromJson(object, Anchor.class);
             cnt++;
             LOGGER.info("\uD83C\uDF51 \uD83C\uDF51 ANCHOR: #" + cnt +
                     " \uD83D\uDC99 " + anchor.getName() + "  \uD83E\uDD66 anchorId: "
@@ -201,7 +222,7 @@ public class FirebaseService implements DatabaseServiceInterface {
     @Override
     public String addClient(Client client) throws Exception {
         Firestore fs = FirestoreClient.getFirestore();
-        Client current = getClientByNameAndAnchor(client.getAnchorId(),
+        Client current = getClientByNameAndAnchor(
                 client.getPersonalKYCFields().getFirst_name(),
                 client.getPersonalKYCFields().getLast_name());
         if (current == null) {
@@ -216,7 +237,7 @@ public class FirebaseService implements DatabaseServiceInterface {
     @Override
     public String addAgent(Agent agent) throws Exception {
         Firestore fs = FirestoreClient.getFirestore();
-        Agent current = getAgentByNameAndAnchor(agent.getAnchorId(),
+        Agent current = getAgentByNameAndAnchor(
                 agent.getPersonalKYCFields().getFirst_name(),
                 agent.getPersonalKYCFields().getLast_name());
         if (current == null) {
@@ -289,7 +310,7 @@ public class FirebaseService implements DatabaseServiceInterface {
 
         paymentRequest.setSeed(null);
         ApiFuture<DocumentReference> future = fs.collection(Constants.PAYMENT_REQUESTS).add(paymentRequest);
-        String msg = Emoji.HAPPY.concat(Emoji.HAPPY.concat(Emoji.HAPPY)) +
+        String msg = E.HAPPY.concat(E.HAPPY.concat(E.HAPPY)) +
                 "PaymentRequest added to Database: "
                         .concat(" amount: ").concat(paymentRequest.getAmount())
                         .concat(" ").concat(paymentRequest.getDate())
@@ -304,7 +325,7 @@ public class FirebaseService implements DatabaseServiceInterface {
     public AgentFundingRequest addAgentFundingRequest(AgentFundingRequest agentFundingRequest) throws Exception {
         Firestore fs = FirestoreClient.getFirestore();
         ApiFuture<DocumentReference> future = fs.collection(Constants.AGENT_FUNDING_REQUESTS).add(agentFundingRequest);
-        String msg = Emoji.HAPPY.concat(Emoji.HAPPY.concat(Emoji.HAPPY)) +
+        String msg = E.HAPPY.concat(E.HAPPY.concat(E.HAPPY)) +
                 "AgentFundingRequest added to Database: "
                         .concat(" amount: ").concat(agentFundingRequest.getAmount())
                         .concat(" ").concat(agentFundingRequest.getDate())
@@ -324,7 +345,7 @@ public class FirebaseService implements DatabaseServiceInterface {
                 .get();
         for (QueryDocumentSnapshot document : future.get().getDocuments()) {
             document.getReference().set(application);
-            String msg = Emoji.WINE + "LoanApplication updated";
+            String msg = E.WINE + "LoanApplication updated";
             return msg;
         }
         throw new Exception("LoanApplication not found for update");
@@ -341,7 +362,7 @@ public class FirebaseService implements DatabaseServiceInterface {
         for (QueryDocumentSnapshot document : future.get().getDocuments()) {
             document.getReference().set(client);
             String msg = "Client updated";
-            LOGGER.info(Emoji.WINE.concat(Emoji.WINE).concat(msg));
+            LOGGER.info(E.WINE.concat(E.WINE).concat(msg));
             return msg;
         }
         throw new Exception("Client not found for update");
@@ -357,7 +378,7 @@ public class FirebaseService implements DatabaseServiceInterface {
         for (QueryDocumentSnapshot document : future.get().getDocuments()) {
             document.getReference().set(agent);
             String msg = "Agent updated";
-            LOGGER.info(Emoji.WINE.concat(Emoji.WINE).concat(msg));
+            LOGGER.info(E.WINE.concat(E.WINE).concat(msg));
             return msg;
         }
         throw new Exception("Agent not found for update");
@@ -366,7 +387,7 @@ public class FirebaseService implements DatabaseServiceInterface {
     @Override
     public String addAnchorInfo(Info info) throws Exception {
         Firestore fs = FirestoreClient.getFirestore();
-        Info current = getAnchorInfo(info.getAnchorId());
+        Info current = getAnchorInfo();
         if (current == null) {
             ApiFuture<DocumentReference> future = fs.collection(Constants.INFOS).add(info);
             LOGGER.info("Info added at path: ".concat(future.get().getPath()));
@@ -385,7 +406,12 @@ public class FirebaseService implements DatabaseServiceInterface {
     }
 
     @Override
-    public Info getAnchorInfo(String anchorId) throws Exception {
+    public Info getAnchorInfo() throws Exception {
+        Toml toml = tomlService.getAnchorToml();
+        if (toml == null) {
+            throw new Exception("Generator: Anchor TOML file is missing: ");
+        }
+        String anchorId = toml.getString("anchorId");
         Firestore fs = FirestoreClient.getFirestore();
         Info info;
         List<Info> mList = new ArrayList<>();
@@ -407,8 +433,13 @@ public class FirebaseService implements DatabaseServiceInterface {
     }
 
 
+    private Toml toml;
     @Override
-    public Anchor getAnchor(String anchorId) throws Exception {
+    public Anchor getAnchor() throws Exception {
+        if (toml == null) {
+            throw new Exception("Generator: Anchor TOML file is missing: ");
+        }
+        String anchorId = toml.getString("anchorId");
         Firestore fs = FirestoreClient.getFirestore();
         Anchor info;
         List<Anchor> mList = new ArrayList<>();
@@ -512,13 +543,18 @@ public class FirebaseService implements DatabaseServiceInterface {
             Member mInfo = G.fromJson(object, Member.class);
             mList.add(mInfo);
         }
-        LOGGER.info(Emoji.BLUE_DISC.concat(Emoji.BLUE_DISC) + mList.size() + " Members found");
+        LOGGER.info(E.BLUE_DISC.concat(E.BLUE_DISC) + mList.size() + " Members found");
 
         return mList;
     }
 
     @Override
-    public List<Agent> getAgents(String anchorId) throws Exception {
+    public List<Agent> getAgents() throws Exception {
+        Toml toml = tomlService.getAnchorToml();
+        if (toml == null) {
+            throw new Exception("Generator: Anchor TOML file is missing: ");
+        }
+        String anchorId = toml.getString("anchorId");
         Firestore fs = FirestoreClient.getFirestore();
         List<Agent> mList = new ArrayList<>();
         ApiFuture<QuerySnapshot> future = fs.collection(Constants.AGENTS)
@@ -529,13 +565,18 @@ public class FirebaseService implements DatabaseServiceInterface {
             Agent mInfo = G.fromJson(object, Agent.class);
             mList.add(mInfo);
         }
-        LOGGER.info(Emoji.BLUE_DISC.concat(Emoji.BLUE_DISC) + mList.size() + " agents found");
+        LOGGER.info(E.BLUE_DISC.concat(E.BLUE_DISC) + mList.size() + " agents found");
 
         return mList;
     }
 
     @Override
-    public List<PaymentRequest> getPaymentRequests(String anchorId) throws Exception {
+    public List<PaymentRequest> getPaymentRequests() throws Exception {
+        Toml toml = tomlService.getAnchorToml();
+        if (toml == null) {
+            throw new Exception("Generator: Anchor TOML file is missing: ");
+        }
+        String anchorId = toml.getString("anchorId");
         Firestore fs = FirestoreClient.getFirestore();
         List<PaymentRequest> mList = new ArrayList<>();
         ApiFuture<QuerySnapshot> future = fs.collection(Constants.PAYMENT_REQUESTS)
@@ -548,7 +589,7 @@ public class FirebaseService implements DatabaseServiceInterface {
             PaymentRequest mInfo = G.fromJson(object, PaymentRequest.class);
             mList.add(mInfo);
         }
-        LOGGER.info(Emoji.BLUE_DISC.concat(Emoji.BLUE_DISC) + mList.size() + " PaymentRequests found");
+        LOGGER.info(E.BLUE_DISC.concat(E.BLUE_DISC) + mList.size() + " PaymentRequests found");
 
         return mList;
     }
@@ -576,12 +617,11 @@ public class FirebaseService implements DatabaseServiceInterface {
     }
 
     @Override
-    public Agent getAgentByNameAndAnchor(String anchorId, String firstName, String lastName) throws Exception {
+    public Agent getAgentByNameAndAnchor(String firstName, String lastName) throws Exception {
         Firestore fs = FirestoreClient.getFirestore();
         Agent agent;
         List<Agent> mList = new ArrayList<>();
         ApiFuture<QuerySnapshot> future = fs.collection(Constants.AGENTS)
-                .whereEqualTo("anchorId", anchorId)
                 .whereEqualTo("personalKYCFields.first_name", firstName)
                 .whereEqualTo("personalKYCFields.last_name", lastName).get();
         for (QueryDocumentSnapshot document : future.get().getDocuments()) {
@@ -600,7 +640,12 @@ public class FirebaseService implements DatabaseServiceInterface {
     }
 
     @Override
-    public List<Client> getAnchorClients(String anchorId) throws Exception {
+    public List<Client> getAnchorClients() throws Exception {
+        Toml toml = tomlService.getAnchorToml();
+        if (toml == null) {
+            throw new Exception("GeneratorController: Anchor TOML file is missing: ");
+        }
+        String anchorId = toml.getString("anchorId");
         Firestore fs = FirestoreClient.getFirestore();
         List<Client> mList = new ArrayList<>();
         ApiFuture<QuerySnapshot> future = fs.collection(Constants.CLIENTS)
@@ -611,7 +656,7 @@ public class FirebaseService implements DatabaseServiceInterface {
             Client mInfo = G.fromJson(object, Client.class);
             mList.add(mInfo);
         }
-        LOGGER.info(Emoji.LEAF + "Found " + mList.size() + " Anchor Clients");
+        LOGGER.info(E.LEAF + "Found " + mList.size() + " Anchor Clients");
         return mList;
     }
 
@@ -627,7 +672,7 @@ public class FirebaseService implements DatabaseServiceInterface {
             Client mInfo = G.fromJson(object, Client.class);
             mList.add(mInfo);
         }
-        LOGGER.info(Emoji.LEAF + "Found " + mList.size() + " Agent Clients");
+        LOGGER.info(E.LEAF + "Found " + mList.size() + " Agent Clients");
         return mList;
     }
 
@@ -644,7 +689,7 @@ public class FirebaseService implements DatabaseServiceInterface {
             LoanApplication mInfo = G.fromJson(object, LoanApplication.class);
             mList.add(mInfo);
         }
-        LOGGER.info(Emoji.LEAF + "Found " + mList.size() + " Agent Loans");
+        LOGGER.info(E.LEAF + "Found " + mList.size() + " Agent Loans");
         return mList;
     }
 
@@ -661,17 +706,17 @@ public class FirebaseService implements DatabaseServiceInterface {
             LoanPayment payment = G.fromJson(object, LoanPayment.class);
             mList.add(payment);
         }
-        LOGGER.info(Emoji.LEAF + "Found " + mList.size() + " Loan Payments");
+        LOGGER.info(E.LEAF + "Found " + mList.size() + " Loan Payments");
         return mList;
     }
 
     @Override
-    public Client getClientByNameAndAnchor(String anchorId, String firstName, String lastName) throws Exception {
+    public Client getClientByNameAndAnchor(String firstName, String lastName) throws Exception {
+
         Firestore fs = FirestoreClient.getFirestore();
         Client agent;
         List<Client> mList = new ArrayList<>();
         ApiFuture<QuerySnapshot> future = fs.collection(Constants.CLIENTS)
-                .whereEqualTo("anchorId", anchorId)
                 .whereEqualTo("personalKYCFields.first_name", firstName)
                 .whereEqualTo("personalKYCFields.last_name", lastName).get();
         for (QueryDocumentSnapshot document : future.get().getDocuments()) {
@@ -743,14 +788,14 @@ public class FirebaseService implements DatabaseServiceInterface {
     }
 
     public UserRecord createUser(String name, String email, String password) throws Exception {
-        LOGGER.info(Emoji.LEMON + Emoji.LEMON + "createUser: name: " + name + " email: " + email + " password: " + password);
+        LOGGER.info(E.LEMON + E.LEMON + "createUser: name: " + name + " email: " + email + " password: " + password);
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         UserRecord.CreateRequest createRequest = new UserRecord.CreateRequest();
         createRequest.setEmail(email);
         createRequest.setDisplayName(name);
         createRequest.setPassword(password);
         ApiFuture<UserRecord> userRecord = firebaseAuth.createUserAsync(createRequest);
-        LOGGER.info(Emoji.HEART_ORANGE + Emoji.HEART_ORANGE + "Firebase user record created: ".concat(userRecord.get().getUid()));
+        LOGGER.info(E.HEART_ORANGE + E.HEART_ORANGE + "Firebase user record created: ".concat(userRecord.get().getUid()));
         return userRecord.get();
 
     }
@@ -762,7 +807,7 @@ public class FirebaseService implements DatabaseServiceInterface {
         ListUsersPage page = future.get();
         while (page != null) {
             for (ExportedUserRecord user : page.getValues()) {
-                LOGGER.info(Emoji.PIG.concat(Emoji.PIG) + "Auth User: " + user.getDisplayName());
+                LOGGER.info(E.PIG.concat(E.PIG) + "Auth User: " + user.getDisplayName());
                 mList.add(user);
             }
             page = page.getNextPage();
@@ -772,21 +817,21 @@ public class FirebaseService implements DatabaseServiceInterface {
     }
 
     public void deleteAuthUsers() throws Exception {
-        LOGGER.info(Emoji.WARNING.concat(Emoji.WARNING.concat(Emoji.WARNING)
-                .concat(" DELETING ALL AUTH USERS from Firebase .... ").concat(Emoji.RED_DOT)));
+        LOGGER.info(E.WARNING.concat(E.WARNING.concat(E.WARNING)
+                .concat(" DELETING ALL AUTH USERS from Firebase .... ").concat(E.RED_DOT)));
         List<ExportedUserRecord> list = getAuthUsers();
         for (ExportedUserRecord exportedUserRecord : list) {
             FirebaseAuth.getInstance().deleteUser(exportedUserRecord.getUid());
             if (exportedUserRecord.getDisplayName() != null) {
-                LOGGER.info(Emoji.OK.concat(Emoji.RED_APPLE) + "Successfully deleted user: "
+                LOGGER.info(E.OK.concat(E.RED_APPLE) + "Successfully deleted user: "
                         .concat(exportedUserRecord.getDisplayName()));
             }
         }
     }
 
     public void deleteCollections() throws Exception {
-        LOGGER.info(Emoji.WARNING.concat(Emoji.WARNING.concat(Emoji.WARNING)
-                .concat(" DELETING ALL DATA from Firestore .... ").concat(Emoji.RED_DOT)));
+        LOGGER.info(E.WARNING.concat(E.WARNING.concat(E.WARNING)
+                .concat(" DELETING ALL DATA from Firestore .... ").concat(E.RED_DOT)));
         Firestore fs = FirestoreClient.getFirestore();
         CollectionReference ref1 = fs.collection(Constants.ANCHORS);
         deleteCollection(ref1, 1000);
@@ -812,8 +857,8 @@ public class FirebaseService implements DatabaseServiceInterface {
         deleteCollection(ref11, 1000);
         CollectionReference ref12 = fs.collection(Constants.STOKVEL_GOALS);
         deleteCollection(ref12, 1000);
-        LOGGER.info(Emoji.PEAR.concat(Emoji.PEAR.concat(Emoji.PEAR)
-                .concat(" DELETED ALL DATA from Firestore .... ").concat(Emoji.RED_TRIANGLE)));
+        LOGGER.info(E.PEAR.concat(E.PEAR.concat(E.PEAR)
+                .concat(" DELETED ALL DATA from Firestore .... ").concat(E.RED_TRIANGLE)));
     }
 
     /**
@@ -830,7 +875,7 @@ public class FirebaseService implements DatabaseServiceInterface {
             for (QueryDocumentSnapshot document : documents) {
                 document.getReference().delete();
                 ++deleted;
-                LOGGER.info(Emoji.RECYCLE.concat(document.getReference().getPath()
+                LOGGER.info(E.RECYCLE.concat(document.getReference().getPath()
                         .concat(" deleted")));
             }
             if (deleted >= batchSize) {
@@ -838,7 +883,7 @@ public class FirebaseService implements DatabaseServiceInterface {
                 deleteCollection(collection, batchSize);
             }
         } catch (Exception e) {
-            LOGGER.info(Emoji.NOT_OK.concat(Emoji.ERROR) + "Error deleting collection : " + e.getMessage());
+            LOGGER.info(E.NOT_OK.concat(E.ERROR) + "Error deleting collection : " + e.getMessage());
         }
     }
 

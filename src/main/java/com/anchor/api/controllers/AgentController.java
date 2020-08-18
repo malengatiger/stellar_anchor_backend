@@ -3,7 +3,7 @@ package com.anchor.api.controllers;
 import com.anchor.api.data.PaymentRequest;
 import com.anchor.api.data.anchor.*;
 import com.anchor.api.services.*;
-import com.anchor.api.util.Emoji;
+import com.anchor.api.util.E;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
@@ -48,11 +48,11 @@ public class AgentController {
      */
     @PostMapping(value = "/createAgent", produces = MediaType.APPLICATION_JSON_VALUE)
     public Agent createAgent(@RequestBody Agent agent) throws Exception {
-        LOGGER.info(Emoji.RAIN_DROPS.concat(Emoji.RAIN_DROPS) + "AgentController:createAgent ...");
+        LOGGER.info(E.RAIN_DROPS.concat(E.RAIN_DROPS) + "AgentController:createAgent ...");
 
         //todo - externalize variables .....
         Agent mAgent = agentService.createAgent(agent);
-        LOGGER.info(Emoji.LEAF.concat(Emoji.LEAF) + "Anchor returns Agent with a new Stellar account:" +
+        LOGGER.info(E.LEAF.concat(E.LEAF) + "Anchor returns Agent with a new Stellar account:" +
                 " \uD83C\uDF4E "
                 + G.toJson(mAgent));
         return mAgent;
@@ -61,17 +61,17 @@ public class AgentController {
 
     @PostMapping(value = "/updateAgent", produces = MediaType.APPLICATION_JSON_VALUE)
     public String updateAgent(@RequestBody Agent agent) throws Exception {
-        LOGGER.info(Emoji.RAIN_DROPS.concat(Emoji.RAIN_DROPS) + "AgentController:createAgent ...");
+        LOGGER.info(E.RAIN_DROPS.concat(E.RAIN_DROPS) + "AgentController:createAgent ...");
         String message = agentService.updateAgent(agent);
-        LOGGER.info(Emoji.LEAF.concat(Emoji.LEAF) + message);
+        LOGGER.info(E.LEAF.concat(E.LEAF) + message);
         return message;
     }
 
     @PostMapping(value = "/approveApplicationByAgent", produces = MediaType.APPLICATION_JSON_VALUE)
     public LoanApplication approveApplicationByAgent(@RequestBody LoanApplication loanApplication) throws Exception {
-        LOGGER.info(Emoji.RAIN_DROPS.concat(Emoji.RAIN_DROPS) + "AgentController:approve ...");
+        LOGGER.info(E.RAIN_DROPS.concat(E.RAIN_DROPS) + "AgentController:approve ...");
         LoanApplication application = agentService.approveApplicationByAgent(loanApplication);
-        LOGGER.info(Emoji.LEAF.concat(Emoji.LEAF) + application.getAmount() + " "
+        LOGGER.info(E.LEAF.concat(E.LEAF) + application.getAmount() + " "
                 + application.getAssetCode());
         return application;
     }
@@ -80,54 +80,54 @@ public class AgentController {
     @PostMapping(value = "/approveApplicationByClient", produces = MediaType.APPLICATION_JSON_VALUE)
     public String approveApplicationByClient(
             @RequestParam String loanId) throws Exception {
-        LOGGER.info(Emoji.RAIN_DROPS.concat(Emoji.RAIN_DROPS)
+        LOGGER.info(E.RAIN_DROPS.concat(E.RAIN_DROPS)
                 + "AgentController:approveApplicationByClient ...");
         String msg = agentService.approveApplicationByClient(loanId);
-        LOGGER.info(Emoji.LEAF.concat(Emoji.LEAF) + msg);
+        LOGGER.info(E.LEAF.concat(E.LEAF) + msg);
         return msg;
     }
 
     @PostMapping(value = "/decline", produces = MediaType.APPLICATION_JSON_VALUE)
     public LoanApplication declineApplication(@RequestBody LoanApplication agent) throws Exception {
-        LOGGER.info(Emoji.RAIN_DROPS.concat(Emoji.RAIN_DROPS) + "AgentController:decline ...");
+        LOGGER.info(E.RAIN_DROPS.concat(E.RAIN_DROPS) + "AgentController:decline ...");
         LoanApplication application = agentService.declineApplication(agent);
-        LOGGER.info(Emoji.LEAF.concat(Emoji.LEAF) + application.getAmount() + " "
+        LOGGER.info(E.LEAF.concat(E.LEAF) + application.getAmount() + " "
                 + application.getAssetCode());
         return application;
     }
 
     @PostMapping(value = "/makeLoanPayment", produces = MediaType.APPLICATION_JSON_VALUE)
     public LoanPayment makeLoanPayment(@RequestBody LoanPayment loanPayment) throws Exception {
-        LOGGER.info(Emoji.RAIN_DROPS.concat(Emoji.RAIN_DROPS) + "AgentController:makeLoanPayment ...");
+        LOGGER.info(E.RAIN_DROPS.concat(E.RAIN_DROPS) + "AgentController:makeLoanPayment ...");
         LoanPayment payment = agentService.addLoanPayment(loanPayment);
-        LOGGER.info(Emoji.LEAF.concat(Emoji.LEAF) + loanPayment.getAmount() + " "
+        LOGGER.info(E.LEAF.concat(E.LEAF) + loanPayment.getAmount() + " "
                 + loanPayment.getAssetCode());
         return payment;
     }
 
     @PostMapping(value = "/addOrganization", produces = MediaType.APPLICATION_JSON_VALUE)
     public Organization addOrganization(@RequestBody Organization organization) throws Exception {
-        LOGGER.info(Emoji.RAIN_DROPS.concat(Emoji.RAIN_DROPS) + "AgentController:addOrganization ...");
+        LOGGER.info(E.RAIN_DROPS.concat(E.RAIN_DROPS) + "AgentController:addOrganization ...");
 
         Organization org = agentService.addOrganization(organization);
-        LOGGER.info(Emoji.LEAF.concat(Emoji.LEAF) + G.toJson(org));
+        LOGGER.info(E.LEAF.concat(E.LEAF) + G.toJson(org));
         return org;
     }
 
     @PostMapping(value = "/loanApplication", produces = MediaType.APPLICATION_JSON_VALUE)
     public LoanApplication loanApplication(@RequestBody LoanApplication loanApplication) throws Exception {
-        LOGGER.info(Emoji.RAIN_DROPS.concat(Emoji.RAIN_DROPS).concat(Emoji.RAIN_DROPS)
+        LOGGER.info(E.RAIN_DROPS.concat(E.RAIN_DROPS).concat(E.RAIN_DROPS)
                 + "AgentController:loanApplication ...");
         LoanApplication org = agentService.addLoanApplication(loanApplication);
-        LOGGER.info(Emoji.LEAF.concat(Emoji.LEAF) + G.toJson(org));
+        LOGGER.info(E.LEAF.concat(E.LEAF) + G.toJson(org));
         return org;
     }
 
     @PostMapping(value = "/approveLoanApplication", produces = MediaType.APPLICATION_JSON_VALUE)
     public LoanApplication approveLoanApplication(@RequestBody LoanApplication loanApplication) throws Exception {
-        LOGGER.info(Emoji.RAIN_DROPS.concat(Emoji.RAIN_DROPS) + "AgentController:approveLoanApplication ...");
+        LOGGER.info(E.RAIN_DROPS.concat(E.RAIN_DROPS) + "AgentController:approveLoanApplication ...");
         LoanApplication org = agentService.approveApplicationByAgent(loanApplication);
-        LOGGER.info(Emoji.LEAF.concat(Emoji.LEAF) + G.toJson(org));
+        LOGGER.info(E.LEAF.concat(E.LEAF) + G.toJson(org));
         return org;
     }
 
@@ -145,34 +145,34 @@ public class AgentController {
 
     @PostMapping(value = "/declineLoanApplication", produces = MediaType.APPLICATION_JSON_VALUE)
     public LoanApplication declineLoanApplication(@RequestBody LoanApplication loanApplication) throws Exception {
-        LOGGER.info(Emoji.RAIN_DROPS.concat(Emoji.RAIN_DROPS) + "AgentController:declineLoanApplication ...");
+        LOGGER.info(E.RAIN_DROPS.concat(E.RAIN_DROPS) + "AgentController:declineLoanApplication ...");
         LoanApplication org = agentService.declineApplication(loanApplication);
-        LOGGER.info(Emoji.LEAF.concat(Emoji.LEAF) + G.toJson(org));
+        LOGGER.info(E.LEAF.concat(E.LEAF) + G.toJson(org));
         return org;
     }
 
     @PostMapping(value = "/loanPayment", produces = MediaType.APPLICATION_JSON_VALUE)
     public LoanPayment loanPayment(@RequestBody LoanPayment loanPayment) throws Exception {
-        LOGGER.info(Emoji.RAIN_DROPS.concat(Emoji.RAIN_DROPS) + "AgentController:loanPayment ...");
+        LOGGER.info(E.RAIN_DROPS.concat(E.RAIN_DROPS) + "AgentController:loanPayment ...");
         LoanPayment org = agentService.addLoanPayment(loanPayment);
-        LOGGER.info(Emoji.LEAF.concat(Emoji.LEAF) + G.toJson(org));
+        LOGGER.info(E.LEAF.concat(E.LEAF) + G.toJson(org));
         return org;
     }
 
 
     @GetMapping(value = "/retrieveKey", produces = MediaType.APPLICATION_JSON_VALUE)
     public String retrieveKey(@RequestParam String agentId) throws Exception {
-        LOGGER.info(Emoji.PEACH.concat(Emoji.PEACH) + "AgentController:retrieveKey ...");
+        LOGGER.info(E.PEACH.concat(E.PEACH) + "AgentController:retrieveKey ...");
         String key = accountService.retrieveKey(agentId);
-        LOGGER.info(Emoji.LEAF.concat(Emoji.LEAF) + " key found:" + key);
+        LOGGER.info(E.LEAF.concat(E.LEAF) + " key found:" + key);
         return key;
     }
 
     @GetMapping(value = "/getLoanPayments", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<LoanPayment> getLoanPayments(@RequestParam String loanId) throws Exception {
-        LOGGER.info(Emoji.PEACH.concat(Emoji.PEACH) + "AgentController:getLoanPayments ...");
+        LOGGER.info(E.PEACH.concat(E.PEACH) + "AgentController:getLoanPayments ...");
         List<LoanPayment> loanPayments = agentService.getLoanPayments(loanId);
-        LOGGER.info(Emoji.LEAF.concat(Emoji.LEAF) + " payments found:" + loanPayments.size());
+        LOGGER.info(E.LEAF.concat(E.LEAF) + " payments found:" + loanPayments.size());
         return loanPayments;
     }
 
@@ -180,21 +180,21 @@ public class AgentController {
     private FirebaseService firebaseService;
 
     @GetMapping(value = "/getAgents", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<Agent> getAgents(@RequestParam String anchorId) throws Exception {
-        LOGGER.info(Emoji.PEACH.concat(Emoji.PEACH) + "AgentController:getAgents ...");
+    public List<Agent> getAgents() throws Exception {
+        LOGGER.info(E.PEACH.concat(E.PEACH) + "AgentController:getAgents ...");
 
-        List<Agent> agents = firebaseService.getAgents(anchorId);
-        LOGGER.info(Emoji.LEAF.concat(Emoji.LEAF).concat(
+        List<Agent> agents = firebaseService.getAgents();
+        LOGGER.info(E.LEAF.concat(E.LEAF).concat(
                 ("Found " + agents.size() + " agents for this Anchor ")));
         return agents;
     }
 
     @GetMapping(value = "/getPaymentRequests", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<PaymentRequest> getPaymentRequests(@RequestParam String anchorId) throws Exception {
-        LOGGER.info(Emoji.PEACH.concat(Emoji.PEACH) + "AgentController:getPaymentRequests ...");
+    public List<PaymentRequest> getPaymentRequests() throws Exception {
+        LOGGER.info(E.PEACH.concat(E.PEACH) + "AgentController:getPaymentRequests ...");
 
-        List<PaymentRequest> requests = firebaseService.getPaymentRequests(anchorId);
-        LOGGER.info(Emoji.LEAF.concat(Emoji.LEAF).concat(
+        List<PaymentRequest> requests = firebaseService.getPaymentRequests();
+        LOGGER.info(E.LEAF.concat(E.LEAF).concat(
                 ("Found " + requests.size() + " PaymentRequests for this Anchor "))
         );
         return requests;
@@ -202,27 +202,27 @@ public class AgentController {
 
     @GetMapping(value = "/getAgentClients", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Client> getAgentClients(@RequestParam String agentId) throws Exception {
-        LOGGER.info(Emoji.PEACH.concat(Emoji.PEACH) + "AgentController:getAgentClients ...");
+        LOGGER.info(E.PEACH.concat(E.PEACH) + "AgentController:getAgentClients ...");
         List<Client> agentClients = agentService.getAgentClients(agentId);
-        LOGGER.info(Emoji.LEAF.concat(Emoji.LEAF).concat(
+        LOGGER.info(E.LEAF.concat(E.LEAF).concat(
                 ("Found " + agentClients.size() + " clients for this Agent ")));
         return agentClients;
     }
 
     @GetMapping(value = "/getAgentLoans", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<LoanApplication> getAgentLoans(@RequestParam String agentId) throws Exception {
-        LOGGER.info(Emoji.PEACH.concat(Emoji.PEACH) + "AgentController:getAgentLoans ...");
+        LOGGER.info(E.PEACH.concat(E.PEACH) + "AgentController:getAgentLoans ...");
         List<LoanApplication> agentLoans = agentService.getAgentLoans(agentId);
-        LOGGER.info(Emoji.LEAF.concat(Emoji.LEAF).concat
+        LOGGER.info(E.LEAF.concat(E.LEAF).concat
                 (" found " + agentLoans.size() + " "));
         return agentLoans;
     }
 
     @GetMapping(value = "/removeClient", produces = MediaType.TEXT_PLAIN_VALUE)
     public String removeClient(@RequestParam String clientId) throws Exception {
-        LOGGER.info(Emoji.PEACH.concat(Emoji.PEACH) + "AgentController:removeClient ...");
+        LOGGER.info(E.PEACH.concat(E.PEACH) + "AgentController:removeClient ...");
         String message = agentService.removeClient(clientId);
-        LOGGER.info(Emoji.LEAF.concat(Emoji.LEAF) + message);
+        LOGGER.info(E.LEAF.concat(E.LEAF) + message);
         return message;
     }
 

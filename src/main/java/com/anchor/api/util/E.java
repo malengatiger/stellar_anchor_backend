@@ -1,6 +1,6 @@
 package com.anchor.api.util;
 
-public class Emoji {
+public class E {
     public static final String
             ERROR = "\uD83D\uDC7F ",        // 👿
             ANGRY = "\uD83D\uDE21 ",        // 😡

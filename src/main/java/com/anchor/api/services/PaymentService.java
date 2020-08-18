@@ -5,7 +5,7 @@ import com.anchor.api.data.AgentFundingRequest;
 import com.anchor.api.data.PaymentRequest;
 import com.anchor.api.data.anchor.Agent;
 import com.anchor.api.data.anchor.Anchor;
-import com.anchor.api.util.Emoji;
+import com.anchor.api.util.E;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.moandjiezana.toml.Toml;
@@ -49,12 +49,12 @@ public class PaymentService {
 
     private SubmitTransactionResponse submit(PaymentRequest request) throws Exception {
         setServerAndNetwork();
-        setAnchor(request.getAnchorId());
+        setAnchor();
 
         KeyPair sourceKeyPair = KeyPair.fromSecretSeed(request.getSeed());
         AccountResponse sourceAccount = server.accounts().account(sourceKeyPair.getAccountId());
         if (request.getDestinationAccount().equalsIgnoreCase(sourceAccount.getAccountId())) {
-            throw new Exception(Emoji.NOT_OK + "Source and destination accounts cannot be the same");
+            throw new Exception(E.NOT_OK + "Source and destination accounts cannot be the same");
         }
         Asset asset = Asset.createNonNativeAsset(
                 request.getAssetCode(),
@@ -77,13 +77,13 @@ public class PaymentService {
         KeyPair sourceKeyPair = KeyPair.fromSecretSeed(paymentRequest.getSeed());
         if (transactionResponse.isSuccess()) {
             //save to database
-            String msg = Emoji.OK.concat(Emoji.HAND2.concat(Emoji.HAND2))
+            String msg = E.OK.concat(E.HAND2.concat(E.HAND2))
                     + "Payment Succeeded; \uD83D\uDD35  amount: "
                     .concat(paymentRequest.getAmount()).concat(" assetCode: ")
                     .concat(paymentRequest.getAssetCode()
                             .concat(" ").concat(paymentRequest.getDate())
                             .concat(" sourceAccount: ")
-                            .concat(sourceKeyPair.getAccountId()).concat(" ").concat(Emoji.HAPPY));
+                            .concat(sourceKeyPair.getAccountId()).concat(" ").concat(E.HAPPY));
             LOGGER.info(msg);
             paymentRequest.setLedger(transactionResponse.getLedger());
             paymentRequest.setDate(new DateTime().toDateTimeISO().toString());
@@ -92,12 +92,12 @@ public class PaymentService {
             paymentRequest.setSourceAccount(sourceKeyPair.getAccountId());
             firebaseService.addPaymentRequest(paymentRequest);
         } else {
-            String err = Emoji.NOT_OK.concat(Emoji.ERROR) + "Payment Failed; \uD83D\uDD35  amount: "
+            String err = E.NOT_OK.concat(E.ERROR) + "Payment Failed; \uD83D\uDD35  amount: "
                     .concat(paymentRequest.getAmount()).concat(" assetCode: ")
                     .concat(" ").concat(paymentRequest.getDate())
                     .concat(paymentRequest.getAssetCode().concat(" sourceAccount: ")
                     .concat(sourceKeyPair.getAccountId()));
-            LOGGER.info(Emoji.NOT_OK.concat(Emoji.NOT_OK).concat(err));
+            LOGGER.info(E.NOT_OK.concat(E.NOT_OK).concat(err));
             AccountService.processPaymentError(transactionResponse);
         }
         return paymentRequest;
@@ -109,9 +109,9 @@ public class PaymentService {
 
     public AgentFundingRequest fundAgent(AgentFundingRequest request) throws Exception {
         setServerAndNetwork();
-        LOGGER.info(Emoji.RAIN_DROP.concat(Emoji.RAIN_DROP) + ".... funding request coming in, check asset code ... : ".concat(G.toJson(request)));
+        LOGGER.info(E.RAIN_DROP.concat(E.RAIN_DROP) + ".... funding request coming in, check asset code ... : ".concat(G.toJson(request)));
         if (anchor == null) {
-            setAnchor(request.getAnchorId());
+            setAnchor();
         }
         Agent agent = firebaseService.getAgent(request.getAgentId());
         String seed = cryptoService.getDecryptedSeed(anchor.getDistributionAccount().getAccountId());
@@ -135,22 +135,22 @@ public class PaymentService {
 
         if (transactionResponse.isSuccess()) {
             //save to database
-            String msg = Emoji.OK.concat(Emoji.HAND2.concat(Emoji.HAND2))
+            String msg = E.OK.concat(E.HAND2.concat(E.HAND2))
                     + "Payment Succeeded; \uD83D\uDD35  amount: "
                     .concat(request.getAmount()).concat(" assetCode: ")
                     .concat(request.getAssetCode()
                             .concat(" ").concat(request.getDate())
                             .concat(" sourceAccount: ")
-                            .concat(sourceKeyPair.getAccountId()).concat(" ").concat(Emoji.HAPPY));
+                            .concat(sourceKeyPair.getAccountId()).concat(" ").concat(E.HAPPY));
             LOGGER.info(msg);
             firebaseService.addAgentFundingRequest(request);
         } else {
-            String err = Emoji.NOT_OK.concat(Emoji.ERROR) + "Payment Failed; \uD83D\uDD35  amount: "
+            String err = E.NOT_OK.concat(E.ERROR) + "Payment Failed; \uD83D\uDD35  amount: "
                     .concat(request.getAmount()).concat(" assetCode: ")
                     .concat(" ").concat(request.getDate())
                     .concat(request.getAssetCode().concat(" sourceAccount: ")
                             .concat(sourceKeyPair.getAccountId()));
-            LOGGER.info(Emoji.NOT_OK.concat(Emoji.NOT_OK).concat(err));
+            LOGGER.info(E.NOT_OK.concat(E.NOT_OK).concat(err));
             AccountService.processPaymentError(transactionResponse);
         }
         return request;
@@ -178,20 +178,16 @@ public class PaymentService {
     }
     @Autowired
     private TOMLService tomlService;
-    private void setAnchor(String anchorId) throws Exception {
+    private void setAnchor() throws Exception {
         if (anchor != null) {
             return;
         }
-        Toml toml = tomlService.getAnchorToml(anchorId);
-        if (toml == null) {
-            throw new Exception("anchor.toml has not been found. upload the file from your computer");
-        } else {
-            String id = toml.getString("anchorId");
-            anchor = firebaseService.getAnchor(id);
-            if (anchor == null) {
-                LOGGER.info(Emoji.FIRE.concat(Emoji.FIRE.concat(Emoji.FIRE)
-                        .concat("We are fucked! There is no ANCHOR !!!")));
-            }
+        anchor = firebaseService.getAnchor();
+        if (anchor == null) {
+            LOGGER.info(E.FIRE.concat(E.FIRE.concat(E.FIRE)
+                    .concat("We are fucked! There is no ANCHOR !!!")));
+                throw new Exception("Generator: Anchor is missing from Database: ");
+
         }
 
 

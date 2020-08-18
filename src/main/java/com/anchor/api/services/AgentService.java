@@ -3,7 +3,7 @@ package com.anchor.api.services;
 import com.anchor.api.data.PaymentRequest;
 import com.anchor.api.data.account.AccountResponseBag;
 import com.anchor.api.data.anchor.*;
-import com.anchor.api.util.Emoji;
+import com.anchor.api.util.E;
 import com.google.firebase.auth.UserRecord;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -31,7 +31,7 @@ import java.util.UUID;
 @Service
 public class AgentService {
     public AgentService() {
-        LOGGER.info(Emoji.DRUM + Emoji.DRUM + "AgentService - not quite the Secret Service" + Emoji.DRUM + Emoji.DRUM);
+        LOGGER.info(E.DRUM + E.DRUM + "AgentService - not quite the Secret Service" + E.DRUM + E.DRUM);
     }
 
     public static final Logger LOGGER = LoggerFactory.getLogger(AgentService.class);
@@ -76,8 +76,8 @@ public class AgentService {
         return firebaseService.getAgentLoans(agentId);
     }
 
-    public List<PaymentRequest> getPaymentRequests(String anchorId) throws Exception {
-        return firebaseService.getPaymentRequests(anchorId);
+    public List<PaymentRequest> getPaymentRequests() throws Exception {
+        return firebaseService.getPaymentRequests();
     }
 
     public List<LoanPayment> getLoanPayments(String loanId) throws Exception {
@@ -88,7 +88,7 @@ public class AgentService {
 
         LoanApplication application = firebaseService.getLoanApplication(loanId);
         if (application == null) {
-            throw new Exception(Emoji.NOT_OK + "LoanApplication not found");
+            throw new Exception(E.NOT_OK + "LoanApplication not found");
         }
 
         application.setApprovedByClient(true);
@@ -107,12 +107,12 @@ public class AgentService {
         String seed = cryptoService.getDecryptedSeed(agent.getStellarAccountId());
         if (application.getAgentSeed() != null) {
             if (!seed.equalsIgnoreCase(application.getAgentSeed())) {
-                throw new Exception(Emoji.ERROR.concat(Emoji.ERROR) + "Bad Agent seed rising");
+                throw new Exception(E.ERROR.concat(E.ERROR) + "Bad Agent seed rising");
             }
         }
         if (!application.isApprovedByClient()) {
             LOGGER.info("Check this LoanApplication: apparently not approved by client");
-            throw new Exception(Emoji.NOT_OK + "LoanApplication not approved by Client");
+            throw new Exception(E.NOT_OK + "LoanApplication not approved by Client");
         }
 
         PaymentRequest request = new PaymentRequest();
@@ -133,7 +133,7 @@ public class AgentService {
 
         firebaseService.updateLoanApplication(application);
         // todo - send email to Client notifying approval and payment
-        LOGGER.info(Emoji.HAND2.concat(Emoji.HAND2.concat(Emoji.HAND2).concat(Emoji.LEAF))
+        LOGGER.info(E.HAND2.concat(E.HAND2.concat(E.HAND2).concat(E.LEAF))
                 + "Loan application approved and funds transferred to Client ");
 
         return application;
@@ -277,7 +277,7 @@ public class AgentService {
         double loanAmt = Double.parseDouble(loanPayment.getAmount());
         double balanceAmt = Double.parseDouble(balance.getBalance());
         if (loanAmt > balanceAmt) {
-            String msg = "Not enough money in account to cover necessary amount ".concat(Emoji.PIG)
+            String msg = "Not enough money in account to cover necessary amount ".concat(E.PIG)
                     .concat(" \uD83C\uDF4E balance: ".concat(balance.getBalance().concat(" \uD83C\uDF4E loan amount: ")
                             .concat(loanPayment.getAmount())));
             LOGGER.info(msg);
@@ -304,8 +304,8 @@ public class AgentService {
         app.setLastPaymentRequestId(request.getPaymentRequestId());
         String res2 = firebaseService.updateLoanApplication(app);
 
-        LOGGER.info(Emoji.LEAF.concat(Emoji.LEAF)
-                .concat("...... LoanPayment COMPLETE! " + Emoji.BLUE_DOT.concat(" messages: ")).concat(res)
+        LOGGER.info(E.LEAF.concat(E.LEAF)
+                .concat("...... LoanPayment COMPLETE! " + E.BLUE_DOT.concat(" messages: ")).concat(res)
                 .concat(" - ").concat(res2));
 
         return loanPayment;
@@ -323,7 +323,7 @@ public class AgentService {
 
     public String updateClient(Client client) throws Exception {
 
-        LOGGER.info(Emoji.LEMON + Emoji.LEMON + "....... updating Client ....... ");
+        LOGGER.info(E.LEMON + E.LEMON + "....... updating Client ....... ");
         return firebaseService.updateClient(client);
     }
 
@@ -331,26 +331,26 @@ public class AgentService {
     private TOMLService tomlService;
     private Anchor anchor;
 
-    private void setAnchor(String anchorId) throws Exception {
+    private void setAnchor() throws Exception {
         if (anchor == null) {
-            LOGGER.info("\n\n\uD83D\uDE21 \uD83D\uDE21 \uD83D\uDE21 ..........AgentService:  Anchor about to be set from toml file: ".concat(anchorId));
-            Toml toml = tomlService.getAnchorToml(anchorId);
+            LOGGER.info("\n\n\uD83D\uDE21 \uD83D\uDE21 \uD83D\uDE21 ..........AgentService:  Anchor about to be set from toml file: ");
+            Toml toml = tomlService.getAnchorToml();
             if (toml == null) {
-                LOGGER.info(Emoji.PEPPER + Emoji.PEPPER + Emoji.PEPPER + "....... Failed to get anchor.toml file from encrypted storage." +
+                LOGGER.info(E.PEPPER + E.PEPPER + E.PEPPER + "....... Failed to get anchor.toml file from encrypted storage." +
                         " solve this by uploading anchor.toml file via AnchorController.uploadTOML \uD83D\uDE21 \uD83D\uDE21 \uD83D\uDE21 ");
                 throw new Exception("anchor.toml has not been found. upload the file from your computer");
             } else {
                 String id = toml.getString("anchorId");
-                LOGGER.info(Emoji.RAIN_DROP + Emoji.RAIN_DROP + Emoji.RAIN_DROP + "....... Anchor ID from anchor.toml: " + id
+                LOGGER.info(E.RAIN_DROP + E.RAIN_DROP + E.RAIN_DROP + "....... Anchor ID from anchor.toml: " + id
                         + "  \uD83D\uDE21 \uD83D\uDE21 \uD83D\uDE21 ");
-                anchor = firebaseService.getAnchor(id);
+                anchor = firebaseService.getAnchor();
                 if (anchor == null) {
-                    LOGGER.info(Emoji.NOT_OK.concat(Emoji.ERROR).concat("setAnchor: Anchor is missing"));
+                    LOGGER.info(E.NOT_OK.concat(E.ERROR).concat("setAnchor: Anchor is missing"));
                     throw new Exception("AgentService:\uD83D\uDE21 \uD83D\uDE21 anchor is missing");
                 }
             }
         } else {
-            LOGGER.info(Emoji.RAIN_DROP + Emoji.RAIN_DROP + Emoji.RAIN_DROP + "....... Anchor is set to: " + anchor.getName()
+            LOGGER.info(E.RAIN_DROP + E.RAIN_DROP + E.RAIN_DROP + "....... Anchor is set to: " + anchor.getName()
                     + "  \uD83D\uDE21 \uD83D\uDE21 \uD83D\uDE21 ");
         }
 
@@ -359,16 +359,16 @@ public class AgentService {
     Toml toml;
     public Client createClient(Client client) throws Exception {
 
-        LOGGER.info(Emoji.LEMON + Emoji.LEMON + Emoji.LEMON + " ....... creating Client (check client duplicates) ....... " + client.getFullName());
+        LOGGER.info(E.LEMON + E.LEMON + E.LEMON + " ....... creating Client (check client duplicates) ....... " + client.getFullName());
         if (toml == null) {
-            toml = tomlService.getAnchorToml(client.getAnchorId());
+            toml = tomlService.getAnchorToml();
             if (toml == null) {
                 throw new Exception("Anchor Settings not found");
             }
-            LOGGER.info(Emoji.RAIN_DROP + Emoji.RAIN_DROP + Emoji.RAIN_DROP + " ....... Anchor TOML file: " + toml.toString()
+            LOGGER.info(E.RAIN_DROP + E.RAIN_DROP + E.RAIN_DROP + " ....... Anchor TOML file: " + toml.toString()
                     + "  \uD83D\uDE21 \uD83D\uDE21 \uD83D\uDE21 ");
         }
-        setAnchor(client.getAnchorId());
+        setAnchor();
         if (anchor == null) {
             throw new Exception("Missing anchor");
         }
@@ -384,12 +384,12 @@ public class AgentService {
         //Agent agent = firebaseService.getAgent(client.getAgentIds().get(0));
 
         //todo - refine validation rules .....
-        Client mClient = firebaseService.getClientByNameAndAnchor(anchor.getAnchorId(),
+        Client mClient = firebaseService.getClientByNameAndAnchor(
                 client.getPersonalKYCFields().getFirst_name(), client.getPersonalKYCFields().getLast_name());
 
         if (mClient != null) {
-            LOGGER.info(Emoji.ERROR + Emoji.ERROR + Emoji.ERROR
-                    + "Client already exists for this Anchor: ".concat(anchor.getName()).concat(Emoji.ERROR)
+            LOGGER.info(E.ERROR + E.ERROR + E.ERROR
+                    + "Client already exists for this Anchor: ".concat(anchor.getName()).concat(E.ERROR)
             .concat(" ").concat(client.getPersonalKYCFields().getFirst_name().concat(" ").concat(client.getPersonalKYCFields().getLast_name())));
             //throw new Exception(Emoji.ERROR + "Client already exists for this Anchor");
             return mClient;
@@ -398,12 +398,12 @@ public class AgentService {
         AccountResponseBag bag = accountService.createAndFundUserAccount(client.getAnchorId(), clientStartingBalance,
                 startingFiatBalance, fiatLimit);
         LOGGER.info(
-                Emoji.HEART_PURPLE + Emoji.HEART_PURPLE + "Client Stellar account has been created and funded with ... "
+                E.HEART_PURPLE + E.HEART_PURPLE + "Client Stellar account has been created and funded with ... "
                         .concat(clientStartingBalance).concat(" XLM"));
 
         List<AccountService.AssetBag> assetBags = accountService
                 .getDefaultAssets(anchor.getIssuingAccount().getAccountId());
-        LOGGER.info(Emoji.WARNING.concat(Emoji.WARNING)
+        LOGGER.info(E.WARNING.concat(E.WARNING)
                 + "createClient:.... Creating Client Fiat TrustLines .... userSeed: ".concat(bag.getSecretSeed()));
         for (AccountService.AssetBag assetBag : assetBags) {
             accountService.changeTrustLine(anchor.getIssuingAccount().getAccountId(), bag.getSecretSeed(),
@@ -412,7 +412,7 @@ public class AgentService {
         }
 
         encryptAndSave(client, bag);
-        LOGGER.info(Emoji.BLUE_BIRD + Emoji.BLUE_BIRD + " ....... Client created ....... " + client.getFullName());
+        LOGGER.info(E.BLUE_BIRD + E.BLUE_BIRD + " ....... Client created ....... " + client.getFullName());
         return client;
     }
 
@@ -420,7 +420,7 @@ public class AgentService {
         // create firebase auth user
         UserRecord record = firebaseService.createUser(client.getFullName(),
                 client.getPersonalKYCFields().getEmail_address(), client.getPassword());
-        LOGGER.info(Emoji.BLUE_BIRD + Emoji.BLUE_BIRD + " Firebase auth user created, uid:  ".concat(record.getUid()));
+        LOGGER.info(E.BLUE_BIRD + E.BLUE_BIRD + " Firebase auth user created, uid:  ".concat(record.getUid()));
         client.setClientId(record.getUid());
         client.setSecretSeed(null);
         client.setAccount(bag.getAccountResponse().getAccountId());
@@ -432,7 +432,7 @@ public class AgentService {
         String savePassword = client.getPassword();
         client.setPassword(null);
 
-        LOGGER.info(Emoji.BLUE_BIRD + Emoji.BLUE_BIRD + "....... adding Client to Firestore ....  ");
+        LOGGER.info(E.BLUE_BIRD + E.BLUE_BIRD + "....... adding Client to Firestore ....  ");
         firebaseService.addClient(client);
         client.setSecretSeed(bag.getSecretSeed());
         sendEmail(client);
@@ -441,35 +441,35 @@ public class AgentService {
         client.setSecretSeed(bag.getSecretSeed());
 
         LOGGER.info(
-                (Emoji.BLUE_DOT + Emoji.BLUE_DOT + Emoji.BLUE_DOT + Emoji.BLUE_DOT +
+                (E.BLUE_DOT + E.BLUE_DOT + E.BLUE_DOT + E.BLUE_DOT +
                         " \uD83C\uDF4E \uD83C\uDF4E Client has been added to Firestore. ").concat(client.getFullName())
-        .concat(Emoji.BLUE_DOT + Emoji.BLUE_DOT));
+        .concat(E.BLUE_DOT + E.BLUE_DOT));
     }
 
     public String updateAgent(Agent agent) throws Exception {
 
-        LOGGER.info(Emoji.LEMON + Emoji.LEMON + "....... updating Agent ....... ");
+        LOGGER.info(E.LEMON + E.LEMON + "....... updating Agent ....... ");
         return firebaseService.updateAgent(agent);
     }
 
     public Agent createAgent(Agent agent) throws Exception {
         // todo - create Stellar account; add to Firestore;
-        LOGGER.info(Emoji.YELLOW_STAR + Emoji.YELLOW_STAR + Emoji.YELLOW_STAR + "....... creating Agent ....... "
+        LOGGER.info(E.YELLOW_STAR + E.YELLOW_STAR + E.YELLOW_STAR + "....... creating Agent ....... "
                 .concat(agent.getPersonalKYCFields().getFirst_name()));
-        setAnchor(agent.getAnchorId());
+        setAnchor();
         if (anchor == null) {
-            anchor = firebaseService.getAnchor(agent.getAnchorId());
+            anchor = firebaseService.getAnchor();
         }
-        Agent mAgent = firebaseService.getAgentByNameAndAnchor(anchor.getAnchorId(),
+        Agent mAgent = firebaseService.getAgentByNameAndAnchor(
                 agent.getPersonalKYCFields().getFirst_name(), agent.getPersonalKYCFields().getLast_name());
         if (mAgent != null) {
-            LOGGER.info(Emoji.ERROR.concat(anchor.getName()).concat(" ").concat(Emoji.ERROR));
-            throw new Exception(Emoji.ERROR + "Agent already exists for this Anchor");
+            LOGGER.info(E.ERROR.concat(anchor.getName()).concat(" ").concat(E.ERROR));
+            throw new Exception(E.ERROR + "Agent already exists for this Anchor");
         }
-        LOGGER.info(Emoji.YELLOW_STAR + Emoji.YELLOW_STAR + Emoji.YELLOW_STAR + "....... Agent Stellar Account about to be created ....... ");
+        LOGGER.info(E.YELLOW_STAR + E.YELLOW_STAR + E.YELLOW_STAR + "....... Agent Stellar Account about to be created ....... ");
         AccountResponseBag bag = accountService.createAndFundUserAccount(agent.getAnchorId(), agentStartingBalance,
                 agent.getFiatBalance(), agent.getFiatLimit());
-        LOGGER.info(Emoji.RED_APPLE + Emoji.RED_APPLE + "Agent Stellar account has been created and funded with ... "
+        LOGGER.info(E.RED_APPLE + E.RED_APPLE + "Agent Stellar account has been created and funded with ... "
                 .concat(agentStartingBalance).concat(" XLM; secretSeed: ".concat(bag.getSecretSeed())));
         cryptoService.encrypt(bag.getAccountResponse().getAccountId(), bag.getSecretSeed());
 
@@ -479,7 +479,7 @@ public class AgentService {
 
         String issuingAccountSeed = cryptoService.getDecryptedSeed(anchor.getIssuingAccount().getAccountId());
 
-        LOGGER.info(Emoji.WARNING.concat(Emoji.WARNING)
+        LOGGER.info(E.WARNING.concat(E.WARNING)
                 + "createAgent:.... Creating Agent Fiat Asset Balances .... userSeed: ".concat(bag.getSecretSeed()));
         // todo - what, exactly is limit?
         for (AccountService.AssetBag assetBag : assetBags) {
@@ -503,12 +503,12 @@ public class AgentService {
             agent.setPassword(null);
             firebaseService.addAgent(agent);
             sendEmail(agent);
-            LOGGER.info((Emoji.LEAF + Emoji.LEAF + "Agent has been added to Firestore without seed or password ")
+            LOGGER.info((E.LEAF + E.LEAF + "Agent has been added to Firestore without seed or password ")
                     .concat(agent.getFullName()));
             agent.setPassword(savedPassword);
             agent.setSecretSeed(bag.getSecretSeed());
         } catch (Exception e) {
-            String msg = Emoji.NOT_OK.concat(Emoji.ERROR).concat("Firebase error: ".concat(e.getMessage()));
+            String msg = E.NOT_OK.concat(E.ERROR).concat("Firebase error: ".concat(e.getMessage()));
             LOGGER.info(msg);
             throw new Exception(msg);
         }
@@ -529,7 +529,7 @@ public class AgentService {
         sb.append("\nRegards,\n");
         sb.append("Anchor Network Team");
 
-        LOGGER.info(Emoji.RAIN_DROPS + Emoji.RAIN_DROP + "SendGrid: send mail from: " + fromMail);
+        LOGGER.info(E.RAIN_DROPS + E.RAIN_DROP + "SendGrid: send mail from: " + fromMail);
 
         Email from = new Email(fromMail);
         String subject = "Welcome to Anchor Agent registration";
@@ -545,8 +545,8 @@ public class AgentService {
             request.setBody(mail.build());
             Response response = sg.api(request);
             LOGGER.info(
-                    Emoji.BLUE_DISC + Emoji.BLUE_DISC + "Registration email sent to Anchor user: " + Emoji.BLUE_THINGY
-                            + agent.getFullName() + Emoji.PANDA + " status code: " + response.getStatusCode());
+                    E.BLUE_DISC + E.BLUE_DISC + "Registration email sent to Anchor user: " + E.BLUE_THINGY
+                            + agent.getFullName() + E.PANDA + " status code: " + response.getStatusCode());
 
         } catch (IOException ex) {
             throw ex;

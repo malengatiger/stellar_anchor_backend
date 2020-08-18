@@ -1,6 +1,6 @@
 package com.anchor.api.data.transfer.sep10;
 
-import com.anchor.api.util.Emoji;
+import com.anchor.api.util.E;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
@@ -21,8 +21,8 @@ import java.util.logging.Logger;
 @Service
 public class JWTokenService {
     public JWTokenService() {
-        LOGGER.info(Emoji.KEY + Emoji.KEY + "JWToken Service constructed "
-        .concat(Emoji.PIG));
+        LOGGER.info(E.KEY + E.KEY + "JWToken Service constructed "
+        .concat(E.PIG));
     }
 
     @Value("${jwtKey}")
@@ -58,7 +58,7 @@ public class JWTokenService {
 
         LOGGER.info(em +" Building the JWT and serializing it to a compact, URL-safe string");
         String token = builder.compact();
-        String em2 = Emoji.LEAF + Emoji.LEAF + Emoji.LEAF;
+        String em2 = E.LEAF + E.LEAF + E.LEAF;
         LOGGER.info(em + em2 + "JWTokenService: Token generated: ".concat(em).concat(token));
         return token;
     }

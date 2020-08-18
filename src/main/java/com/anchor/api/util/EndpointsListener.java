@@ -41,23 +41,23 @@ public class EndpointsListener {
 //            LOGGER.info("\uD83C\uDF45 Anchor ENDPOINT #"+cnt+" \uD83C\uDF45 {} {}", key, value);
         });
         cnt = 0;
-        LOGGER.info(Emoji.FLOWER_YELLOW.concat("POST endpoints ..... ").concat(" : " + posts.size() + " ").concat(Emoji.FLOWER_YELLOW));
+        LOGGER.info(E.FLOWER_YELLOW.concat("POST endpoints ..... ").concat(" : " + posts.size() + " ").concat(E.FLOWER_YELLOW));
         for (String post : posts) {
             cnt++;
-            LOGGER.info(Emoji.RED_APPLE.concat("Server POST ").concat(Emoji.PEAR).concat("EndPoint").concat(" #" + cnt + " ").concat(post));
+            LOGGER.info(E.RED_APPLE.concat("Server POST ").concat(E.PEAR).concat("EndPoint").concat(" #" + cnt + " ").concat(post));
         }
-        LOGGER.info(Emoji.FLOWER_YELLOW.concat("GET endpoints ..... ").concat(" : " + gets.size() + " ").concat(Emoji.FLOWER_YELLOW));
+        LOGGER.info(E.FLOWER_YELLOW.concat("GET endpoints ..... ").concat(" : " + gets.size() + " ").concat(E.FLOWER_YELLOW));
         cnt = 0;
         for (String gg : gets) {
             cnt++;
-            LOGGER.info(Emoji.RED_APPLE.concat("Server GET ").concat(Emoji.BLUE_DOT).concat("EndPoint").concat(" #" + cnt + " ").concat(gg));
+            LOGGER.info(E.RED_APPLE.concat("Server GET ").concat(E.BLUE_DOT).concat("EndPoint").concat(" #" + cnt + " ").concat(gg));
         }
-        LOGGER.info(Emoji.FLOWER_YELLOW.concat("OTHER endpoints ..... ").concat(" : " + other.size() + " ").concat(Emoji.FLOWER_YELLOW));
+        LOGGER.info(E.FLOWER_YELLOW.concat("OTHER endpoints ..... ").concat(" : " + other.size() + " ").concat(E.FLOWER_YELLOW));
 
         cnt = 0;
         for (String gg : other) {
             cnt++;
-            LOGGER.info(Emoji.RED_APPLE.concat("Server EndPoint ").concat(Emoji.DICE).concat(" #" + cnt + " ").concat(gg));
+            LOGGER.info(E.RED_APPLE.concat("Server EndPoint ").concat(E.DICE).concat(" #" + cnt + " ").concat(gg));
         }
         LOGGER.info("\uD83C\uDF45 \uD83C\uDF45 \uD83C\uDF45 \uD83C\uDF45 \uD83C\uDF45 EndpointsListener: Total EndPoints: " + mCount);
     }

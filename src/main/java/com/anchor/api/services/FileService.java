@@ -1,7 +1,7 @@
 package com.anchor.api.services;
 
 import com.anchor.api.controllers.ClientController;
-import com.anchor.api.util.Emoji;
+import com.anchor.api.util.E;
 import com.google.cloud.storage.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -33,7 +33,7 @@ public class FileService {
     private String keyRingId;
 
     public FileService() {
-        LOGGER.info(Emoji.RED_CAR.concat(Emoji.RED_CAR)
+        LOGGER.info(E.RED_CAR.concat(E.RED_CAR)
         .concat("FileService for client files up and running \uD83D\uDE21"));
     }
     public static final String
@@ -73,8 +73,8 @@ public class FileService {
                         "bucket " + bucketName + " \uD83C\uDF3C as " + type);
         //
         Files.delete(Paths.get(file.getAbsolutePath()));
-        LOGGER.info(Emoji.PEPPER.concat(Emoji.PEPPER) + "File deleted "
-                .concat(file.getAbsolutePath()).concat(" ".concat(Emoji.PEPPER)));
+        LOGGER.info(E.PEPPER.concat(E.PEPPER) + "File deleted "
+                .concat(file.getAbsolutePath()).concat(" ".concat(E.PEPPER)));
 
     }
 
@@ -95,9 +95,9 @@ public class FileService {
     }
 
     private File downloadFile(String id, String type) throws Exception {
-        LOGGER.info(Emoji.YELLOW_BIRD.concat(Emoji.YELLOW_BIRD).concat(" .... about to download file for: "
-                .concat(id).concat(" bucket: ").concat(bucketName).concat(Emoji.RED_APPLE)
-                .concat(" object: ".concat(type)).concat(" ").concat(Emoji.RED_APPLE)));
+        LOGGER.info(E.YELLOW_BIRD.concat(E.YELLOW_BIRD).concat(" .... about to download file for: "
+                .concat(id).concat(" bucket: ").concat(bucketName).concat(E.RED_APPLE)
+                .concat(" object: ".concat(type)).concat(" ").concat(E.RED_APPLE)));
 
         File dir = getDirectory();
         File mFile = new File(dir, DOWNLOAD_PATH.concat(id));
@@ -106,11 +106,11 @@ public class FileService {
 
         Blob blob = storage.get(BlobId.of(bucketName, type.concat("_").concat(id)));
         if (blob == null) {
-            LOGGER.info(Emoji.NOT_OK.concat(Emoji.NOT_OK).concat("Blob for downloading is fucking NULL? WTF?"));
-            throw new Exception(Emoji.NOT_OK + "KMS Blob for downloading is fucking NULL? WTF?");
+            LOGGER.info(E.NOT_OK.concat(E.NOT_OK).concat("Blob for downloading is fucking NULL? WTF?"));
+            throw new Exception(E.NOT_OK + "KMS Blob for downloading is fucking NULL? WTF?");
         }
         blob.downloadTo(destFilePath);
-        LOGGER.info(Emoji.YELLOW_BIRD.concat(Emoji.YELLOW_BIRD)
+        LOGGER.info(E.YELLOW_BIRD.concat(E.YELLOW_BIRD)
                 .concat(" File downloaded from cloud storage: ")
                 .concat(" length: " + destFilePath.toFile().length()));
 

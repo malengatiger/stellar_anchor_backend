@@ -5,7 +5,7 @@ import com.anchor.api.services.AgentService;
 import com.anchor.api.services.FileService;
 import com.anchor.api.services.FirebaseService;
 import com.anchor.api.services.TOMLService;
-import com.anchor.api.util.Emoji;
+import com.anchor.api.util.E;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ public class ClientController {
     private static final Gson G = new GsonBuilder().setPrettyPrinting().create();
 
     public ClientController() {
-        LOGGER.info(Emoji.BURGER.concat(Emoji.BURGER.concat("ClientController waiting to go! ").concat(Emoji.CHICKEN)));
+        LOGGER.info(E.BURGER.concat(E.BURGER.concat("ClientController waiting to go! ").concat(E.CHICKEN)));
     }
 
     @Autowired
@@ -49,7 +49,7 @@ public class ClientController {
         }
 
         Client mClient = agentService.createClient(client);
-        LOGGER.info(Emoji.LEAF.concat(Emoji.LEAF) + "AgentService returns Client with brand new Stellar account: \uD83C\uDF4E "
+        LOGGER.info(E.LEAF.concat(E.LEAF) + "AgentService returns Client with brand new Stellar account: \uD83C\uDF4E "
                 + mClient.getFullName());
         return mClient;
 
@@ -57,9 +57,9 @@ public class ClientController {
 
     @PostMapping(value = "/updateClient", produces = MediaType.TEXT_PLAIN_VALUE)
     public String updateClient(@RequestBody Client client) throws Exception {
-        LOGGER.info(Emoji.RAIN_DROPS.concat(Emoji.RAIN_DROPS) + "AnchorController:updateClient...");
+        LOGGER.info(E.RAIN_DROPS.concat(E.RAIN_DROPS) + "AnchorController:updateClient...");
         String mClient = agentService.updateClient(client);
-        LOGGER.info(Emoji.LEAF.concat(Emoji.LEAF) + mClient);
+        LOGGER.info(E.LEAF.concat(E.LEAF) + mClient);
         return mClient;
     }
     public static final String DIRECTORY = "anchor";
@@ -68,7 +68,7 @@ public class ClientController {
                            @RequestParam("idFront") MultipartFile idFront,
                            @RequestParam("idBack") MultipartFile idBack) throws Exception {
 
-        LOGGER.info(Emoji.RAIN_DROP.concat(Emoji.RAIN_DROP) + "ClientController:uploadID... : ".concat(id));
+        LOGGER.info(E.RAIN_DROP.concat(E.RAIN_DROP) + "ClientController:uploadID... : ".concat(id));
         // Front of ID Card
         File dir = getDirectory();
         byte[] idFrontBytes = idFront.getBytes();
@@ -86,7 +86,7 @@ public class ClientController {
         LOGGER.info("....... idBack file received: \uD83C\uDFBD "
                 .concat(" length: " + idBackFile.length() + " idFrontBytes"));
         fileService.uploadIDBack(id, idBackFile);
-        String msg = Emoji.HAND2.concat("ID Documents have been uploaded");
+        String msg = E.HAND2.concat("ID Documents have been uploaded");
         LOGGER.info("\uD83C\uDFBD \uD83C\uDFBD \uD83C\uDFBD Returned from upload .... OK!");
         return msg;
     }
@@ -95,7 +95,7 @@ public class ClientController {
     public String uploadProofOfResidence(@RequestParam("id") String id,
                            @RequestParam("proofOfResidence") MultipartFile proofOfResidence) throws Exception {
 
-        LOGGER.info(Emoji.RAIN_DROP.concat(Emoji.RAIN_DROP) + "ClientController:uploadProofOfResidence...");
+        LOGGER.info(E.RAIN_DROP.concat(E.RAIN_DROP) + "ClientController:uploadProofOfResidence...");
         // Front of ID Card
         File dir = getDirectory();
         byte[] proofOfResidenceBytes = proofOfResidence.getBytes();
@@ -107,13 +107,13 @@ public class ClientController {
 
         fileService.uploadProofOfResidence(id, proofFile);
         LOGGER.info("\uD83C\uDFBD \uD83C\uDFBD \uD83C\uDFBD Returned from upload .... OK!");
-        return Emoji.HAND2.concat("Proof of Residence document has been uploaded");
+        return E.HAND2.concat("Proof of Residence document has been uploaded");
     }
     @PostMapping(value = "/uploadSelfie", produces = MediaType.TEXT_PLAIN_VALUE)
     public String uploadSelfie(@RequestParam("id") String id,
                                          @RequestParam("selfie") MultipartFile selfie) throws Exception {
 
-        LOGGER.info(Emoji.RAIN_DROP.concat(Emoji.RAIN_DROP) + "ClientController:uploadSelfie ...");
+        LOGGER.info(E.RAIN_DROP.concat(E.RAIN_DROP) + "ClientController:uploadSelfie ...");
         // Front of ID Card
         File dir = getDirectory();
         byte[] selfieBytes = selfie.getBytes();
@@ -125,7 +125,7 @@ public class ClientController {
 
         fileService.uploadSelfie(id, selfieFile);
         LOGGER.info("\uD83C\uDFBD \uD83C\uDFBD \uD83C\uDFBD Returned from upload .... OK!");
-        return Emoji.HAND2.concat(Emoji.ALIEN).concat("Selfie document has been uploaded");
+        return E.HAND2.concat(E.ALIEN).concat("Selfie document has been uploaded");
     }
 
     private File getDirectory() {
@@ -141,27 +141,27 @@ public class ClientController {
     @GetMapping(value = "/downloadSelfie", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public byte[] downloadSelfie(@RequestParam("id") String id) throws Exception {
 
-        LOGGER.info(Emoji.RAIN_DROP.concat(Emoji.RAIN_DROP) + "ClientController:downloadSelfie...");
+        LOGGER.info(E.RAIN_DROP.concat(E.RAIN_DROP) + "ClientController:downloadSelfie...");
         // Front of ID Card
         File file = fileService.downloadSelfie(id);
         LOGGER.info("....... selfie file received: \uD83C\uDFBD "
                 .concat(" length: " + file.length() + " file"));
         byte[] bytes = Files.readAllBytes(file.toPath());
         Files.delete(file.toPath());
-        LOGGER.info(Emoji.PEPPER.concat(Emoji.PEPPER) + "downloadSelfie file deleted after creating output byte[]");
+        LOGGER.info(E.PEPPER.concat(E.PEPPER) + "downloadSelfie file deleted after creating output byte[]");
         return bytes;
     }
     @GetMapping(value = "/downloadProofOfResidence", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public byte[] downloadProofOfResidence(@RequestParam("id") String id) throws Exception {
 
-        LOGGER.info(Emoji.RAIN_DROP.concat(Emoji.RAIN_DROP) + "ClientController:downloadProofOfResidence...");
+        LOGGER.info(E.RAIN_DROP.concat(E.RAIN_DROP) + "ClientController:downloadProofOfResidence...");
         // Front of ID Card
         File file = fileService.downloadProofOfResidence(id);
         LOGGER.info("....... proofOfResidence file received: \uD83C\uDFBD "
                 .concat(" length: " + file.length() + " file"));
         byte[] bytes = Files.readAllBytes(file.toPath());
         Files.delete(file.toPath());
-        LOGGER.info(Emoji.PEPPER.concat(Emoji.PEPPER) + "downloadProofOfResidence file deleted after creating output byte[]");
+        LOGGER.info(E.PEPPER.concat(E.PEPPER) + "downloadProofOfResidence file deleted after creating output byte[]");
         return bytes;
     }
     /**
@@ -173,7 +173,7 @@ public class ClientController {
     @GetMapping(value = "/downloadIDFront", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public byte[] downloadIDFront(@RequestParam("id") String id) throws Exception {
 
-        LOGGER.info(Emoji.RAIN_DROP.concat(Emoji.RAIN_DROP) + "ClientController:downloadIDFront...");
+        LOGGER.info(E.RAIN_DROP.concat(E.RAIN_DROP) + "ClientController:downloadIDFront...");
         // Front of ID Card
         File file = fileService.downloadIDFront(id);
         LOGGER.info("....... idFront file downloaded: \uD83C\uDFBD "
@@ -181,7 +181,7 @@ public class ClientController {
 
         byte[] bytes = Files.readAllBytes(file.toPath());
         Files.delete(file.toPath());
-        LOGGER.info(Emoji.PEPPER.concat(Emoji.PEPPER) + "downloadIDFront file deleted after creating output byte[]");
+        LOGGER.info(E.PEPPER.concat(E.PEPPER) + "downloadIDFront file deleted after creating output byte[]");
         return bytes;
     }
     /**
@@ -193,7 +193,7 @@ public class ClientController {
     @GetMapping(value = "/downloadIDBack", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public byte[] downloadIDBack(@RequestParam("id") String id) throws Exception {
 
-        LOGGER.info(Emoji.RAIN_DROP.concat(Emoji.RAIN_DROP) + "ClientController:downloadIDBack...");
+        LOGGER.info(E.RAIN_DROP.concat(E.RAIN_DROP) + "ClientController:downloadIDBack...");
         // Back of ID Card
         File file = fileService.downloadIDBack(id);
         LOGGER.info("....... idFront file downloaded: \uD83C\uDFBD "
@@ -201,7 +201,7 @@ public class ClientController {
 
         byte[] bytes = Files.readAllBytes(file.toPath());
         Files.delete(file.toPath());
-        LOGGER.info(Emoji.PEPPER.concat(Emoji.PEPPER) + "downloadIDBack file deleted after creating output byte[]");
+        LOGGER.info(E.PEPPER.concat(E.PEPPER) + "downloadIDBack file deleted after creating output byte[]");
         return bytes;
     }
 

@@ -18,7 +18,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.stellar.sdk.responses.AccountResponse;
 
-import java.io.File;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -28,14 +27,14 @@ public class DemoDataGenerator {
     private static final Gson G = new GsonBuilder().setPrettyPrinting().create();
 
     public DemoDataGenerator() {
-        LOGGER.info(Emoji.RED_CAR.concat(Emoji.RED_CAR) + "Demo data DemoDataGenerator ready and able!");
+        LOGGER.info(E.RED_CAR.concat(E.RED_CAR) + "Demo data DemoDataGenerator ready and able!");
     }
 
     /*
     🛎 🛎 🛎 🛎 UPDATE FUNDING SEED FROM STELLAR LAB .... 🛎 BEFORE THE RUN OF ANCHOR START
      */
-    public static final String FUNDING_ACCOUNT = "GCXRMCU4O7QVSOLQ46TMMZ5Q3AB7467ZDZFTFI7HAKD5PQ7KOLR44W3I",
-            FUNDING_SEED = "SB2SEQEA7KJJIPIL7INY35T2EFPGRJQMT5SCJWXYRF5LKYUJHXXWGTK4";
+    public static final String FUNDING_ACCOUNT = "GDFVUZNWT5MP4SZOW2HA2XP53PBNPLUKBI7DAW6OFN5CQZKO4VHJNO5P",
+            FUNDING_SEED = "SBBVHA723TU43FLZEZ4LYU7UXS46QLZPSN4ABM2VT53T63YKFBDZRGDK";
     @Autowired
     private ApplicationContext context;
     @Autowired
@@ -66,55 +65,45 @@ public class DemoDataGenerator {
 
     public Anchor createNewAnchor(String anchorName) throws Exception {
         if (!status.equalsIgnoreCase("dev")) {
-            throw new Exception(Emoji.NOT_OK + "Demo Data Generation may not be run in PRODUCTION");
+            throw new Exception(E.NOT_OK + "Demo Data Generation may not be run in PRODUCTION");
         }
         deleteFirebaseArtifacts();
         Anchor mAnchor = addAnchor(anchorName);
-        LOGGER.info(Emoji.FERN.concat(Emoji.FIRE.concat(Emoji.FIRE))
+        LOGGER.info(E.FERN.concat(E.FIRE.concat(E.FIRE))
                 + "Start Anchor complete. Complete generation after copying anchorId to anchor.toml \uD83D\uDECE AND STELLAR.TOML");
-        LOGGER.info(Emoji.RED_APPLE+Emoji.RED_APPLE+ G.toJson(mAnchor));
+        LOGGER.info(E.RED_APPLE+ E.RED_APPLE+ G.toJson(mAnchor));
         return mAnchor;
     }
 
-    public void startGeneration(String anchorId) throws Exception {
+    public void startGeneration() throws Exception {
         if (!status.equalsIgnoreCase("dev")) {
-            throw new Exception(Emoji.NOT_OK + "Demo Data Generation may not be run in PRODUCTION");
+            throw new Exception(E.NOT_OK + "Demo Data Generation may not be run in PRODUCTION");
         }
+        Toml toml = tomlService.getAnchorToml();
+        if (toml == null) {
+            throw new Exception(E.NOT_OK+E.NOT_OK + "Generator: Anchor TOML file is missing: ");
+        }
+        String anchorId = toml.getString("anchorId");
         if (anchorId == null) {
-            throw new Exception(Emoji.NOT_OK + "anchorId is NULL");
+            throw new Exception(E.NOT_OK + "anchorId is NULL");
         }
-        anchor = firebaseService.getAnchor(anchorId);
+        anchor = firebaseService.getAnchor();
         if (anchor == null) {
-            throw new Exception("Generator: Anchor is missing from Database: " + anchorId);
+            throw new Exception(E.ERROR +"Generator: Anchor is missing from Database: " + anchorId);
         }
 
-        File file = new File("anchor.toml");
-        LOGGER.info("\uD83C\uDFBD \uD83C\uDFBD Do We Have A File? check path needed ...".concat(file.getAbsolutePath()));
-        if (file.exists()) {
-            tomlService.encryptAndUploadAnchorFile(anchor.getAnchorId(), file);
-            LOGGER.info("\uD83C\uDF4E \uD83C\uDF4E \uD83C\uDF4E anchor.toml has been encrypted and uploaded via KMS \n"
-                    + "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ ANCHOR TOML uploaded OK!\n");
-        } else {
-            String msg = Emoji.NOT_OK.concat(Emoji.ERROR).concat((" .... anchor.toml file not found. " +
-                    "\uD83C\uDF3C CREATE in project root ").concat(Emoji.ERROR));
-            LOGGER.info(msg);
-            //throw new Exception(msg);
-        }
-        LOGGER.info("\n\n" + Emoji.HEART_BLUE.concat(Emoji.HEART_BLUE).concat(Emoji.HEART_BLUE).concat(Emoji.HEART_BLUE)
-                + "........ Start Demo Data Generation ........".concat(Emoji.HEART_BLUE.concat(Emoji.HEART_BLUE)));
-        //
-
-        // add data
+        LOGGER.info("\n\n" + E.HEART_BLUE.concat(E.HEART_BLUE).concat(E.HEART_BLUE).concat(E.HEART_BLUE)
+                + "........ Start Demo Data Generation ........".concat(E.HEART_BLUE.concat(E.HEART_BLUE)));
 
         addAgents();
-        generateAgentClients(anchorId, 5);
+        generateAgentClients(5);
 
         LOGGER.info("\n\n\n"
-                .concat(Emoji.PRETZEL.concat(Emoji.PRETZEL.concat(Emoji.PRETZEL).concat(Emoji.ALIEN.concat(Emoji.ALIEN))
+                .concat(E.PRETZEL.concat(E.PRETZEL.concat(E.PRETZEL).concat(E.ALIEN.concat(E.ALIEN))
                         .concat(" ......... starting Agent funding, LoanApplications generation "
                                 + " \uD83C\uDF3C \uD83C\uDF3C "))));
-        generateAgentFunding(anchor.getAnchorId());
-        generateLoanApplications(anchor.getAnchorId());
+        generateAgentFunding();
+        generateLoanApplications();
 
         // LOGGER.info("\n\n\n".concat(Emoji.PRETZEL.concat(Emoji.PRETZEL.concat(Emoji.PRETZEL)
         // .concat(Emoji.PANDA.concat(Emoji.PANDA))
@@ -143,26 +132,25 @@ public class DemoDataGenerator {
 
     }
 
-    private void setAnchor(String anchorId) throws Exception {
+    private void setAnchor() throws Exception {
         if (anchor != null) {
             return;
         }
-        Toml toml = tomlService.getAnchorToml(anchorId);
+        Toml toml = tomlService.getAnchorToml();
         if (toml == null) {
             throw new Exception("anchor.toml has not been found. upload the file from your computer");
         } else {
-            String name = toml.getString("anchorId");
-            anchor = firebaseService.getAnchor(name);
+            anchor = firebaseService.getAnchor();
         }
 
     }
 
-    public void generatePayments(String anchorId) throws Exception {
-        LOGGER.info(Emoji.STAR.concat(Emoji.STAR.concat(Emoji.STAR.concat(Emoji.STAR.concat(Emoji.STAR)
+    public void generatePayments() throws Exception {
+        LOGGER.info(E.STAR.concat(E.STAR.concat(E.STAR.concat(E.STAR.concat(E.STAR)
                 .concat(".......... Generating client payments for all loans until the bitter end !..... ")
-                .concat(Emoji.HAND2.concat(Emoji.HAND2))))));
-        setAnchor(anchorId);
-        List<Agent> agents = firebaseService.getAgents(anchorId);
+                .concat(E.HAND2.concat(E.HAND2))))));
+        setAnchor();
+        List<Agent> agents = firebaseService.getAgents();
         DateTime now = new DateTime();
         long day = 1000 * 60 * 60 * 24;
         for (Agent agent : agents) {
@@ -247,17 +235,17 @@ public class DemoDataGenerator {
         try {
             payment = agentService.addLoanPayment(payment);
             payment.setPaymentRequestId(request.getPaymentRequestId());
-            LOGGER.info(Emoji.PRETZEL.concat(Emoji.PRETZEL.concat(Emoji.HAPPY))
+            LOGGER.info(E.PRETZEL.concat(E.PRETZEL.concat(E.HAPPY))
                     + "MONTHLY LoanPayment made on Stellar and stored in database; getPaymentRequestId: "
                             .concat(payment.getPaymentRequestId())
-                            .concat(" " + Emoji.RED_TRIANGLE.concat(Emoji.RED_TRIANGLE)));
+                            .concat(" " + E.RED_TRIANGLE.concat(E.RED_TRIANGLE)));
         } catch (Exception e) {
             // ignore
             if (e.getMessage() == null) {
-                LOGGER.info(Emoji.ERROR.concat("Unknown error"));
+                LOGGER.info(E.ERROR.concat("Unknown error"));
                 e.printStackTrace();
             } else {
-                LOGGER.info(Emoji.ERROR.concat(e.getMessage()));
+                LOGGER.info(E.ERROR.concat(e.getMessage()));
             }
 
         }
@@ -289,7 +277,7 @@ public class DemoDataGenerator {
                 sendAndSave(application, client, clientSeed, payment);
             } catch (Exception e) {
                 e.printStackTrace();
-                LOGGER.info(Emoji.PIG.concat(Emoji.PIG.concat(Emoji.PIG))
+                LOGGER.info(E.PIG.concat(E.PIG.concat(E.PIG))
                         .concat("This WEEKLY payment failed ".concat(e.getMessage() == null ? "" : e.getMessage())));
                 break;
             }
@@ -319,7 +307,7 @@ public class DemoDataGenerator {
         double loanAmt = Double.parseDouble(loanPayment.getAmount());
         double balanceAmt = Double.parseDouble(balance.getBalance());
         if (loanAmt > balanceAmt) {
-            String msg = "Not enough money in account to cover necessary amount ".concat(Emoji.PIG)
+            String msg = "Not enough money in account to cover necessary amount ".concat(E.PIG)
                     .concat(" \uD83C\uDF4E balance: ".concat(balance.getBalance().concat(" \uD83C\uDF4E loan amount: ")
                             .concat(loanPayment.getAmount())));
             LOGGER.info(msg);
@@ -352,16 +340,16 @@ public class DemoDataGenerator {
 
         try {
             payment = agentService.addLoanPayment(payment);
-            LOGGER.info(Emoji.PRETZEL.concat(Emoji.PRETZEL)
+            LOGGER.info(E.PRETZEL.concat(E.PRETZEL)
                     + "Weekly LoanPayment made on Stellar and stored in database; getPaymentRequestId: "
-                            .concat(payment.getPaymentRequestId()).concat(Emoji.RED_TRIANGLE));
+                            .concat(payment.getPaymentRequestId()).concat(E.RED_TRIANGLE));
         } catch (Exception e) {
             // ignore
             if (e.getMessage() == null) {
-                LOGGER.info(Emoji.ERROR.concat("Unknown LoanPayment error"));
+                LOGGER.info(E.ERROR.concat("Unknown LoanPayment error"));
                 e.printStackTrace();
             } else {
-                LOGGER.info(Emoji.ERROR.concat(e.getMessage()));
+                LOGGER.info(E.ERROR.concat(e.getMessage()));
             }
 
         }
@@ -371,9 +359,9 @@ public class DemoDataGenerator {
     private void deleteFirebaseArtifacts() throws Exception {
         // delete users and collections
         firebaseService.deleteAuthUsers();
-        LOGGER.info(Emoji.SOCCER_BALL.concat(Emoji.SOCCER_BALL) + "Firebase auth users have been cleaned out");
+        LOGGER.info(E.SOCCER_BALL.concat(E.SOCCER_BALL) + "Firebase auth users have been cleaned out");
         firebaseService.deleteCollections();
-        LOGGER.info(Emoji.BASKET_BALL.concat(Emoji.BASKET_BALL) + "Firestore collections have been cleaned out");
+        LOGGER.info(E.BASKET_BALL.concat(E.BASKET_BALL) + "Firestore collections have been cleaned out");
     }
 
     @Autowired
@@ -385,11 +373,11 @@ public class DemoDataGenerator {
     private CryptoService cryptoService;
 
     public void generateLoanApprovals(String anchorId) throws Exception {
-        LOGGER.info("\n\n" + Emoji.BLUE_DOT.concat(Emoji.BLUE_DOT)
+        LOGGER.info("\n\n" + E.BLUE_DOT.concat(E.BLUE_DOT)
                 .concat("======================= Approval of LoanApplication by Clients and Agents ..."));
-        setAnchor(anchorId);
+        setAnchor();
         int cnt = 0;
-        agents = firebaseService.getAgents(anchor.getAnchorId());
+        agents = firebaseService.getAgents();
         for (Agent agent : agents) {
             List<LoanApplication> loanApplications = firebaseService.getAgentLoans(agent.getAgentId());
             for (LoanApplication loanApplication : loanApplications) {
@@ -399,7 +387,7 @@ public class DemoDataGenerator {
                 }
             }
         }
-        LOGGER.info(Emoji.BLUE_DOT.concat(Emoji.BLUE_DOT.concat(Emoji.BLUE_DOT))
+        LOGGER.info(E.BLUE_DOT.concat(E.BLUE_DOT.concat(E.BLUE_DOT))
                 .concat(" .... Clients have completed " + cnt + " loan approvals"));
         int cnt2 = 0;
         for (Agent agent : agents) {
@@ -413,19 +401,19 @@ public class DemoDataGenerator {
                         cnt2++;
                     }
                 } catch (Exception e) {
-                    LOGGER.info(Emoji.NOT_OK + "Bad shit, IGNORED ... : ".concat(e.getMessage()));
+                    LOGGER.info(E.NOT_OK + "Bad shit, IGNORED ... : ".concat(e.getMessage()));
                 }
             }
         }
-        LOGGER.info(Emoji.BLUE_DOT.concat(Emoji.BLUE_DOT.concat(Emoji.BLUE_DOT))
+        LOGGER.info(E.BLUE_DOT.concat(E.BLUE_DOT.concat(E.BLUE_DOT))
                 .concat(" .... Agents have completed " + cnt2 + " loan approvals"));
     }
 
-    public void generateAgentFunding(String anchorId) throws Exception {
-        LOGGER.info(Emoji.PEAR.concat(Emoji.PEAR.concat(Emoji.PEACH))
-                + "...... Generating agent funds ...".concat(Emoji.PEAR.concat(Emoji.PEAR)));
-        setAnchor(anchorId);
-        agents = firebaseService.getAgents(anchor.getAnchorId());
+    public void generateAgentFunding() throws Exception {
+        LOGGER.info(E.PEAR.concat(E.PEAR.concat(E.PEACH))
+                + "...... Generating agent funds ...".concat(E.PEAR.concat(E.PEAR)));
+        setAnchor();
+        agents = firebaseService.getAgents();
         List<AccountService.AssetBag> assetBags = accountService
                 .getDefaultAssets(anchor.getIssuingAccount().getAccountId());
         String seed = cryptoService.getDecryptedSeed(anchor.getDistributionAccount().getAccountId());
@@ -449,12 +437,12 @@ public class DemoDataGenerator {
                 }
             }
         }
-        LOGGER.info(Emoji.YELLOW_BIRD.concat(Emoji.YELLOW_BIRD.concat(Emoji.YELLOW_BIRD).concat(
+        LOGGER.info(E.YELLOW_BIRD.concat(E.YELLOW_BIRD.concat(E.YELLOW_BIRD).concat(
                 " Agent Funding complete ...............  \uD83C\uDF51 " + "total funding transactions: " + cnt)));
     }
 
     public Stokvel generateStokvel(String anchorId) throws Exception {
-        LOGGER.info(Emoji.PEACH.concat(Emoji.PEACH).concat("Generate Stokvel"));
+        LOGGER.info(E.PEACH.concat(E.PEACH).concat("Generate Stokvel"));
         Stokvel stokvel = new Stokvel();
         stokvel.setName("OriginalGroup II");
         stokvel.setAnchorId(anchorId);
@@ -465,13 +453,13 @@ public class DemoDataGenerator {
         fields.setEmail("stokvel_".concat("" + System.currentTimeMillis()).concat("@modernachor.com"));
         stokvel.setKycFields(fields);
         stokvel = stokvelService.createStokvel(stokvel);
-        LOGGER.info(Emoji.LEMON
-                .concat(Emoji.LEMON.concat(Emoji.LEMON).concat("Stokvel generated: ".concat(stokvel.getName()))));
+        LOGGER.info(E.LEMON
+                .concat(E.LEMON.concat(E.LEMON).concat("Stokvel generated: ".concat(stokvel.getName()))));
         return stokvel;
     }
 
     public List<Member> generateStokvelMembers(String stokvelId, String anchorId) throws Exception {
-        LOGGER.info(Emoji.PEACH.concat(Emoji.PEACH).concat("Generate Member"));
+        LOGGER.info(E.PEACH.concat(E.PEACH).concat("Generate Member"));
         setFirstNames();
         setLastNames();
         List<Member> list = new ArrayList<>();
@@ -495,11 +483,11 @@ public class DemoDataGenerator {
             m = stokvelService.createMember(m);
             list.add(m);
             cnt++;
-            LOGGER.info(Emoji.RED_CAR.concat(Emoji.RED_CAR.concat(Emoji.RED_CAR)
+            LOGGER.info(E.RED_CAR.concat(E.RED_CAR.concat(E.RED_CAR)
                     .concat("Member #" + cnt + " generated: ".concat(m.getFullName()))));
         }
-        LOGGER.info(Emoji.RED_CAR
-                .concat(Emoji.RED_CAR.concat(Emoji.RED_CAR).concat("Members generated: ".concat("" + list.size()))));
+        LOGGER.info(E.RED_CAR
+                .concat(E.RED_CAR.concat(E.RED_CAR).concat("Members generated: ".concat("" + list.size()))));
         return list;
     }
 
@@ -517,13 +505,13 @@ public class DemoDataGenerator {
         return "" + total + ".00";
     }
 
-    public void generateLoanApplications(String anchorId) throws Exception {
+    public void generateLoanApplications() throws Exception {
 
-        setAnchor(anchorId);
-        List<Client> clients = firebaseService.getAnchorClients(anchor.getAnchorId());
+        setAnchor();
+        List<Client> clients = firebaseService.getAnchorClients();
         List<AccountService.AssetBag> assetBags = accountService
                 .getDefaultAssets(anchor.getIssuingAccount().getAccountId());
-        LOGGER.info(Emoji.YELLOW_BIRD.concat(Emoji.YELLOW_BIRD.concat(Emoji.YELLOW_BIRD)
+        LOGGER.info(E.YELLOW_BIRD.concat(E.YELLOW_BIRD.concat(E.YELLOW_BIRD)
                 .concat(" Generating LoanApplications ............... total clients: " + clients.size())));
         int cnt = 0;
         for (Client client : clients) {
@@ -545,7 +533,7 @@ public class DemoDataGenerator {
                 app.setDate(new DateTime().toDateTimeISO().toString());
                 try {
                     LOGGER.info(
-                            Emoji.PANDA.concat(Emoji.PANDA).concat(Emoji.PANDA).concat("Generate LoanApplication for: ")
+                            E.PANDA.concat(E.PANDA).concat(E.PANDA).concat("Generate LoanApplication for: ")
                                     .concat(client.getFullName()).concat("  \uD83C\uDF51 asset: ")
                                     .concat(assetBag.getAssetCode()).concat(" \uD83D\uDC26 interest rate: "
                                             + app.getInterestRate() + " % ".concat("  \uD83C\uDFB2 ")));
@@ -560,7 +548,7 @@ public class DemoDataGenerator {
             }
         }
 
-        LOGGER.info("\n\n" + Emoji.YELLOW_BIRD.concat(Emoji.YELLOW_BIRD.concat(Emoji.YELLOW_BIRD)
+        LOGGER.info("\n\n" + E.YELLOW_BIRD.concat(E.YELLOW_BIRD.concat(E.YELLOW_BIRD)
                 .concat(" LoanApplications generation completed ............... total loans: " + cnt)));
     }
 
@@ -621,35 +609,39 @@ public class DemoDataGenerator {
     private List<Agent> agents = new ArrayList<>();
 
     private void addAgents() throws Exception {
-        LOGGER.info(Emoji.ALIEN.concat(Emoji.ALIEN.concat(Emoji.LEAF))
+        LOGGER.info(E.ALIEN.concat(E.ALIEN.concat(E.LEAF))
                 + " - \uD83D\uDC26 Creating agents .....");
         Agent agent1 = buildAgent();
         agent1.getPersonalKYCFields().setFirst_name("Tiger");
         agent1.getPersonalKYCFields().setLast_name("Wannamaker");
         agents.add(agentService.createAgent(agent1));
-        LOGGER.info(Emoji.ALIEN.concat(Emoji.ALIEN.concat(Emoji.LEAF))
+        LOGGER.info(E.ALIEN.concat(E.ALIEN.concat(E.LEAF))
                 .concat("Agent Wannamaker created OK: ".concat(G.toJson(agent1))));
 
         Agent agent3 = buildAgent();
         agent3.getPersonalKYCFields().setFirst_name("Kgabzela");
         agent3.getPersonalKYCFields().setLast_name("Marule-Smythe");
         agents.add(agentService.createAgent(agent3));
-        LOGGER.info(Emoji.ALIEN.concat(Emoji.ALIEN.concat(Emoji.LEAF)).concat(agent3.getFullName()
+        LOGGER.info(E.ALIEN.concat(E.ALIEN.concat(E.LEAF)).concat(agent3.getFullName()
                 + " - \uD83D\uDC26 Agent Marule-Smythe created OK: ".concat(agent3.getFullName())));
     }
 
-    public void generateAgentClients(String anchorId, int count) throws Exception {
-        LOGGER.info(Emoji.ALIEN.concat(Emoji.ALIEN.concat(Emoji.LEAF))
+    public void generateAgentClients(int count) throws Exception {
+        LOGGER.info(E.ALIEN.concat(E.ALIEN.concat(E.LEAF))
                 + " - \uD83D\uDC26 Creating clients for the agents .....");
         setFirstNames();
         setLastNames();
-        agents = firebaseService.getAgents(anchorId);
-        anchor = firebaseService.getAnchor(anchorId);
+        Toml toml = tomlService.getAnchorToml();
+        if (toml == null) {
+            throw new Exception("Generator: Anchor TOML file is missing: ");
+        }
+        agents = firebaseService.getAgents();
+        anchor = firebaseService.getAnchor();
         for (Agent agent : agents) {
             for (int i = 0; i < count; i++) {
                 Client c1 = buildClient(agent.getAgentId());
                 Client result = agentService.createClient(c1);
-                LOGGER.info(Emoji.LEMON.concat(Emoji.LEMON).concat(".......... agent Client created: ")
+                LOGGER.info(E.LEMON.concat(E.LEMON).concat(".......... agent Client created: ")
                         .concat(result.getFullName()));
             }
         }

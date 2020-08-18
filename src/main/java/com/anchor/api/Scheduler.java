@@ -6,7 +6,7 @@ import com.anchor.api.data.anchor.Agent;
 import com.anchor.api.data.anchor.Anchor;
 import com.anchor.api.services.FirebaseService;
 import com.anchor.api.services.TOMLService;
-import com.anchor.api.util.Emoji;
+import com.anchor.api.util.E;
 import com.moandjiezana.toml.Toml;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,16 +30,16 @@ public class Scheduler {
     private TOMLService tomlService;
 
     public Scheduler() {
-        LOGGER.info(Emoji.YELLOW_BIRD.concat(Emoji.YELLOW_BIRD) +
-                "Scheduler constructed. Waiting to be triggered ".concat(Emoji.YELLOW_BIRD));
+        LOGGER.info(E.YELLOW_BIRD.concat(E.YELLOW_BIRD) +
+                "Scheduler constructed. Waiting to be triggered ".concat(E.YELLOW_BIRD));
     }
 
     @Scheduled(fixedRate = 1000 * 60 * 60)
 //    @Scheduled(fixedRate = 1000 * 15)
     public void fixedRateScheduled() throws Exception {
-        LOGGER.info(Emoji.PRETZEL.concat(Emoji.PRETZEL).concat(Emoji.PRETZEL) + "Fixed Rate scheduler; " +
+        LOGGER.info(E.PRETZEL.concat(E.PRETZEL).concat(E.PRETZEL) + "Fixed Rate scheduler; " +
                 "\uD83C\uDF3C CALCULATE LOAN BALANCES or OTHER NECESSARY WORK: " + new DateTime().toDateTimeISO().toString()
-                + " " + Emoji.RED_APPLE);
+                + " " + E.RED_APPLE);
 //        try {
 //            fileCleanUp();
 //        } catch (Exception e) {
@@ -53,21 +53,21 @@ public class Scheduler {
             if (!anchors.isEmpty()) {
                 Anchor anchor = anchors.get(0);
 
-                List<Agent> list = firebaseService.getAgents(anchor.getAnchorId());
+                List<Agent> list = firebaseService.getAgents();
                 for (Agent agent : list) {
-                    LOGGER.info(Emoji.DICE.concat(Emoji.DICE) + "Agent: ".concat(agent.getFullName()).concat(" ")
-                            .concat(Emoji.HEART_BLUE));
+                    LOGGER.info(E.DICE.concat(E.DICE) + "Agent: ".concat(agent.getFullName()).concat(" ")
+                            .concat(E.HEART_BLUE));
                 }
-                Toml toml = tomlService.getAnchorToml(anchor.getAnchorId());
+                Toml toml = tomlService.getAnchorToml();
                 if (toml != null) {
-                    LOGGER.info(Emoji.DICE.concat(Emoji.DICE) + "  ANCHOR TOML FILE " + Emoji.RED_APPLE + Emoji.RED_APPLE);
-                    LOGGER.info("\n" + Emoji.DICE.concat(Emoji.DICE) + toml.toMap().toString() + Emoji.DICE.concat(Emoji.DICE));
+                    LOGGER.info(E.DICE.concat(E.DICE) + "  ANCHOR TOML FILE " + E.RED_APPLE + E.RED_APPLE);
+                    LOGGER.info("\n" + E.DICE.concat(E.DICE) + toml.toMap().toString() + E.DICE.concat(E.DICE));
                 }
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            LOGGER.info(Emoji.NOT_OK.concat(Emoji.NOT_OK) + "Firebase query or anchor toml retrieval fell down");
+            LOGGER.info(E.NOT_OK.concat(E.NOT_OK) + "Firebase query or anchor toml retrieval fell down");
 //            e.printStackTrace();
         }
     }
@@ -79,16 +79,16 @@ public class Scheduler {
         LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C test file: "+  test.getAbsolutePath() +
                 "  \uD83D\uDC99 \uD83D\uDC9C");
         if (directory.exists()) {
-            LOGGER.info(Emoji.HASH.concat(Emoji.HASH).concat(Emoji.HASH)
+            LOGGER.info(E.HASH.concat(E.HASH).concat(E.HASH)
                     + "Directory ".concat(directory.getAbsolutePath()));
             File[] list = directory.listFiles();
             if ( list != null){
                 for (File file : list) {
-                    LOGGER.info(Emoji.HASH.concat(Emoji.HASH) + "File ".concat(file.getAbsolutePath()));
+                    LOGGER.info(E.HASH.concat(E.HASH) + "File ".concat(file.getAbsolutePath()));
                 }
             }
         } else {
-            LOGGER.info(Emoji.HASH.concat(Emoji.HASH).concat(Emoji.PEPPER).concat(Emoji.PEPPER) + "Directory "
+            LOGGER.info(E.HASH.concat(E.HASH).concat(E.PEPPER).concat(E.PEPPER) + "Directory "
                     .concat(ClientController.DIRECTORY).concat(" does not exist. CleanUp not necessary"));
         }
 

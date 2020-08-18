@@ -6,7 +6,7 @@ import com.anchor.api.data.account.AccountResponseBag;
 import com.anchor.api.data.anchor.Agent;
 import com.anchor.api.data.anchor.Anchor;
 import com.anchor.api.data.transfer.sep10.AnchorSep10Challenge;
-import com.anchor.api.util.Emoji;
+import com.anchor.api.util.E;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.moandjiezana.toml.Toml;
@@ -99,24 +99,24 @@ public class AccountService {
     private TOMLService tomlService;
     private Anchor anchor;
 
-    private void setAnchor(final String anchorId) throws Exception {
+    private void setAnchor() throws Exception {
         if (anchor != null) {
             return;
         }
-        final Toml toml = tomlService.getAnchorToml(anchorId);
+        final Toml toml = tomlService.getAnchorToml();
         if (toml == null) {
             throw new Exception("anchor.toml has not been found. upload the file from your computer");
         } else {
             final String id = toml.getString("anchorId");
             if (id == null) {
-                String msg = Emoji.NOT_OK.concat("anchorId missing from anchor.toml ".concat(Emoji.FIRE));
+                String msg = E.NOT_OK.concat("anchorId missing from anchor.toml ".concat(E.FIRE));
                 LOGGER.info(msg);
                 throw new Exception(msg);
             }
-            anchor = firebaseService.getAnchor(id);
+            anchor = firebaseService.getAnchor();
             if (anchor == null) {
-                LOGGER.info(Emoji.FIRE
-                        .concat(Emoji.FIRE.concat(Emoji.FIRE).concat("We are fucked! There is no ANCHOR !!!")));
+                LOGGER.info(E.FIRE
+                        .concat(E.FIRE.concat(E.FIRE).concat("We are fucked! There is no ANCHOR !!!")));
             }
         }
 
@@ -133,13 +133,13 @@ public class AccountService {
     // todo - ensure auth as anchor user for this call
     public AccountResponse getAccountUsingAccount(final String accountId) throws Exception {
         setServerAndNetwork();
-        LOGGER.info(Emoji.PEAR + " ..... Getting account: " + accountId);
+        LOGGER.info(E.PEAR + " ..... Getting account: " + accountId);
         try {
             return server.accounts().account(accountId);
         } catch (Exception e) {
-            LOGGER.info(Emoji.NOT_OK.concat(Emoji.NOT_OK) + "getAccountUsingAccount FAILED");
+            LOGGER.info(E.NOT_OK.concat(E.NOT_OK) + "getAccountUsingAccount FAILED");
             e.printStackTrace();
-            throw new Exception(Emoji.ERROR + "Failed to get Account data from Stellar");
+            throw new Exception(E.ERROR + "Failed to get Account data from Stellar");
         }
     }
 
@@ -155,7 +155,7 @@ public class AccountService {
 
     public AccountResponseBag createAndFundAnchorAccount(final String seed, final String startingBalance)
             throws Exception {
-        LOGGER.info("\uD83D\uDC99 ... ... ... ... createAndFundStellarAccount starting ....... startingBalance: "
+        LOGGER.info("\n\n\uD83D\uDC99 \uD83D\uDC99 \uD83D\uDC99 \uD83C\uDF4E... ... ... ... AccountService: createAndFundAnchorAccount starting ....... startingBalance: "
                 + startingBalance);
         setServerAndNetwork();
         AccountResponse accountResponse;
@@ -174,36 +174,35 @@ public class AccountService {
             transaction.sign(sourceKeyPair);
 
             final SubmitTransactionResponse submitTransactionResponse = server.submitTransaction(transaction);
-            TransactionResult transactionResult = submitTransactionResponse.getDecodedTransactionResult().get();
-            CreateAccountResult createAccountResult = null;
-            for (OperationResult result : transactionResult.getResult().getResults()) {
-                if (result.getTr().getCreateAccountResult() != null) {
-                    createAccountResult = result.getTr().getCreateAccountResult();
-                }
-            }
-            if (createAccountResult == null) {
-                throw  new Exception("CreateAccountOperation failed");
-            }
-            LOGGER.info(Emoji.DICE.concat(Emoji.DICE.concat(Emoji.DICE)) + "createAccountResult: ".concat(G.toJson(createAccountResult)));
+
 
             if (submitTransactionResponse.isSuccess()) {
                 accountResponse = server.accounts().account(newAccountKeyPair.getAccountId());
-                LOGGER.info("\uD83D\uDC99  "
+                LOGGER.info("\uD83D\uDC99 \uD83D\uDC99 \uD83D\uDC99 \uD83D\uDC99  "
                         + "Stellar account has been created and funded!: \uD83C\uDF4E \uD83C\uDF4E YEBO!!!");
                 final AccountResponseBag bag = new AccountResponseBag(accountResponse, secret);
                 LOGGER.info(("\uD83C\uDF4E \uD83C\uDF4E RESPONSE from Stellar; " + "\uD83D\uDC99 new accountId: ")
                         .concat(bag.getAccountResponse().getAccountId()));
+                cryptoService.encrypt(bag.getAccountResponse().getAccountId(), secret);
                 return bag;
             } else {
-                processAccountCreationError(createAccountResult);
+                if (submitTransactionResponse.getExtras() != null) {
+                    SubmitTransactionResponse.Extras.ResultCodes codes = submitTransactionResponse.getExtras().getResultCodes();
+                    if (codes.getTransactionResultCode().contains("tx_failed")) {
+                        LOGGER.info(E.PEPPER+ E.PEPPER + "CreateAccount Transaction failed ".concat(E.NOT_OK+ E.NOT_OK));
+                        for (String code : codes.getOperationsResultCodes()) {
+                            LOGGER.info(E.PEPPER+ E.PEPPER + "OperationsResultCode: " + code + " " + E.NOT_OK);
+                        }
+                    }
+                }
+                throw new Exception(E.PEPPER+ E.PEPPER + "Stellar CreateAccount Transaction failed ".concat(E.NOT_OK));
 
             }
 
         } catch (final IOException e) {
-            LOGGER.info(Emoji.ERROR+Emoji.ERROR + "Failed to create account - see below ...");
+            LOGGER.info(E.ERROR+ E.ERROR + "Failed to create account - see below ...");
             throw new Exception("\uD83D\uDD34 Unable to create Account", e);
         }
-        return null;
     }
 
     private void processAccountCreationError(CreateAccountResult createAccountResult) throws Exception {
@@ -228,21 +227,21 @@ public class AccountService {
 
     public AccountResponseBag createAndFundUserAccount(final String anchorId, final String startingXLMBalance,
                                                        final String startingFiatBalance, final String fiatLimit) throws Exception {
-        LOGGER.info(Emoji.PEAR.concat(Emoji.PEAR) + "\uD83D\uDC99 ... ... ... ... createAndFundAgentAccount starting "
+        LOGGER.info(E.PEAR.concat(E.PEAR) + "\uD83D\uDC99 ... ... ... ... createAndFundAgentAccount starting "
                 + "....... startingXLMBalance: " + startingXLMBalance + " startingFiatBalance:" + startingFiatBalance
                 + " fiatLimit: " + fiatLimit);
         setServerAndNetwork();
-        setAnchor(anchorId);
-        AccountResponseBag agentAccountResponseBag = null;
+        setAnchor();
+        AccountResponseBag accountResponseBag = null;
         try {
-            LOGGER.info(Emoji.PEAR.concat(Emoji.PEAR.concat("Getting encrypted seed (BaseAccount AccountId)from storage; \uD83C\uDF4E \uD83C\uDF4E will decrypt and use ...")));
+            LOGGER.info(E.PEAR.concat(E.PEAR.concat("Getting encrypted seed (BaseAccount AccountId)from storage; \uD83C\uDF4E \uD83C\uDF4E will decrypt and use ...")));
             final String baseSeed = cryptoService.getDecryptedSeed(anchor.getBaseAccount().getAccountId());
-            final KeyPair agentKeyPair = KeyPair.random();
+            final KeyPair keyPair = KeyPair.random();
             final KeyPair sourceKeyPair = KeyPair.fromSecretSeed(baseSeed);
 
             final AccountResponse baseAccount = server.accounts().account(sourceKeyPair.getAccountId());
 
-            LOGGER.info(Emoji.PEAR.concat(Emoji.PEAR.concat("Getting encrypted seed (DistributionAccount AccountId)from storage; \uD83C\uDF4E \uD83C\uDF4E will decrypt and use ...")));
+            LOGGER.info(E.PEAR.concat(E.PEAR.concat("Getting encrypted seed (DistributionAccount AccountId)from storage; \uD83C\uDF4E \uD83C\uDF4E will decrypt and use ...")));
 
             final String distributionSeed = cryptoService
                     .getDecryptedSeed(anchor.getDistributionAccount().getAccountId());
@@ -250,54 +249,54 @@ public class AccountService {
 
             final Transaction transaction = new Transaction.Builder(baseAccount, network)
                     .addOperation(
-                            new CreateAccountOperation.Builder(agentKeyPair.getAccountId(), startingXLMBalance).build())
+                            new CreateAccountOperation.Builder(keyPair.getAccountId(), startingXLMBalance).build())
                     .addMemo(Memo.text("CreateAccount Tx")).setTimeout(180).setBaseFee(100).build();
 
             transaction.sign(sourceKeyPair);
-            LOGGER.info(Emoji.RED_CAR + Emoji.RED_CAR + Emoji.RED_CAR + " ... Submit tx with CreateAccountOperation to Stellar ... ");
+            LOGGER.info(E.RED_CAR + E.RED_CAR + E.RED_CAR + " ... Submit tx with CreateAccountOperation to Stellar ... ");
             final SubmitTransactionResponse submitTransactionResponse = server.submitTransaction(transaction);
 
-            TransactionResult transactionResult = submitTransactionResponse.getDecodedTransactionResult().get();
-            CreateAccountResult createAccountResult = null;
-            for (OperationResult result : transactionResult.getResult().getResults()) {
-                if (result.getTr().getCreateAccountResult() != null) {
-                    createAccountResult = result.getTr().getCreateAccountResult();
-                }
-            }
-            if (createAccountResult == null) {
-                throw  new Exception("CreateAccountOperation failed");
-            }
             if (submitTransactionResponse.isSuccess()) {
                 // add trustlines and first payment for all fiat tokens
-                LOGGER.info(Emoji.LEAF.concat(Emoji.LEAF).concat(Emoji.LEAF).concat(Emoji.LEAF)
-                        + "Stellar account created: ".concat(Emoji.LEAF).concat(Emoji.LEAF).concat(" ")
-                        .concat(agentKeyPair.getAccountId()).concat(" ... about to start creating trustlines ..."));
-               agentAccountResponseBag = addTrustlinesAndOriginalBalances(fiatLimit,
-                        startingFiatBalance, agentKeyPair, distributionKeyPair);
-                LOGGER.info(Emoji.LEAF.concat(Emoji.LEAF.concat(Emoji.LEAF))
+                LOGGER.info(E.LEAF.concat(E.LEAF).concat(E.LEAF).concat(E.LEAF)
+                        + "Stellar account created: ".concat(E.LEAF).concat(E.LEAF).concat(" ")
+                        .concat(keyPair.getAccountId()).concat(" ... about to start creating trustlines ..."));
+               accountResponseBag = addTrustlinesAndOriginalBalances(fiatLimit,
+                        startingFiatBalance, keyPair, distributionKeyPair);
+                LOGGER.info(E.LEAF.concat(E.LEAF.concat(E.LEAF))
                         + " .......... It is indeed possible that everything worked. \uD83D\uDE21 WTF?");
-                final String secret = new String(agentKeyPair.getSecretSeed());
-                agentAccountResponseBag.setSecretSeed(secret);
-                return agentAccountResponseBag;
+                final String secret = new String(keyPair.getSecretSeed());
+                accountResponseBag.setSecretSeed(secret);
+
+                cryptoService.encrypt(accountResponseBag.getAccountResponse().getAccountId(), secret);
+                return accountResponseBag;
             } else {
-                processAccountCreationError(createAccountResult);
+                if (submitTransactionResponse.getExtras() != null) {
+                    SubmitTransactionResponse.Extras.ResultCodes codes = submitTransactionResponse.getExtras().getResultCodes();
+                    if (codes.getTransactionResultCode().contains("tx_failed")) {
+                        LOGGER.info(E.PEPPER+ E.PEPPER + "CreateAccount Transaction failed ".concat(E.NOT_OK+ E.NOT_OK));
+                        for (String code : codes.getOperationsResultCodes()) {
+                            LOGGER.info(E.PEPPER+ E.PEPPER + "OperationsResultCode: " + code + " " + E.NOT_OK);
+                        }
+                    }
+                }
+                throw new Exception(E.PEPPER+ E.PEPPER + "Stellar CreateAccount Transaction failed ".concat(E.NOT_OK));
             }
 
         } catch (final IOException e) {
             LOGGER.severe("Failed to create account - see below ...");
             throw new Exception("\uD83D\uDD34 Unable to create Account", e);
         }
-        return null;
     }
 
     private AccountResponseBag addTrustlinesAndOriginalBalances(final String limit, final String startingFiatBalance,
                                                                 final KeyPair userKeyPair, final KeyPair distributionKeyPair) throws Exception {
 
         final List<AssetBag> assetBags = getDefaultAssets(anchor.getIssuingAccount().getAccountId());
-        LOGGER.info(Emoji.PEAR.concat(Emoji.PEAR)
+        LOGGER.info(E.PEAR.concat(E.PEAR)
                 .concat(("addTrustlinesAndOriginalBalances: "
                         + "Building transaction with trustline operations ... FIAT ASSETS: " + assetBags.size())
-                        .concat(Emoji.RED_DOT)));
+                        .concat(E.RED_DOT)));
         final AccountResponse account = server.accounts().account(userKeyPair.getAccountId());
         final Transaction.Builder trustlineTxBuilder = new Transaction.Builder(account, network);
         for (final AssetBag assetBag : assetBags) {
@@ -307,50 +306,59 @@ public class AccountService {
                 .setBaseFee(100).build();
 
         userTrustlineTx.sign(userKeyPair);
-        LOGGER.info(Emoji.PEAR.concat(Emoji.PEAR)
+        LOGGER.info(E.PEAR.concat(E.PEAR)
                 .concat(("addTrustlinesAndOriginalBalances: " + "Submitting transaction with trustline operations ... ")
-                        .concat(Emoji.RED_DOT)));
+                        .concat(E.RED_DOT)));
         final SubmitTransactionResponse trustlineTransactionResponse = server.submitTransaction(userTrustlineTx);
         LOGGER.info(
-                Emoji.HAND1.concat(Emoji.HAND2.concat(Emoji.HAND3)) + "User Trustline transaction response; isSuccess: "
+                E.HAND1.concat(E.HAND2.concat(E.HAND3)) + "User Trustline transaction response; isSuccess: "
                         .concat("" + trustlineTransactionResponse.isSuccess()));
         if (trustlineTransactionResponse.isSuccess()) {
             return sendFiatPayments(startingFiatBalance, userKeyPair, distributionKeyPair, assetBags);
         } else {
-
-            TransactionResult transactionResult = trustlineTransactionResponse.getDecodedTransactionResult().get();
-            AllowTrustResult allowTrustResult = null;
-            for (OperationResult result : transactionResult.getResult().getResults()) {
-                if (result.getTr().getCreateAccountResult() != null) {
-                    allowTrustResult = result.getTr().getAllowTrustResult();
+//
+//            TransactionResult transactionResult = trustlineTransactionResponse.getDecodedTransactionResult().get();
+//            AllowTrustResult allowTrustResult = null;
+//            for (OperationResult result : transactionResult.getResult().getResults()) {
+//                if (result.getTr().getCreateAccountResult() != null) {
+//                    allowTrustResult = result.getTr().getAllowTrustResult();
+//                }
+//            }
+//            if (allowTrustResult == null) {
+//                throw  new Exception("AllowTrustOperation failed");
+//            }
+//            switch (allowTrustResult.getDiscriminant().getValue()) {
+//                case -1:
+//                    LOGGER.info(Emoji.NOT_OK+Emoji.NOT_OK+Emoji.NOT_OK + "ALLOW_TRUST_MALFORMED");
+//                  throw new Exception("ALLOW_TRUST_MALFORMED");
+//                case -2:
+//                    LOGGER.info(Emoji.NOT_OK+Emoji.NOT_OK+Emoji.NOT_OK + "ALLOW_TRUST_NO_TRUST_LINE");
+//                    throw new Exception("ALLOW_TRUST_NO_TRUST_LINE");
+//                case -3:
+//                    LOGGER.info(Emoji.NOT_OK+Emoji.NOT_OK+Emoji.NOT_OK + "ALLOW_TRUST_TRUST_NOT_REQUIRED");
+//                    throw new Exception("ALLOW_TRUST_TRUST_NOT_REQUIRED");
+//                case -4:
+//                    LOGGER.info(Emoji.NOT_OK+Emoji.NOT_OK+Emoji.NOT_OK + "ALLOW_TRUST_CANT_REVOKE");
+//                    throw new Exception("ALLOW_TRUST_CANT_REVOKE");
+//                case -5:
+//                    LOGGER.info(Emoji.NOT_OK+Emoji.NOT_OK+Emoji.NOT_OK + "ALLOW_TRUST_SELF_NOT_ALLOWED");
+//                    throw new Exception("ALLOW_TRUST_SELF_NOT_ALLOWED");
+//                default:
+//                    String msg = Emoji.NOT_OK.concat(Emoji.NOT_OK.concat(Emoji.ERROR)
+//                            .concat("Trustline Transaction failed "));
+//                    LOGGER.info(msg);
+//                    throw new Exception(msg);
+//            }
+            if (trustlineTransactionResponse.getExtras() != null) {
+                SubmitTransactionResponse.Extras.ResultCodes codes = trustlineTransactionResponse.getExtras().getResultCodes();
+                if (codes.getTransactionResultCode().contains("tx_failed")) {
+                    LOGGER.info(E.PEPPER+ E.PEPPER + "CreateAccount Transaction failed ".concat(E.NOT_OK+ E.NOT_OK));
+                    for (String code : codes.getOperationsResultCodes()) {
+                        LOGGER.info(E.PEPPER+ E.PEPPER + "OperationsResultCode: " + code + " " + E.NOT_OK);
+                    }
                 }
             }
-            if (allowTrustResult == null) {
-                throw  new Exception("AllowTrustOperation failed");
-            }
-            switch (allowTrustResult.getDiscriminant().getValue()) {
-                case -1:
-                    LOGGER.info(Emoji.NOT_OK+Emoji.NOT_OK+Emoji.NOT_OK + "ALLOW_TRUST_MALFORMED");
-                  throw new Exception("ALLOW_TRUST_MALFORMED");
-                case -2:
-                    LOGGER.info(Emoji.NOT_OK+Emoji.NOT_OK+Emoji.NOT_OK + "ALLOW_TRUST_NO_TRUST_LINE");
-                    throw new Exception("ALLOW_TRUST_NO_TRUST_LINE");
-                case -3:
-                    LOGGER.info(Emoji.NOT_OK+Emoji.NOT_OK+Emoji.NOT_OK + "ALLOW_TRUST_TRUST_NOT_REQUIRED");
-                    throw new Exception("ALLOW_TRUST_TRUST_NOT_REQUIRED");
-                case -4:
-                    LOGGER.info(Emoji.NOT_OK+Emoji.NOT_OK+Emoji.NOT_OK + "ALLOW_TRUST_CANT_REVOKE");
-                    throw new Exception("ALLOW_TRUST_CANT_REVOKE");
-                case -5:
-                    LOGGER.info(Emoji.NOT_OK+Emoji.NOT_OK+Emoji.NOT_OK + "ALLOW_TRUST_SELF_NOT_ALLOWED");
-                    throw new Exception("ALLOW_TRUST_SELF_NOT_ALLOWED");
-                default:
-                    String msg = Emoji.NOT_OK.concat(Emoji.NOT_OK.concat(Emoji.ERROR)
-                            .concat("Trustline Transaction failed "));
-                    LOGGER.info(msg);
-                    throw new Exception(msg);
-            }
-
+            throw new Exception(E.PEPPER+ E.PEPPER + "Stellar CreateAccount Transaction failed ".concat(E.NOT_OK));
         }
 
     }
@@ -358,11 +366,11 @@ public class AccountService {
     private AccountResponseBag sendFiatPayments(final String amount, final KeyPair destinationKeyPair,
                                                 final KeyPair sourceKeyPair, final List<AssetBag> assetBags) throws Exception {
 
-        LOGGER.info(Emoji.BLUE_BIRD.concat(Emoji.BLUE_BIRD)
+        LOGGER.info(E.BLUE_BIRD.concat(E.BLUE_BIRD)
                 .concat("sendFiatPayments: Creating payment transaction ... " + assetBags.size()
                         + " FIAT assets to be paid; destinationAccount: ".concat(destinationKeyPair.getAccountId())
-                        .concat(" sourceAccount: ").concat(sourceKeyPair.getAccountId()).concat(Emoji.FIRE)
-                        .concat(Emoji.FIRE))
+                        .concat(" sourceAccount: ").concat(sourceKeyPair.getAccountId()).concat(E.FIRE)
+                        .concat(E.FIRE))
                 .concat(" ----- check AMOUNT: ").concat(amount));
 
         setServerAndNetwork();
@@ -377,11 +385,11 @@ public class AccountService {
 
         paymentTx.sign(sourceKeyPair);
 
-        LOGGER.info(Emoji.PEAR.concat(Emoji.PEAR).concat(
-                ("sendPayment: " + "Submitting transaction with payment operations ... ").concat(Emoji.RED_DOT)));
+        LOGGER.info(E.PEAR.concat(E.PEAR).concat(
+                ("sendPayment: " + "Submitting transaction with payment operations ... ").concat(E.RED_DOT)));
         final SubmitTransactionResponse payTransactionResponse = server.submitTransaction(paymentTx);
         if (payTransactionResponse.isSuccess()) {
-            final String msg = Emoji.LEAF.concat(Emoji.LEAF.concat(Emoji.LEAF)
+            final String msg = E.LEAF.concat(E.LEAF.concat(E.LEAF)
                     .concat("Payment Transaction is successful. \uD83D\uDE21 Check fiat balances on user account \uD83D\uDE21"));
             LOGGER.info(msg);
             final AccountResponse userAccountResponse = server.accounts().account(destinationKeyPair.getAccountId());
@@ -421,8 +429,8 @@ public class AccountService {
         if (paymentResult == null) {
             throw  new Exception("PaymentOperation failed");
         }
-        final String msgx = Emoji.NOT_OK
-                .concat(Emoji.NOT_OK.concat(Emoji.ERROR).concat("Payment Transaction Failed : "));
+        final String msgx = E.NOT_OK
+                .concat(E.NOT_OK.concat(E.ERROR).concat("Payment Transaction Failed : "));
         switch (paymentResult.getDiscriminant().getValue()) {
             case -1:
                 LOGGER.info(msgx + "PAYMENT_MALFORMED");
@@ -520,8 +528,8 @@ public class AccountService {
                 if (changeTrustResult == null) {
                     throw  new Exception("ChangeTrustOperation failed");
                 }
-                final String msgx = Emoji.NOT_OK
-                        .concat(Emoji.NOT_OK.concat(Emoji.ERROR).concat("ChangeTrustOperation Failed : "));
+                final String msgx = E.NOT_OK
+                        .concat(E.NOT_OK.concat(E.ERROR).concat("ChangeTrustOperation Failed : "));
                 switch (changeTrustResult.getDiscriminant().getValue()) {
                     case -1:
                         LOGGER.info(msgx + "CHANGE_TRUST_MALFORMED");
@@ -551,14 +559,14 @@ public class AccountService {
 
     private static File TOML_FILE;
 
-    public List<AssetBag> getAnchorCurrencies(final String anchorId) throws Exception {
-        Anchor anchor = firebaseService.getAnchor(anchorId);
+    public List<AssetBag> getAnchorCurrencies() throws Exception {
+        Anchor anchor = firebaseService.getAnchor();
         return getDefaultAssets(anchor.getIssuingAccount().getAccountId());
     }
 
     public List<AssetBag> getDefaultAssets(final String issuingAccount) throws Exception {
         final List<AssetBag> mList = new ArrayList<>();
-        LOGGER.info(Emoji.PRESCRIPTION.concat(Emoji.PRESCRIPTION)
+        LOGGER.info(E.PRESCRIPTION.concat(E.PRESCRIPTION)
                 + "getDefaultAssets: get stellar.toml file and return to caller...");
         final ClassLoader classLoader = getClass().getClassLoader();
         if (TOML_FILE == null) {
@@ -588,7 +596,7 @@ public class AccountService {
         }
 
         if (mList.isEmpty()) {
-            LOGGER.info(Emoji.RED_DOT.concat(Emoji.RED_DOT.concat(Emoji.RED_DOT)
+            LOGGER.info(E.RED_DOT.concat(E.RED_DOT.concat(E.RED_DOT)
                     .concat("Currencies missing from STELLAR TOML file. Please add issuing account after creation ")));
             mList.add(new AssetBag("ZAR", Asset.createNonNativeAsset("ZAR", issuingAccount)));
             mList.add(new AssetBag("USD", Asset.createNonNativeAsset("USD", issuingAccount)));
@@ -647,7 +655,7 @@ public class AccountService {
 
     public SubmitTransactionResponse createAsset(final String issuingAccountSeed, final String distributionAccount,
                                                  final String assetCode, final String amount) throws Exception {
-        LOGGER.info(Emoji.PEACH.concat(Emoji.PEACH) + "  .......... createAsset ........ \uD83C\uDF40 "
+        LOGGER.info(E.PEACH.concat(E.PEACH) + "  .......... createAsset ........ \uD83C\uDF40 "
                 + " \uD83C\uDF40 code: " + assetCode + " \uD83C\uDF40 " + " amount:" + amount
                 + "\n \uD83C\uDF51 issuingAccountSeed: " + issuingAccountSeed + " \uD83C\uDF51 distributionAccount: "
                 + distributionAccount);
@@ -680,7 +688,7 @@ public class AccountService {
                         + "Stellar createAsset: PaymentOperation has been executed OK: \uD83C\uDF4E \uD83C\uDF4E isSuccess: "
                         + submitTransactionResponse.isSuccess());
             } else {
-                LOGGER.info(Emoji.NOT_OK + "ERROR: \uD83C\uDF45 resultXdr: " + submitTransactionResponse.getResultXdr().get());
+                LOGGER.info(E.NOT_OK + "ERROR: \uD83C\uDF45 resultXdr: " + submitTransactionResponse.getResultXdr().get());
                 processPaymentError(submitTransactionResponse);
             }
             return submitTransactionResponse;
@@ -812,8 +820,8 @@ public class AccountService {
             if (setOptionsResult == null) {
                 throw  new Exception("SetOptionsOperation failed");
             }
-            final String msgx = Emoji.NOT_OK
-                    .concat(Emoji.NOT_OK.concat(Emoji.ERROR).concat("SetOptionsOperation Failed : "));
+            final String msgx = E.NOT_OK
+                    .concat(E.NOT_OK.concat(E.ERROR).concat("SetOptionsOperation Failed : "));
             switch (setOptionsResult.getDiscriminant().getValue()) {
                 case -1:
                     LOGGER.info(msgx + "SET_OPTIONS_LOW_RESERVE");

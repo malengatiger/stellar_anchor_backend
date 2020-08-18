@@ -1,6 +1,6 @@
 package com.anchor.api.services;
 
-import com.anchor.api.util.Emoji;
+import com.anchor.api.util.E;
 import com.google.cloud.kms.v1.*;
 import com.google.cloud.storage.*;
 import com.google.protobuf.ByteString;
@@ -133,13 +133,22 @@ public class CryptoService {
     }
 
     public void uploadFile(String id) throws IOException {
+        LOGGER.info(
+                "... \uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 Uploading file \uD83C\uDF4E bucketName: " + bucketName + " id: " + id
+        + " projectId: " + projectId);
         Storage storage = StorageOptions.newBuilder().setProjectId(projectId)
                 .build().getService();
         BlobId blobId = BlobId.of(bucketName, id);
         BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
 
         storage.create(blobInfo, Files.readAllBytes(Paths.get(FILE_PATH.concat(id))));
-        Files.delete(Paths.get(FILE_PATH.concat(id)));
+        File gg = new File(String.valueOf(Paths.get(FILE_PATH.concat(id))));
+        if (gg.exists()) {
+            boolean deleted = gg.delete();
+            LOGGER.info(E.PRESCRIPTION + E.PRESCRIPTION + E.PRESCRIPTION
+                    + ".......temporary file deleted: " + deleted);
+        }
+
         LOGGER.info(
                 "... \uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 Yebo!! \uD83C\uDF4E " +
                         "Encrypted Seed File \uD83C\uDF4E \uD83C\uDF4E " + FILE_PATH.concat(id) + " \uD83C\uDF4E \uD83C\uDF4E uploaded to \uD83C\uDF3C " +
@@ -152,25 +161,30 @@ public class CryptoService {
         byte[] bytes = readFile(accountId);
         return decrypt(bytes);
     }
+
     private void downloadSeedFile(String accountId) throws Exception {
-        LOGGER.info(Emoji.YELLOW_BIRD.concat(Emoji.YELLOW_BIRD).concat(" .... about to download seed file for accountId: "
-                .concat(accountId).concat(" bucketName: ").concat(bucketName).concat( " " + Emoji.RED_APPLE)
-        .concat(" object: ".concat(objectName)).concat(" ").concat(Emoji.RED_APPLE)));
+        LOGGER.info(E.YELLOW_BIRD.concat(E.YELLOW_BIRD).concat(" .... about to download seed file for accountId: "
+                .concat(accountId).concat(" bucketName: ").concat(bucketName).concat( " " + E.RED_APPLE
+                .concat(" projectId: ".concat(projectId)))
+        .concat(" object: ".concat(objectName)).concat(" ").concat(E.RED_APPLE)));
         String name = getPath(accountId);
         Path destFilePath = Paths.get(DOWNLOAD_PATH.concat(accountId));
         Storage storage = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
-        LOGGER.info(Emoji.YELLOW_BIRD.concat(Emoji.YELLOW_BIRD)
+        LOGGER.info(E.YELLOW_BIRD.concat(E.YELLOW_BIRD)
                 .concat(" serviceAccount email: ")
                 .concat(storage.getServiceAccount(projectId).getEmail()));
         Blob blob = storage.get(BlobId.of(bucketName, accountId));
         if (blob == null) {
-            LOGGER.info(Emoji.NOT_OK.concat(Emoji.NOT_OK).concat(Emoji.PEPPER).concat("Blob for downloading is fucking NULL? \uD83D\uDE21 WTF? \uD83D\uDE21 name: "
+            LOGGER.info(E.NOT_OK.concat(E.NOT_OK).concat(E.PEPPER).concat("Blob for downloading is fucking NULL? \uD83D\uDE21 WTF? \uD83D\uDE21 name: "
             .concat(accountId).concat(" in bucket: ".concat(bucketName))));
-            throw new Exception(Emoji.NOT_OK + "KMS Blob for downloading is fucking NULL? WTF?");
+            throw new Exception(E.NOT_OK + "KMS Blob for downloading is fucking NULL? WTF?");
         }
         blob.downloadTo(destFilePath);
-        LOGGER.info(Emoji.YELLOW_BIRD.concat(Emoji.YELLOW_BIRD)
-                .concat(" seed file has been downloaded OK into ").concat(destFilePath.toAbsolutePath().toString()));
+        boolean del = destFilePath.toFile().delete();
+        LOGGER.info(E.YELLOW_BIRD.concat(E.YELLOW_BIRD)
+                .concat(" seed file has been downloaded OK into ")
+                .concat(" temporary file deleted: " + del + " ")
+                .concat(destFilePath.toAbsolutePath().toString()));
     }
 
     @NotNull
@@ -179,7 +193,7 @@ public class CryptoService {
         if (!dir.exists()) {
             boolean ok = dir.mkdir();
             if (!ok) {
-                LOGGER.info(Emoji.ERROR+Emoji.ERROR+Emoji.ERROR+" Unable to create directory");
+                LOGGER.info(E.ERROR+ E.ERROR+ E.ERROR+" Unable to create directory");
                 throw new Exception("Unable to create directory");
             }
         }

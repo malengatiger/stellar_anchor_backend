@@ -5,7 +5,7 @@ import com.anchor.api.services.AccountService;
 import com.anchor.api.services.AgentService;
 import com.anchor.api.services.AnchorAccountService;
 import com.anchor.api.services.FirebaseService;
-import com.anchor.api.util.Emoji;
+import com.anchor.api.util.E;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.joda.time.DateTime;
@@ -35,7 +35,7 @@ public class AnchorBackendApplication implements ApplicationListener<Application
     private static final Gson G = new GsonBuilder().setPrettyPrinting().create();
 
     public static void main(String[] args) {
-        LOGGER.info(Emoji.PANDA.concat(Emoji.PANDA).concat(Emoji.PANDA) +
+        LOGGER.info(E.PANDA.concat(E.PANDA).concat(E.PANDA) +
                 " AnchorApplication starting ...");
         SpringApplication app = new SpringApplication(AnchorBackendApplication.class);
         app.setLogStartupInfo(true);
@@ -50,16 +50,16 @@ public class AnchorBackendApplication implements ApplicationListener<Application
         });
 
         app.run(args);
-        LOGGER.info(Emoji.PANDA.concat(Emoji.PANDA).concat(Emoji.PANDA) +
-                " AnchorApplication started OK! ".concat(Emoji.HAND2.concat(Emoji.HAND2))
+        LOGGER.info(E.PANDA.concat(E.PANDA).concat(E.PANDA) +
+                " AnchorApplication started OK! ".concat(E.HAND2.concat(E.HAND2))
                 + " All services up and running.");
     }
 
     private static String getBanner() {
         StringBuilder sb = new StringBuilder();
         sb.append("###############################################\n");
-        sb.append("#### " + Emoji.HEART_BLUE + "ANCHOR BANK NETWORK SERVICES " + Emoji.HEART_BLUE + "   ####\n");
-        sb.append("#### ".concat(Emoji.FLOWER_RED).concat(" ").concat(new DateTime().toDateTimeISO().toString().concat("     ####\n")));
+        sb.append("#### " + E.HEART_BLUE + "ANCHOR BANK NETWORK SERVICES " + E.HEART_BLUE + "   ####\n");
+        sb.append("#### ".concat(E.FLOWER_RED).concat(" ").concat(new DateTime().toDateTimeISO().toString().concat("     ####\n")));
         sb.append("###############################################\n");
         return sb.toString();
     }
@@ -100,10 +100,10 @@ public class AnchorBackendApplication implements ApplicationListener<Application
 
         Calendar cal = Calendar.getInstance();
         int res = cal.getActualMaximum(Calendar.DATE);
-        LOGGER.info(Emoji.SKULL.concat(Emoji.SKULL) + "Today's Date = " + cal.getTime());
+        LOGGER.info(E.SKULL.concat(E.SKULL) + "Today's Date = " + cal.getTime());
 
-        LOGGER.info(Emoji.SKULL.concat(Emoji.SKULL) +
-                "Last Date of the current month = " + res + Emoji.SKULL.concat(Emoji.SKULL));
+        LOGGER.info(E.SKULL.concat(E.SKULL) +
+                "Last Date of the current month = " + res + E.SKULL.concat(E.SKULL));
 
         try {
             //
@@ -111,34 +111,34 @@ public class AnchorBackendApplication implements ApplicationListener<Application
             firebaseService.initializeFirebase();
             for (Method method : accountService.getClass().getMethods()) {
                 if (isValid(method.getName()))
-                    LOGGER.info(Emoji.FLOWER_YELLOW.concat(Emoji.FLOWER_YELLOW).concat("AccountService method: "
-                            .concat(method.getName()).concat(" - " + Emoji.RED_APPLE)));
+                    LOGGER.info(E.FLOWER_YELLOW.concat(E.FLOWER_YELLOW).concat("AccountService method: "
+                            .concat(method.getName()).concat(" - " + E.RED_APPLE)));
             }
             LOGGER.info("\n\n");
             for (Method method : firebaseService.getClass().getMethods()) {
                 if (isValid(method.getName()))
-                    LOGGER.info(Emoji.FLOWER_PINK.concat(Emoji.FLOWER_PINK).concat("FirebaseService method: "
-                            .concat(method.getName()).concat(" - " + Emoji.RED_APPLE)));
+                    LOGGER.info(E.FLOWER_PINK.concat(E.FLOWER_PINK).concat("FirebaseService method: "
+                            .concat(method.getName()).concat(" - " + E.RED_APPLE)));
             }
             LOGGER.info("\n\n");
             for (Method method : agentService.getClass().getMethods()) {
                 if (isValid(method.getName()))
-                    LOGGER.info(Emoji.HAND3.concat(Emoji.HAND3).concat("AgentService method: "
-                            .concat(method.getName()).concat(" - " + Emoji.RED_APPLE)));
+                    LOGGER.info(E.HAND3.concat(E.HAND3).concat("AgentService method: "
+                            .concat(method.getName()).concat(" - " + E.RED_APPLE)));
             }
             LOGGER.info("\n\n");
             for (Method method : anchorAccountService.getClass().getMethods()) {
                 if (isValid(method.getName()))
-                    LOGGER.info(Emoji.FLOWER_RED.concat(Emoji.FLOWER_RED).concat("AnchorAccountService method: "
-                            .concat(method.getName()).concat(" - " + Emoji.RED_APPLE)));
+                    LOGGER.info(E.FLOWER_RED.concat(E.FLOWER_RED).concat("AnchorAccountService method: "
+                            .concat(method.getName()).concat(" - " + E.RED_APPLE)));
             }
             LOGGER.info("\n\n");
             AnchorController controller = context.getBean(AnchorController.class);
             String tom = controller.getWellKnownStellarToml();
-            LOGGER.info(Emoji.SKULL.concat(Emoji.SKULL)
-                    + Emoji.SKULL.concat(Emoji.SKULL)
+            LOGGER.info(E.SKULL.concat(E.SKULL)
+                    + E.SKULL.concat(E.SKULL)
                     + "  ------------ STELLAR TOML FILE ------------\n"
-                    + tom + " " + Emoji.SKULL.concat(Emoji.SKULL) + "\n\n");
+                    + tom + " " + E.SKULL.concat(E.SKULL) + "\n\n");
 
         } catch (Exception e) {
             LOGGER.info(" \uD83C\uDF45 Firebase initialization FAILED");

@@ -4,7 +4,7 @@ import com.anchor.api.data.account.Account;
 import com.anchor.api.data.account.AccountResponseBag;
 import com.anchor.api.data.anchor.Anchor;
 import com.anchor.api.data.anchor.AnchorUser;
-import com.anchor.api.util.Emoji;
+import com.anchor.api.util.E;
 import com.google.firebase.auth.UserRecord;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -57,8 +57,8 @@ public class AnchorAccountService {
     private CryptoService cryptoService;
 //🍀 🍀
     public AnchorAccountService() {
-        LOGGER.info(Emoji.DRUM + Emoji.DRUM + "AnchorAccountService Constructor fired ..." +
-                Emoji.HEART_ORANGE + "manages the setup of Anchor base and issuing accounts");
+        LOGGER.info(E.DRUM + E.DRUM + "AnchorAccountService Constructor fired ..." +
+                E.HEART_ORANGE + "manages the setup of Anchor base and issuing accounts");
     }
 /*
     🍎 🍎 🍎 Assets
@@ -84,7 +84,7 @@ public class AnchorAccountService {
     public Anchor createAnchorAccounts(Anchor newAnchor, String password,
                                        String assetAmount, String fundingSeed, String startingBalance)
             throws Exception {
-        LOGGER.info(Emoji.FERN + Emoji.FERN + "AnchorAccountService: creating Anchor Accounts " +
+        LOGGER.info(E.FERN + E.FERN + "AnchorAccountService: creating Anchor Accounts " +
                 ".... \uD83C\uDF40 DEV STATUS: " + status + " \uD83C\uDF51 " +
                 "startingBalance: " + startingBalance + " \uD83C\uDF51 seed: " + fundingSeed);
         Anchor anchor = new Anchor();
@@ -141,12 +141,12 @@ public class AnchorAccountService {
                         distributionAccount.getSecretSeed(),
                         limit, assetBag.assetCode);
 
-                LOGGER.info(Emoji.FLOWER_RED + Emoji.FLOWER_RED + "AnchorAccountService: createTrustLine for asset: " + assetBag.assetCode +
-                        ".... "+ Emoji.HAPPY+" TrustLine Response isSuccess:  " + createTrustResponse.isSuccess());
+                LOGGER.info(E.FLOWER_RED + E.FLOWER_RED + "AnchorAccountService: createTrustLine for asset: " + assetBag.assetCode +
+                        ".... "+ E.HAPPY+" TrustLine Response isSuccess:  " + createTrustResponse.isSuccess());
             }
 
             for (AccountService.AssetBag assetBag : assets) {
-                LOGGER.info(Emoji.YELLOW_BIRD.concat(Emoji.YELLOW_BIRD) +
+                LOGGER.info(E.YELLOW_BIRD.concat(E.YELLOW_BIRD) +
                         "Creating Asset .... ".concat(assetBag.assetCode)
                                 .concat(" with assetAmount: ".concat(assetAmount)));
                 SubmitTransactionResponse createAssetResponse = accountService.createAsset(
@@ -154,7 +154,7 @@ public class AnchorAccountService {
                         distributionAccount.getAccountResponse().getAccountId(),
                         assetBag.assetCode,assetAmount);
 
-                LOGGER.info(Emoji.HASH.concat(Emoji.HAND2)
+                LOGGER.info(E.HASH.concat(E.HAND2)
                         .concat(" Asset " + assetBag.assetCode + " \uD83C\uDF4E created? "
                                 + createAssetResponse.isSuccess())
                 .concat(" asset amount: ").concat(assetAmount));
@@ -162,11 +162,11 @@ public class AnchorAccountService {
 
         } catch (Exception e) {
             e.printStackTrace();
-            LOGGER.severe(Emoji.NOT_OK + "Trustline/Asset creation failed" + Emoji.ERROR);
+            LOGGER.severe(E.NOT_OK + "Trustline/Asset creation failed" + E.ERROR);
             throw e;
         }
 
-        LOGGER.info(Emoji.LEAF + Emoji.LEAF + Emoji.LEAF +
+        LOGGER.info(E.LEAF + E.LEAF + E.LEAF +
                 "Anchor created and will be added to Firestore: " +
                 " " + anchor.getName());
         AnchorUser anchorUser = createAnchorUser(anchor, password);
@@ -176,7 +176,7 @@ public class AnchorAccountService {
         //todo - send email to confirm the anchor with link ...
         try {
             sendEmail(anchor);
-            LOGGER.info(Emoji.FLOWER_YELLOW + Emoji.FLOWER_YELLOW + "Email has been sent ... ");
+            LOGGER.info(E.FLOWER_YELLOW + E.FLOWER_YELLOW + "Email has been sent ... ");
         } catch (Exception e) {
             e.printStackTrace();
             LOGGER.severe("Email sending failed");

@@ -17,7 +17,7 @@ import com.anchor.api.data.transfer.sep27.InfoServerResponse;
 import com.anchor.api.services.AccountService;
 import com.anchor.api.services.FirebaseService;
 import com.anchor.api.services.TOMLService;
-import com.anchor.api.util.Emoji;
+import com.anchor.api.util.E;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,7 +90,10 @@ public class TransferController {
      */
     @PostMapping("deposit")
     public DepositOKResponse deposit(@RequestBody DepositRequestParameters requestParameters) throws Exception {
-        LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 TransferController:deposit ...");
+        LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 TransferController:deposit ... fiat money into normal account, " +
+                "\uD83C\uDF4E \uD83C\uDF4E then issue token for the equivalent value");
+        // 1. write request to firestore
+        // 2. do payment transaction for xlm token (stablecoin)
 
         return null;
     }
@@ -221,7 +224,7 @@ public class TransferController {
             LOGGER.info(emm + "Token returned: ".concat(token).concat(emm));
             return ResponseEntity.ok(new JWTToken(token));
         } catch (Exception e) {
-            String msg = Emoji.ERROR + "Token acquisition failed " + Emoji.ERROR + e.getMessage();
+            String msg = E.ERROR + "Token acquisition failed " + E.ERROR + e.getMessage();
             LOGGER.info(msg);
             return ResponseEntity.badRequest()
                     .body(msg);
@@ -280,18 +283,18 @@ public class TransferController {
     @GetMapping("/info")
     public Map<String, Object> info() throws Exception {
         LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 TransferController:info ... get info object ");
-        Anchor anchor;
-        List<Anchor> anchors = firebaseService.getAnchors();
-        if (!anchors.isEmpty()) {
-            anchor = anchors.get(0);
-            accountService.getAnchorCurrencies(anchor.getAnchorId());
+        Anchor anchor = firebaseService.getAnchor();
+
+        if (anchor != null) {
+           //what ?
+
         } else {
             throw new Exception("Anchor Missing");
         }
         return null;
     }
 
-    public static final String emm = Emoji.BLUE_DOT + Emoji.BLUE_DOT + Emoji.BLUE_DOT + Emoji.BLUE_DOT ;
+    public static final String emm = E.BLUE_DOT + E.BLUE_DOT + E.BLUE_DOT + E.BLUE_DOT ;
     /*
         🌼 One of id, 🥏 stellar_transaction_id or 🥏 external_transaction_id is required.
 

@@ -6,7 +6,7 @@ import com.anchor.api.data.stokvel.Member;
 import com.anchor.api.data.stokvel.Stokvel;
 import com.anchor.api.data.stokvel.StokvelGoal;
 import com.anchor.api.data.stokvel.StokvelPayment;
-import com.anchor.api.util.Emoji;
+import com.anchor.api.util.E;
 import com.google.firebase.auth.UserRecord;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -51,16 +51,16 @@ public class StokvelService {
     private String fiatLimit;
 
     public StokvelService() {
-        LOGGER.info(Emoji.HAND2.concat(Emoji.HAND2)
-        .concat("StokvelService up and ready for gig! ".concat(Emoji.RAIN_DROP)));
+        LOGGER.info(E.HAND2.concat(E.HAND2)
+        .concat("StokvelService up and ready for gig! ".concat(E.RAIN_DROP)));
     }
     private Anchor anchor;
 
     public Stokvel createStokvel(Stokvel stokvel) throws Exception {
-        LOGGER.info(Emoji.YELLOW_BIRD + Emoji.YELLOW_BIRD + Emoji.YELLOW_BIRD +
+        LOGGER.info(E.YELLOW_BIRD + E.YELLOW_BIRD + E.YELLOW_BIRD +
                 "....... creating Stokvel ....... ");
         if (anchor == null) {
-            anchor = firebaseService.getAnchor(stokvel.getAnchorId());
+            anchor = firebaseService.getAnchor();
         }
         Stokvel mStokvel = firebaseService.getStokvelByName(stokvel.getName());
         if (mStokvel != null) {
@@ -70,14 +70,14 @@ public class StokvelService {
                 stokvel.getAnchorId(),
                 agentStartingBalance,
                 "0.01", fiatLimit);
-        LOGGER.info(Emoji.RED_APPLE + Emoji.RED_APPLE +
+        LOGGER.info(E.RED_APPLE + E.RED_APPLE +
                 "Stokvel Stellar account has been created and funded with ... "
                         .concat(agentStartingBalance).concat(" XLM; secretSeed: ".concat(bag.getSecretSeed())));
         cryptoService.encrypt(bag.getAccountResponse().getAccountId(), bag.getSecretSeed());
         List<AccountService.AssetBag> assetBags = accountService.getDefaultAssets(
                 anchor.getIssuingAccount().getAccountId());
         String issuingAccountSeed = cryptoService.getDecryptedSeed(anchor.getIssuingAccount().getAccountId());
-        LOGGER.info(Emoji.WARNING.concat(Emoji.WARNING) + "createStokvel:.... Creating Stokvel Fiat Asset Balances .... userSeed: "
+        LOGGER.info(E.WARNING.concat(E.WARNING) + "createStokvel:.... Creating Stokvel Fiat Asset Balances .... userSeed: "
                 .concat(bag.getSecretSeed()));
         for (AccountService.AssetBag assetBag : assetBags) {
             accountService.changeTrustLine(anchor.getIssuingAccount().getAccountId(),bag.getSecretSeed(),fiatLimit,
@@ -98,12 +98,12 @@ public class StokvelService {
             stokvel.setPassword(null);
             firebaseService.addStokvel(stokvel);
             //todo - sendEmail(stokvel ....);
-            LOGGER.info((Emoji.LEAF + Emoji.LEAF +
+            LOGGER.info((E.LEAF + E.LEAF +
                     "Stokvel has been added to Firestore without seed or password ").concat(stokvel.getName()));
             stokvel.setPassword(savedPassword);
             stokvel.setSecretSeed(bag.getSecretSeed());
         } catch (Exception e) {
-            String msg = Emoji.NOT_OK.concat(Emoji.ERROR)
+            String msg = E.NOT_OK.concat(E.ERROR)
                     .concat("Firebase error: ".concat(e.getMessage()));
             LOGGER.info(msg);
             throw new Exception(msg);
@@ -111,10 +111,10 @@ public class StokvelService {
         return stokvel;
     }
     public Member createMember(Member member) throws Exception {
-        LOGGER.info(Emoji.BLUE_BIRD + Emoji.BLUE_BIRD + Emoji.BLUE_BIRD +
+        LOGGER.info(E.BLUE_BIRD + E.BLUE_BIRD + E.BLUE_BIRD +
                 "....... creating Member ....... ");
         if (anchor == null) {
-            anchor = firebaseService.getAnchor(member.getAnchorId());
+            anchor = firebaseService.getAnchor();
         }
         Member mMember = firebaseService.getMemberByName(member.getKycFields().getFirst_name(), member.getKycFields().getLast_name());
         if (mMember != null) {
@@ -128,14 +128,14 @@ public class StokvelService {
                 member.getAnchorId(),
                 clientStartingBalance,
                 "0.01", fiatLimit);
-        LOGGER.info(Emoji.RED_APPLE + Emoji.RED_APPLE +
+        LOGGER.info(E.RED_APPLE + E.RED_APPLE +
                 "Member Stellar account has been created and funded with ... "
                         .concat(agentStartingBalance).concat(" XLM; secretSeed: ".concat(bag.getSecretSeed())));
         cryptoService.encrypt(bag.getAccountResponse().getAccountId(), bag.getSecretSeed());
         List<AccountService.AssetBag> assetBags = accountService.getDefaultAssets(
                 anchor.getIssuingAccount().getAccountId());
         String issuingAccountSeed = cryptoService.getDecryptedSeed(anchor.getIssuingAccount().getAccountId());
-        LOGGER.info(Emoji.WARNING.concat(Emoji.WARNING) + "createMember:.... Creating Member Fiat Asset Balances .... userSeed: "
+        LOGGER.info(E.WARNING.concat(E.WARNING) + "createMember:.... Creating Member Fiat Asset Balances .... userSeed: "
                 .concat(bag.getSecretSeed()));
 
         for (AccountService.AssetBag assetBag : assetBags) {
@@ -157,12 +157,12 @@ public class StokvelService {
             member.setSecretSeed(null);
             firebaseService.addMember(member);
             //sendEmail(agent);
-            LOGGER.info((Emoji.LEAF + Emoji.LEAF +
+            LOGGER.info((E.LEAF + E.LEAF +
                     "Member has been added to Firestore without seed or password ").concat(member.getFullName()));
             member.setPassword(savedPassword);
             member.setSecretSeed(bag.getSecretSeed());
         } catch (Exception e) {
-            String msg = Emoji.NOT_OK.concat(Emoji.ERROR)
+            String msg = E.NOT_OK.concat(E.ERROR)
                     .concat("Firebase error: ".concat(e.getMessage()));
             LOGGER.info(msg);
             throw new Exception(msg);
