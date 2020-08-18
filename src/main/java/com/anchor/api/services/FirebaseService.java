@@ -437,7 +437,10 @@ public class FirebaseService implements DatabaseServiceInterface {
     @Override
     public Anchor getAnchor() throws Exception {
         if (toml == null) {
-            throw new Exception("Generator: Anchor TOML file is missing: ");
+           toml = tomlService.getAnchorToml();
+           if (toml == null) {
+               throw new Exception("Generator: Anchor TOML file is missing: ");
+           }
         }
         String anchorId = toml.getString("anchorId");
         Firestore fs = FirestoreClient.getFirestore();

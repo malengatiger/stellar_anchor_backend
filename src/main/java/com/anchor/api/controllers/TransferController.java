@@ -197,7 +197,7 @@ public class TransferController {
 
     @GetMapping(value = "/auth", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> auth(@RequestParam String account) throws Exception {
-        LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 TransferController:auth ...");
+        LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 TransferController:auth ... authorizing account: ".concat(account));
         try {
             ChallengeResponse response = anchorSep10Challenge.newChallenge(account);
             return ResponseEntity.ok(response);
