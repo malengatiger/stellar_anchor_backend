@@ -8,6 +8,7 @@ import com.anchor.api.services.FirebaseService;
 import com.anchor.api.util.E;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.jetbrains.annotations.NotNull;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,7 +91,7 @@ public class AnchorBackendApplication implements ApplicationListener<Application
     private Scheduler scheduler;
 
     @Override
-    public void onApplicationEvent(ApplicationReadyEvent event) {
+    public void onApplicationEvent(@NotNull ApplicationReadyEvent event) {
         LOGGER.info("\uD83C\uDF3C \uD83C\uDF3C AnchorBackendApplication: onApplicationEvent: " +
                 "ApplicationReadyEvent fired: \uD83C\uDF3C \uD83C\uDF3C app is ready to initialize Firebase .... ");
         LOGGER.info("\uD83C\uDF3C \uD83C\uDF3C onApplicationEvent: DEVELOPMENT STATUS: " +
