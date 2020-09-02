@@ -69,7 +69,7 @@ public class DemoDataGenerator {
         }
         deleteFirebaseArtifacts();
         Anchor mAnchor = addAnchor(anchorName);
-        LOGGER.info(E.FERN.concat(E.FIRE.concat(E.FIRE))
+        LOGGER.info(E.FERN.concat(E.FIRE.concat(E.FIRE.concat(E.FIRE)))
                 + "Start Anchor complete. Complete generation after copying anchorId to anchor.toml \uD83D\uDECE AND STELLAR.TOML");
         LOGGER.info(E.RED_APPLE+ E.RED_APPLE+ G.toJson(mAnchor));
         return mAnchor;

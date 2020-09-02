@@ -118,7 +118,7 @@ public class FirebaseService implements DatabaseServiceInterface {
             String object = G.toJson(map);
              anchor = G.fromJson(object, Anchor.class);
             cnt++;
-            LOGGER.info("\uD83C\uDF51 \uD83C\uDF51 ANCHOR: #" + cnt +
+            LOGGER.info("\uD83C\uDF51 \uD83C\uDF51 \uD83C\uDF51 ANCHOR: #" + cnt +
                     " \uD83D\uDC99 " + anchor.getName() + "  \uD83E\uDD66 anchorId: "
                     + anchor.getAnchorId());
         }
