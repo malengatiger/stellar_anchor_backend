@@ -21,3 +21,8 @@ gcloud kms keyrings create "aubsKeyRing"  --location "global"
 
 gcloud kms keys create "stellarKey"  --location "global"  --keyring "aubsKeyRing"  --purpose "encryption"
 
+
+//PROMETHEUS Monitor
+docker run -d --name=prometheus -p 9090:9090 -v /Users/aubs/WORK/STELLAR-ANCHOR/stellar_anchor_backend/prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus --config.file=/etc/prometheus/prometheus.yml
+docker run -d --name=grafana -p 3000:3000 grafana/grafana
+

@@ -79,11 +79,20 @@ public class DemoDataGenerator {
         if (!status.equalsIgnoreCase("dev")) {
             throw new Exception(E.NOT_OK + "Demo Data Generation may not be run in PRODUCTION");
         }
+        Anchor mAnchor = firebaseService.getAnchor();
+        String concat = E.HEART_BLUE.concat(E.HEART_BLUE).concat(E.HEART_BLUE).concat(E.HEART_BLUE);
+        LOGGER.info(concat
+                + "........ Anchor:  ........"
+                .concat(G.toJson(mAnchor)).concat(" ")
+                .concat(E.HEART_BLUE.concat(E.HEART_BLUE)));
+        if (mAnchor == null) {
+            throw new Exception(E.NOT_OK+E.NOT_OK + "Generator: Anchor is missing from Firestore ");
+        }
         Toml toml = tomlService.getAnchorToml();
         if (toml == null) {
             throw new Exception(E.NOT_OK+E.NOT_OK + "Generator: Anchor TOML file is missing: ");
         }
-        String anchorId = toml.getString("anchorId");
+        String anchorId = mAnchor.getAnchorId();
         if (anchorId == null) {
             throw new Exception(E.NOT_OK + "anchorId is NULL");
         }
@@ -92,7 +101,7 @@ public class DemoDataGenerator {
             throw new Exception(E.ERROR +"Generator: Anchor is missing from Database: " + anchorId);
         }
 
-        LOGGER.info("\n\n" + E.HEART_BLUE.concat(E.HEART_BLUE).concat(E.HEART_BLUE).concat(E.HEART_BLUE)
+        LOGGER.info("\n\n" + concat
                 + "........ Start Demo Data Generation ........".concat(E.HEART_BLUE.concat(E.HEART_BLUE)));
 
         addAgents();
@@ -585,7 +594,7 @@ public class DemoDataGenerator {
     private TOMLService tomlService;
 
     private Anchor addAnchor(String anchorName) throws Exception {
-        // create bag ...
+        // create anchor bag ...
         AnchorBag bag = new AnchorBag();
         bag.setFundingSeed(FUNDING_SEED);
         bag.setAssetAmount("99999999000");
@@ -594,7 +603,7 @@ public class DemoDataGenerator {
 
         Anchor mAnchor = new Anchor();
         mAnchor.setName(anchorName);
-        mAnchor.setEmail("a_".concat("" + new DateTime().getMillis()).concat("@anchor.com"));
+        mAnchor.setEmail("anchor_".concat("" + new DateTime().getMillis()).concat("@anchor.com"));
         mAnchor.setCellphone("+27911447786");
         mAnchor.setDate(new DateTime().toDateTimeISO().toString());
 

@@ -102,11 +102,11 @@ public class AnchorSep10Challenge {
         } catch (Exception e) {
             LOGGER.severe("Client Account not found on Stellar");
         }
-        if (clientAccount == null) {
+        if (clientAccount == null) {      
             throw new Exception(error + "Client Account missing ".concat(error));
         }
         LOGGER.info(em2 +" Client has an account on Stellar. We good! Starting ManageDataOperation in transaction ..."
-                +em2);
+                +em2 + G.toJson(clientAccount) + em2);
 
         String key = "A" + System.currentTimeMillis() + " auth";
         Account sourceAccount = new Account(signer.getAccountId(), -1L);
@@ -305,7 +305,7 @@ public class AnchorSep10Challenge {
         String mm = E.PANDA + E.PANDA + E.BLUE_DISC + E.BLUE_DISC;
         LOGGER.info(mm + "readChallengeTransaction completed. "
                 .concat(challengeTransaction.getClientAccountId()));
-        return new ChallengeTransaction(transaction, clientAccountId);
+        return challengeTransaction;
     }
 
     private Anchor anchor;
@@ -392,7 +392,7 @@ public class AnchorSep10Challenge {
         //todo - un-comment code to check for client signature ....
         // Confirm we matched signatures to the client signers.
 //        if (signersFound.isEmpty()) {
-//            throw new InvalidSep10ChallengeException(Emoji.ERROR + "Transaction not signed by any client signer.");
+//            throw new InvalidSep10ChallengeException(E.ERROR + "Transaction not signed by any client signer.");
 //        }
 //
 //        // Confirm all signatures were consumed by a signer.
@@ -458,7 +458,7 @@ public class AnchorSep10Challenge {
         if (transaction.getSignatures().isEmpty()) {
             throw new InvalidSep10ChallengeException("Transaction has no signatures.");
         }
-
+        LOGGER.info(E.COFFEE+E.COFFEE + "verifyTransactionSignatures, has " + transaction.getSignatures().size() + " " + E.BELL);
         byte[] txHash = transaction.hash();
 
         // find and verify signatures
