@@ -1,4 +1,4 @@
-package com.anchor.api.services;
+package com.anchor.api.services.payments;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

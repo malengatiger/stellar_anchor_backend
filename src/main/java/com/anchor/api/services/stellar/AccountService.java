@@ -1,11 +1,15 @@
-package com.anchor.api.services;
+package com.anchor.api.services.stellar;
 
 
+import com.anchor.api.data.AccountInfoDTO;
 import com.anchor.api.data.PaymentRequest;
 import com.anchor.api.data.account.AccountResponseBag;
 import com.anchor.api.data.anchor.Agent;
 import com.anchor.api.data.anchor.Anchor;
 import com.anchor.api.data.transfer.sep10.AnchorSep10Challenge;
+import com.anchor.api.services.misc.CryptoService;
+import com.anchor.api.services.misc.FirebaseService;
+import com.anchor.api.services.misc.TOMLService;
 import com.anchor.api.util.E;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -225,7 +229,7 @@ public class AccountService {
         }
     }
 
-    public AccountResponseBag createAndFundUserAccount(final String anchorId, final String startingXLMBalance,
+    public AccountResponseBag createAndFundUserAccount(final String startingXLMBalance,
                                                        final String startingFiatBalance, final String fiatLimit) throws Exception {
         LOGGER.info(E.PEAR.concat(E.PEAR) + "\uD83D\uDC99 ... ... ... ... createAndFundAgentAccount starting "
                 + "....... startingXLMBalance: " + startingXLMBalance + " startingFiatBalance:" + startingFiatBalance
@@ -261,7 +265,7 @@ public class AccountService {
                 LOGGER.info(E.LEAF.concat(E.LEAF).concat(E.LEAF).concat(E.LEAF)
                         + "Stellar account created: ".concat(E.LEAF).concat(E.LEAF).concat(" ")
                         .concat(keyPair.getAccountId()).concat(" ... about to start creating trustlines ..."));
-               accountResponseBag = addTrustlinesAndOriginalBalances(fiatLimit,
+               accountResponseBag = addTrustLinesAndOriginalBalances(fiatLimit,
                         startingFiatBalance, keyPair, distributionKeyPair);
                 LOGGER.info(E.LEAF.concat(E.LEAF.concat(E.LEAF))
                         + " .......... It is indeed possible that everything worked. \uD83D\uDE21 WTF?");
@@ -289,7 +293,7 @@ public class AccountService {
         }
     }
 
-    private AccountResponseBag addTrustlinesAndOriginalBalances(final String limit, final String startingFiatBalance,
+    private AccountResponseBag addTrustLinesAndOriginalBalances(final String limit, final String startingFiatBalance,
                                                                 final KeyPair userKeyPair, final KeyPair distributionKeyPair) throws Exception {
 
         final List<AssetBag> assetBags = getDefaultAssets(anchor.getIssuingAccount().getAccountId());
@@ -462,6 +466,21 @@ public class AccountService {
             default:
                 throw new Exception(msgx + " UNKNOWN ERROR");
         }
+    }
+
+    @Value("${userXLMStartingBalance}")
+    private String userXLMStartingBalance;
+
+    @Value("${userFiatStartingBalance}")
+    private String  userFiatStartingBalance;
+    @Value("${userXLMStartingBalance}")
+    private String  userFiatLimit;
+
+    public AccountResponseBag addBFNAccount(AccountInfoDTO accountInfo) throws Exception {
+
+        AccountResponseBag bag = createAndFundUserAccount(userXLMStartingBalance, userFiatStartingBalance,userFiatLimit);
+        LOGGER.info(E.COFFEE+E.COFFEE+E.COFFEE+ "BFN Account now has an Account with the Stellar based Anchor "+E.RED_APPLE);
+        return bag;
     }
 
     @Autowired

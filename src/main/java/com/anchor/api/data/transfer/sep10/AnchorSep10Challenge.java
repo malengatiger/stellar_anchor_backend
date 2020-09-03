@@ -2,9 +2,9 @@ package com.anchor.api.data.transfer.sep10;
 
 
 import com.anchor.api.data.anchor.Anchor;
-import com.anchor.api.services.CryptoService;
-import com.anchor.api.services.FirebaseService;
-import com.anchor.api.services.TOMLService;
+import com.anchor.api.services.misc.CryptoService;
+import com.anchor.api.services.misc.FirebaseService;
+import com.anchor.api.services.misc.TOMLService;
 import com.anchor.api.util.E;
 import com.google.common.base.Objects;
 import com.google.common.collect.HashMultimap;

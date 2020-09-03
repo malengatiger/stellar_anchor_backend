@@ -1,4 +1,4 @@
-package com.anchor.api.services;
+package com.anchor.api.services.stellar;
 
 import com.anchor.api.data.account.AccountResponseBag;
 import com.anchor.api.data.anchor.Anchor;
@@ -6,6 +6,9 @@ import com.anchor.api.data.stokvel.Member;
 import com.anchor.api.data.stokvel.Stokvel;
 import com.anchor.api.data.stokvel.StokvelGoal;
 import com.anchor.api.data.stokvel.StokvelPayment;
+import com.anchor.api.services.misc.CryptoService;
+import com.anchor.api.services.misc.FirebaseService;
+import com.anchor.api.services.payments.PaymentService;
 import com.anchor.api.util.E;
 import com.google.firebase.auth.UserRecord;
 import com.google.gson.Gson;

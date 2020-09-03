@@ -1,6 +1,6 @@
-package com.anchor.api.services;
+package com.anchor.api.services.misc;
 
-import com.anchor.api.controllers.AnchorController;
+import com.anchor.api.controllers.stellar.AnchorController;
 import com.anchor.api.data.AgentFundingRequest;
 import com.anchor.api.data.PaymentRequest;
 import com.anchor.api.data.anchor.*;

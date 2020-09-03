@@ -1,11 +1,9 @@
-package com.anchor.api;
+package com.anchor.api.services.misc;
 
 
-import com.anchor.api.controllers.ClientController;
+import com.anchor.api.controllers.stellar.ClientController;
 import com.anchor.api.data.anchor.Agent;
 import com.anchor.api.data.anchor.Anchor;
-import com.anchor.api.services.FirebaseService;
-import com.anchor.api.services.TOMLService;
 import com.anchor.api.util.E;
 import com.moandjiezana.toml.Toml;
 import org.joda.time.DateTime;

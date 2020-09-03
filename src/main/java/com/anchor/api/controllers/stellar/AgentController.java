@@ -1,8 +1,12 @@
-package com.anchor.api.controllers;
+package com.anchor.api.controllers.stellar;
 
 import com.anchor.api.data.PaymentRequest;
 import com.anchor.api.data.anchor.*;
-import com.anchor.api.services.*;
+import com.anchor.api.services.misc.FirebaseService;
+import com.anchor.api.services.payments.PaymentService;
+import com.anchor.api.services.stellar.AccountService;
+import com.anchor.api.services.stellar.AgentService;
+import com.anchor.api.services.stellar.AnchorAccountService;
 import com.anchor.api.util.E;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

@@ -1,4 +1,4 @@
-package com.anchor.api.controllers;
+package com.anchor.api.controllers.stellar;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

@@ -1,4 +1,4 @@
-package com.anchor.api.services;
+package com.anchor.api.services.payments;
 
 import com.google.common.primitives.UnsignedLong;
 import io.xpring.ilp.IlpClient;

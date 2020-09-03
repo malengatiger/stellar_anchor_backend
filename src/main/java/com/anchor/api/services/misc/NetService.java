@@ -1,6 +1,7 @@
-package com.anchor.api.services;
+package com.anchor.api.services.misc;
 
 import com.anchor.api.data.models.ozow.OzowPaymentRequest;
+import com.anchor.api.services.payments.HashCheckGenerator;
 import com.anchor.api.util.E;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

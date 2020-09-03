@@ -1,7 +1,7 @@
-package com.anchor.api.controllers;
+package com.anchor.api.controllers.payments;
 
-import com.anchor.api.services.HashCheckGenerator;
-import com.anchor.api.services.NetService;
+import com.anchor.api.services.payments.HashCheckGenerator;
+import com.anchor.api.services.misc.NetService;
 import com.anchor.api.util.E;
 
 import com.google.gson.Gson;

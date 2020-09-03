@@ -1,10 +1,10 @@
-package com.anchor.api.controllers;
+package com.anchor.api.controllers.stellar;
 
 import com.anchor.api.data.anchor.Client;
-import com.anchor.api.services.AgentService;
-import com.anchor.api.services.FileService;
-import com.anchor.api.services.FirebaseService;
-import com.anchor.api.services.TOMLService;
+import com.anchor.api.services.stellar.AgentService;
+import com.anchor.api.services.misc.FileService;
+import com.anchor.api.services.misc.FirebaseService;
+import com.anchor.api.services.misc.TOMLService;
 import com.anchor.api.util.E;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

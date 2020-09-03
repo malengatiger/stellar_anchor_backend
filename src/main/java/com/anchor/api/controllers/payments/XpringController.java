@@ -1,4 +1,4 @@
-package com.anchor.api.controllers;
+package com.anchor.api.controllers.payments;
 
 
 import com.anchor.api.util.E;
@@ -26,7 +26,7 @@ public class XpringController {
     private static final Gson G = new GsonBuilder().setPrettyPrinting().create();
 
     @Autowired
-    private com.anchor.api.services.XRPWalletService XRPWalletService;
+    private com.anchor.api.services.payments.XRPWalletService XRPWalletService;
 
     public XpringController() {
         LOGGER.info(E.DICE.concat(E.DICE.concat("RIPPLE: XpringController ready to go ... \uD83C\uDF4E")));

@@ -1,4 +1,4 @@
-package com.anchor.api.services;
+package com.anchor.api.services.payments;
 
 import com.anchor.api.data.models.ozow.OzowPaymentRequest;
 import com.anchor.api.data.models.payfast.PayFastRequest;

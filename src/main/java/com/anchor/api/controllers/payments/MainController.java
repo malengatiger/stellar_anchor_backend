@@ -1,4 +1,4 @@
-package com.anchor.api.controllers;
+package com.anchor.api.controllers.payments;
 
 
 import com.anchor.api.util.E;

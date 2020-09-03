@@ -1,14 +1,17 @@
-package com.anchor.api.services;
+package com.anchor.api.services.payments;
 
 
 import com.anchor.api.data.AgentFundingRequest;
 import com.anchor.api.data.PaymentRequest;
 import com.anchor.api.data.anchor.Agent;
 import com.anchor.api.data.anchor.Anchor;
+import com.anchor.api.services.misc.CryptoService;
+import com.anchor.api.services.misc.FirebaseService;
+import com.anchor.api.services.misc.TOMLService;
+import com.anchor.api.services.stellar.AccountService;
 import com.anchor.api.util.E;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.moandjiezana.toml.Toml;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

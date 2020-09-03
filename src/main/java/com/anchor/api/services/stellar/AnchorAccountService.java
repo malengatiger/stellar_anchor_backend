@@ -1,9 +1,11 @@
-package com.anchor.api.services;
+package com.anchor.api.services.stellar;
 
 import com.anchor.api.data.account.Account;
 import com.anchor.api.data.account.AccountResponseBag;
 import com.anchor.api.data.anchor.Anchor;
 import com.anchor.api.data.anchor.AnchorUser;
+import com.anchor.api.services.misc.CryptoService;
+import com.anchor.api.services.misc.FirebaseService;
 import com.anchor.api.util.E;
 import com.google.firebase.auth.UserRecord;
 import com.google.gson.Gson;
@@ -20,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
-import org.stellar.sdk.responses.AccountResponse;
 import org.stellar.sdk.responses.SubmitTransactionResponse;
 
 import java.io.IOException;

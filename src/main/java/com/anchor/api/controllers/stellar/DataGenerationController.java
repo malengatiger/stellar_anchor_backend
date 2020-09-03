@@ -1,12 +1,12 @@
-package com.anchor.api.controllers;
+package com.anchor.api.controllers.stellar;
 
 import com.anchor.api.data.anchor.Anchor;
 import com.anchor.api.data.stokvel.Member;
 import com.anchor.api.data.stokvel.Stokvel;
-import com.anchor.api.services.AccountService;
-import com.anchor.api.services.AgentService;
-import com.anchor.api.services.AnchorAccountService;
-import com.anchor.api.services.TOMLService;
+import com.anchor.api.services.stellar.AccountService;
+import com.anchor.api.services.stellar.AgentService;
+import com.anchor.api.services.stellar.AnchorAccountService;
+import com.anchor.api.services.misc.TOMLService;
 import com.anchor.api.util.DemoDataGenerator;
 import com.anchor.api.util.E;
 import com.google.gson.Gson;
