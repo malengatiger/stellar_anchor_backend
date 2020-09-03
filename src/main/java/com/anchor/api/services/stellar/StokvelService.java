@@ -8,7 +8,7 @@ import com.anchor.api.data.stokvel.StokvelGoal;
 import com.anchor.api.data.stokvel.StokvelPayment;
 import com.anchor.api.services.misc.CryptoService;
 import com.anchor.api.services.misc.FirebaseService;
-import com.anchor.api.services.payments.PaymentService;
+import com.anchor.api.services.payments.StellarPaymentService;
 import com.anchor.api.util.E;
 import com.google.firebase.auth.UserRecord;
 import com.google.gson.Gson;
@@ -35,7 +35,7 @@ public class StokvelService {
     private CryptoService cryptoService;
 
     @Autowired
-    private PaymentService paymentService;
+    private StellarPaymentService stellarPaymentService;
 
     @Value("${sendgrid}")
     private String sendGridAPIKey;
@@ -70,9 +70,8 @@ public class StokvelService {
             throw new Exception("Stokvel already exists");
         }
         AccountResponseBag bag = accountService.createAndFundUserAccount(
-                stokvel.getAnchorId(),
                 agentStartingBalance,
-                "0.01", fiatLimit);
+                clientStartingBalance, fiatLimit);
         LOGGER.info(E.RED_APPLE + E.RED_APPLE +
                 "Stokvel Stellar account has been created and funded with ... "
                         .concat(agentStartingBalance).concat(" XLM; secretSeed: ".concat(bag.getSecretSeed())));
@@ -128,9 +127,8 @@ public class StokvelService {
             throw new Exception("Member already exists");
         }
         AccountResponseBag bag = accountService.createAndFundUserAccount(
-                member.getAnchorId(),
                 clientStartingBalance,
-                "0.01", fiatLimit);
+                clientStartingBalance, fiatLimit);
         LOGGER.info(E.RED_APPLE + E.RED_APPLE +
                 "Member Stellar account has been created and funded with ... "
                         .concat(agentStartingBalance).concat(" XLM; secretSeed: ".concat(bag.getSecretSeed())));

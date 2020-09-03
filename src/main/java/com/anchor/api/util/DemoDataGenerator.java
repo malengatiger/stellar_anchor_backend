@@ -10,7 +10,7 @@ import com.anchor.api.data.transfer.sep9.PersonalKYCFields;
 import com.anchor.api.services.misc.CryptoService;
 import com.anchor.api.services.misc.FirebaseService;
 import com.anchor.api.services.misc.TOMLService;
-import com.anchor.api.services.payments.PaymentService;
+import com.anchor.api.services.payments.StellarPaymentService;
 import com.anchor.api.services.stellar.AccountService;
 import com.anchor.api.services.stellar.AgentService;
 import com.anchor.api.services.stellar.AnchorAccountService;
@@ -244,7 +244,7 @@ public class DemoDataGenerator {
         request.setDate(new DateTime().toDateTimeISO().toString());
         request.setDestinationAccount(payment.getAgentAccount());
 
-        PaymentRequest response = paymentService.sendPayment(request);
+        PaymentRequest response = stellarPaymentService.sendPayment(request);
 
         payment.setLedger(response.getLedger());
         payment.setOnTime(true);
@@ -349,7 +349,7 @@ public class DemoDataGenerator {
         request.setDate(new DateTime().toDateTimeISO().toString());
         //
         request.setDestinationAccount(payment.getAgentAccount());
-        paymentService.sendPayment(request);
+        stellarPaymentService.sendPayment(request);
 
         payment.setOnTime(true);
         payment.setPaymentRequestId(request.getPaymentRequestId());
@@ -381,7 +381,7 @@ public class DemoDataGenerator {
     }
 
     @Autowired
-    private PaymentService paymentService;
+    private StellarPaymentService stellarPaymentService;
 
     @Autowired
     private StokvelService stokvelService;
@@ -445,7 +445,7 @@ public class DemoDataGenerator {
                 paymentRequest.setDestinationAccount(agent.getStellarAccountId());
                 paymentRequest.setAmount(getRandomAgentAmount());
                 try {
-                    paymentService.sendPayment(paymentRequest);
+                    stellarPaymentService.sendPayment(paymentRequest);
                     cnt++;
                 } catch (Exception e) {
                     e.printStackTrace();

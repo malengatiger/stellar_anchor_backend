@@ -23,8 +23,8 @@ import org.stellar.sdk.responses.SubmitTransactionResponse;
 import java.util.logging.Logger;
 
 @Service
-public class PaymentService {
-    public static final Logger LOGGER = Logger.getLogger(PaymentService.class.getSimpleName());
+public class StellarPaymentService {
+    public static final Logger LOGGER = Logger.getLogger(StellarPaymentService.class.getSimpleName());
     private Server server;
     private Network network;
     private boolean isDevelopment;
@@ -44,7 +44,7 @@ public class PaymentService {
     private String stellarUrl;
 
 
-    public PaymentService() {
+    public StellarPaymentService() {
         LOGGER.info("\uD83C\uDF0D \uD83C\uDF0D PaymentService Constructor fired ... \uD83C\uDF0D");
     }
 

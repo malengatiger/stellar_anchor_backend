@@ -5,7 +5,7 @@ import com.anchor.api.data.account.AccountResponseBag;
 import com.anchor.api.data.anchor.*;
 import com.anchor.api.services.misc.CryptoService;
 import com.anchor.api.services.misc.FirebaseService;
-import com.anchor.api.services.payments.PaymentService;
+import com.anchor.api.services.payments.StellarPaymentService;
 import com.anchor.api.services.misc.TOMLService;
 import com.anchor.api.util.E;
 import com.google.firebase.auth.UserRecord;
@@ -127,7 +127,7 @@ public class AgentService {
         request.setAssetCode(application.getAssetCode());
         request.setDate(new DateTime().toDateTimeISO().toString());
         request.setDestinationAccount(application.getClientAccount());
-        PaymentRequest response = paymentService.sendPayment(request);
+        PaymentRequest response = stellarPaymentService.sendPayment(request);
 
         application.setPaid(false);
         application.setApprovedByAgent(true);
@@ -296,7 +296,7 @@ public class AgentService {
         request.setDate(new DateTime().toDateTimeISO().toString());
         request.setDestinationAccount(loanPayment.getAgentAccount());
 
-        PaymentRequest response = paymentService.sendPayment(request);
+        PaymentRequest response = stellarPaymentService.sendPayment(request);
 
         // todo - royalties to Anchor and to Agent ... 🍎 set up ROYALTY REGIME!!
         loanPayment.setCompleted(true);
@@ -399,7 +399,7 @@ public class AgentService {
             return mClient;
         }
 
-        AccountResponseBag bag = accountService.createAndFundUserAccount(client.getAnchorId(), clientStartingBalance,
+        AccountResponseBag bag = accountService.createAndFundUserAccount(clientStartingBalance,
                 startingFiatBalance, fiatLimit);
         LOGGER.info(
                 E.HEART_PURPLE + E.HEART_PURPLE + "Client Stellar account has been created and funded with ... "
@@ -471,7 +471,7 @@ public class AgentService {
             throw new Exception(E.ERROR + "Agent already exists for this Anchor");
         }
         LOGGER.info(E.YELLOW_STAR + E.YELLOW_STAR + E.YELLOW_STAR + "....... Agent Stellar Account about to be created ....... ");
-        AccountResponseBag bag = accountService.createAndFundUserAccount(agent.getAnchorId(), agentStartingBalance,
+        AccountResponseBag bag = accountService.createAndFundUserAccount( agentStartingBalance,
                 agent.getFiatBalance(), agent.getFiatLimit());
         LOGGER.info(E.RED_APPLE + E.RED_APPLE + "Agent Stellar account has been created and funded with ... "
                 .concat(agentStartingBalance).concat(" XLM; secretSeed: ".concat(bag.getSecretSeed())));
@@ -521,7 +521,7 @@ public class AgentService {
     }
 
     @Autowired
-    private PaymentService paymentService;
+    private StellarPaymentService stellarPaymentService;
 
     private void sendEmail(Agent agent) throws IOException {
 

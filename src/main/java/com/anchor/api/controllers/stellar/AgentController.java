@@ -3,7 +3,7 @@ package com.anchor.api.controllers.stellar;
 import com.anchor.api.data.PaymentRequest;
 import com.anchor.api.data.anchor.*;
 import com.anchor.api.services.misc.FirebaseService;
-import com.anchor.api.services.payments.PaymentService;
+import com.anchor.api.services.payments.StellarPaymentService;
 import com.anchor.api.services.stellar.AccountService;
 import com.anchor.api.services.stellar.AgentService;
 import com.anchor.api.services.stellar.AnchorAccountService;
@@ -136,7 +136,7 @@ public class AgentController {
     }
 
     @Autowired
-    private PaymentService paymentService;
+    private StellarPaymentService stellarPaymentService;
 
     // @PostMapping(value = "/sendPayment", produces = MediaType.APPLICATION_JSON_VALUE)
     // public boolean sendPayment(@RequestBody PaymentRequest paymentRequest) throws Exception {

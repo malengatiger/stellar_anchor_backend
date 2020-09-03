@@ -9,7 +9,7 @@ import com.anchor.api.data.info.Info;
 import com.anchor.api.services.misc.CryptoService;
 import com.anchor.api.services.misc.FirebaseService;
 import com.anchor.api.services.misc.TOMLService;
-import com.anchor.api.services.payments.PaymentService;
+import com.anchor.api.services.payments.StellarPaymentService;
 import com.anchor.api.services.stellar.AccountService;
 import com.anchor.api.services.stellar.AgentService;
 import com.anchor.api.services.stellar.AnchorAccountService;
@@ -252,13 +252,13 @@ public class AnchorController {
     private CryptoService cryptoService;
 
     @Autowired
-    private PaymentService paymentService;
+    private StellarPaymentService stellarPaymentService;
 
     @PostMapping(value = "/fundAgent", produces = MediaType.APPLICATION_JSON_VALUE)
     public AgentFundingRequest fundAgent(@RequestBody AgentFundingRequest fundingRequest) throws Exception {
         LOGGER.info(em + "AnchorController: fundAgent requested .... " + G.toJson(fundingRequest));
         fundingRequest.setAgentFundingRequestId(UUID.randomUUID().toString());
-        fundingRequest = paymentService.fundAgent(fundingRequest);
+        fundingRequest = stellarPaymentService.fundAgent(fundingRequest);
         String msg = E.LEAF + "Agent Funding complete: " + fundingRequest.getAgentFundingRequestId();
         LOGGER.info(E.LEAF.concat(msg));
         return fundingRequest;
@@ -284,7 +284,7 @@ public class AnchorController {
     public PaymentRequest sendPayment(PaymentRequest paymentRequest) throws Exception {
         LOGGER.info(E.RAIN_DROP.concat(E.RAIN_DROP) +
             "............. send payment ... ".concat(G.toJson(paymentRequest)));
-        PaymentRequest response = paymentService.sendPayment(paymentRequest);
+        PaymentRequest response = stellarPaymentService.sendPayment(paymentRequest);
         LOGGER.info(E.LEAF.concat(E.LEAF) + "Payment has been successfully sent: ".concat(G.toJson(response)));
         return response;
     }
