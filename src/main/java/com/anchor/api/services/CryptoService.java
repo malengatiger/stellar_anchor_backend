@@ -47,6 +47,7 @@ public class CryptoService {
     private String keyRingId;
     @Value("${stellarCryptoKeyId}")
     private String cryptoKeyId;
+
     /**
      *  Creates a new key ring with the given id
      * @return string

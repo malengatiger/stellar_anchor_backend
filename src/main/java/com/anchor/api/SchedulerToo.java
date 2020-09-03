@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.logging.Logger;
 
 @Component
-public class Scheduler {
-    public static final Logger LOGGER = Logger.getLogger(Scheduler.class.getSimpleName());
+public class SchedulerToo {
+    public static final Logger LOGGER = Logger.getLogger(SchedulerToo.class.getSimpleName());
     @Autowired
     private ApplicationContext context;
     @Value("${anchorName}")
@@ -29,7 +29,7 @@ public class Scheduler {
     @Autowired
     private TOMLService tomlService;
 
-    public Scheduler() {
+    public SchedulerToo() {
         LOGGER.info(E.YELLOW_BIRD.concat(E.YELLOW_BIRD) +
                 "Scheduler constructed. Waiting to be triggered ".concat(E.YELLOW_BIRD));
     }
@@ -40,12 +40,7 @@ public class Scheduler {
         LOGGER.info(E.PRETZEL.concat(E.PRETZEL).concat(E.PRETZEL) + "Fixed Rate scheduler; " +
                 "\uD83C\uDF3C CALCULATE LOAN BALANCES or OTHER NECESSARY WORK: " + new DateTime().toDateTimeISO().toString()
                 + " " + E.RED_APPLE);
-//        try {
-//            fileCleanUp();
-//        } catch (Exception e) {
-//            LOGGER.info(Emoji.NOT_OK.concat(Emoji.NOT_OK) + "File CleanUp fell down");
-//            e.printStackTrace();
-//        }
+
         try {
 
             FirebaseService firebaseService = context.getBean(FirebaseService.class);
@@ -68,7 +63,6 @@ public class Scheduler {
         } catch (Exception e) {
             e.printStackTrace();
             LOGGER.info(E.NOT_OK.concat(E.NOT_OK) + "Firebase query or anchor toml retrieval fell down");
-//            e.printStackTrace();
         }
     }
 

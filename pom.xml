@@ -22,6 +22,11 @@
 	<dependencies>
 		<!-- Micrometer Prometheus registry  -->
 		<dependency>
+			<groupId>io.xpring</groupId>
+			<artifactId>xpring4j</artifactId>
+			<version>LATEST</version>
+		</dependency>
+		<dependency>
 			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-registry-prometheus</artifactId>
 		</dependency>

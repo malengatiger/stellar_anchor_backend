@@ -1,5 +1,12 @@
 package com.anchor.api;
 
+import com.anchor.api.controllers.OzowController;
+import com.anchor.api.controllers.PayPalController;
+import com.anchor.api.controllers.PayfastController;
+import com.anchor.api.services.InterLedgerService;
+import com.anchor.api.services.PublisherService;
+import com.anchor.api.services.SubscriberService;
+import com.anchor.api.services.XRPWalletService;
 import com.anchor.api.controllers.AnchorController;
 import com.anchor.api.services.AccountService;
 import com.anchor.api.services.AgentService;
@@ -8,6 +15,7 @@ import com.anchor.api.services.FirebaseService;
 import com.anchor.api.util.E;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import io.xpring.ilp.model.AccountBalance;
 import org.jetbrains.annotations.NotNull;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -27,6 +35,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Map;
 
 @SpringBootApplication
@@ -88,11 +97,34 @@ public class AnchorBackendApplication implements ApplicationListener<Application
     private String activeProfile;
 
     @Autowired
-    private Scheduler scheduler;
+    private SchedulerToo schedulerToo;
+
+    @Autowired
+    private OzowController ozowController;
+
+    @Autowired
+    private PayfastController payfastController;
+
+    @Autowired
+    private PayPalController payPalController;
+
+
+    @Autowired
+    private PublisherService publisherService;
+
+    @Autowired
+    private SubscriberService subscriberService;
+
+    @Autowired
+    private XRPWalletService xrpWalletService;
+
+    @Autowired
+    private InterLedgerService ilpService;
+
 
     @Override
     public void onApplicationEvent(@NotNull ApplicationReadyEvent event) {
-        LOGGER.info("\uD83C\uDF3C \uD83C\uDF3C AnchorBackendApplication: onApplicationEvent: " +
+        LOGGER.info("\uD83C\uDF3C \uD83C\uDF3C \uD83C\uDF51 STELLAR :: \uD83C\uDF51 AnchorBackendApplication: onApplicationEvent: " +
                 "ApplicationReadyEvent fired: \uD83C\uDF3C \uD83C\uDF3C app is ready to initialize Firebase .... ");
         LOGGER.info("\uD83C\uDF3C \uD83C\uDF3C onApplicationEvent: DEVELOPMENT STATUS: " +
                 "\uD83C\uDF51 " + status + " \uD83C\uDF51 ");
@@ -146,6 +178,39 @@ public class AnchorBackendApplication implements ApplicationListener<Application
             LOGGER.info(" \uD83C\uDF45 Firebase initialization FAILED");
             e.printStackTrace();
         }
+        ///
+        try {
+            LOGGER.info("\uD83C\uDF38 \uD83C\uDF38 \uD83C\uDF38 onApplicationEvent: calling Publisher Service ");
+            String msg = E.PEAR.concat(E.PEAR).concat("Network Payment Services started and ready to serve ".concat(E.CAT)
+                    .concat(new Date().toString().concat(" ".concat(E.BLUE_BIRD.concat(E.BLUE_BIRD)))));
+
+            for (Method method : xrpWalletService.getClass().getMethods()) {
+                if (isValid(method.getName()))
+                    LOGGER.info(E.FLOWER_YELLOW.concat(E.FLOWER_YELLOW).concat("XRPWalletService method: "
+                            .concat(method.getName()).concat(" - " + E.RED_APPLE)));
+            }
+            LOGGER.info("\n\n");
+            for (Method method : publisherService.getClass().getMethods()) {
+                if (isValid(method.getName()))
+                    LOGGER.info(E.FLOWER_PINK.concat(E.FLOWER_PINK).concat("PublisherService method: "
+                            .concat(method.getName()).concat(" - " + E.RED_APPLE)));
+            }
+
+
+            AccountBalance balance = ilpService.testILP();
+            LOGGER.info("\uD83E\uDD6C\uD83E\uDD6C\uD83E\uDD6C\uD83E\uDD6C AccountBalance from ILP: ".concat(G.toJson(balance)));
+            publisherService.publish(msg, "ozow-success");
+        } catch (Exception e) {
+            LOGGER.info("\uD83D\uDC7F \uD83D\uDC4E\uD83C\uDFFD  \uD83D\uDC4E\uD83C\uDFFD \uD83D\uDC7D\uD83D\uDC7D\uD83D\uDC7D\uD83D\uDC7D PUBLISH FAILED: " + e.getMessage()
+                    + " \uD83D\uDC7D\uD83D\uDC7D\uD83D\uDC7D\uD83D\uDC7D  \uD83D\uDC4E\uD83C\uDFFD \uD83D\uDC7F");
+            //e.printStackTrace();
+        }
+
+        LOGGER.info("\uD83C\uDFB2 \uD83C\uDFB2 \uD83C\uDFB2 Network Payment Services Configuration Server URIs");
+
+        ozowController.printOzowCallbacks();
+        payfastController.printPayfastCallbacks();
+        payPalController.printPayPalCallbacks();
 
     }
 
