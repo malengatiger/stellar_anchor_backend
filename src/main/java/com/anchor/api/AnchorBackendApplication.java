@@ -5,9 +5,10 @@ import com.anchor.api.controllers.payments.PayPalController;
 import com.anchor.api.controllers.payments.PayfastController;
 import com.anchor.api.services.misc.SchedulerToo;
 import com.anchor.api.services.payments.InterLedgerService;
+import com.anchor.api.services.payments.StellarPaymentService;
 import com.anchor.api.services.pubsub.PublisherService;
 import com.anchor.api.services.pubsub.SubscriberService;
-import com.anchor.api.services.payments.XRPWalletService;
+import com.anchor.api.services.payments.RipplePaymentService;
 import com.anchor.api.controllers.stellar.AnchorController;
 import com.anchor.api.services.stellar.AccountService;
 import com.anchor.api.services.stellar.AgentService;
@@ -117,7 +118,10 @@ public class AnchorBackendApplication implements ApplicationListener<Application
     private SubscriberService subscriberService;
 
     @Autowired
-    private XRPWalletService xrpWalletService;
+    private RipplePaymentService ripplePaymentService;
+
+    @Autowired
+    private StellarPaymentService stellarPaymentService;
 
     @Autowired
     private InterLedgerService ilpService;
@@ -185,9 +189,14 @@ public class AnchorBackendApplication implements ApplicationListener<Application
             String msg = E.PEAR.concat(E.PEAR).concat("Network Payment Services started and ready to serve ".concat(E.CAT)
                     .concat(new Date().toString().concat(" ".concat(E.BLUE_BIRD.concat(E.BLUE_BIRD)))));
 
-            for (Method method : xrpWalletService.getClass().getMethods()) {
+            for (Method method : stellarPaymentService.getClass().getMethods()) {
                 if (isValid(method.getName()))
-                    LOGGER.info(E.FLOWER_YELLOW.concat(E.FLOWER_YELLOW).concat("XRPWalletService method: "
+                    LOGGER.info(E.FLOWER_YELLOW.concat(E.FLOWER_YELLOW).concat("StellarPaymentService method: "
+                            .concat(method.getName()).concat(" - " + E.RED_APPLE)));
+            }
+            for (Method method : ripplePaymentService.getClass().getMethods()) {
+                if (isValid(method.getName()))
+                    LOGGER.info(E.FLOWER_YELLOW.concat(E.FLOWER_YELLOW).concat("RipplePaymentService method: "
                             .concat(method.getName()).concat(" - " + E.RED_APPLE)));
             }
             LOGGER.info("\n\n");

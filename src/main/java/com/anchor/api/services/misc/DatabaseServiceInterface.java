@@ -1,6 +1,7 @@
 package com.anchor.api.services.misc;
 
 import com.anchor.api.controllers.stellar.AnchorController;
+import com.anchor.api.data.AccountInfoDTO;
 import com.anchor.api.data.AgentFundingRequest;
 import com.anchor.api.data.PaymentRequest;
 import com.anchor.api.data.anchor.*;
@@ -53,4 +54,8 @@ public interface DatabaseServiceInterface {
     public String addTransactionResponse(TransactionResponse transactionResponse) throws Exception;
     public Agent getAgentByAccount(String accountId) throws Exception;
     public Client getClientByAccount(String accountId) throws Exception;
+    public String createBFNAccount(AccountInfoDTO accountInfo) throws Exception;
+    public String updateBFNAccount(AccountInfoDTO accountInfo) throws Exception;
+    public AccountInfoDTO getBFNAccount(String identifier) throws Exception;
+
 }

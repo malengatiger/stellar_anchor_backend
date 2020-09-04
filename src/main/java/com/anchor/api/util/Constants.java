@@ -18,6 +18,7 @@ public class Constants {
             INVITATIONS = "invitations",
             BALANCES = "balances",
             AGENT_FUNDING_REQUESTS = "agentFundingRequests",
+            BFN_ACCOUNTS = "bfnAccounts",
             ANCHOR_USERS = "anchorUsers";
 
 

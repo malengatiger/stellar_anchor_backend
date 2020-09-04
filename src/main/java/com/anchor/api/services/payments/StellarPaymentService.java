@@ -45,7 +45,7 @@ public class StellarPaymentService {
 
 
     public StellarPaymentService() {
-        LOGGER.info("\uD83C\uDF0D \uD83C\uDF0D PaymentService Constructor fired ... \uD83C\uDF0D");
+        LOGGER.info(E.DICE+E.DICE+"Stellar Payment Service started ... \uD83C\uDF0D");
     }
 
     private Anchor anchor;
@@ -75,7 +75,7 @@ public class StellarPaymentService {
         return server.submitTransaction(transaction);
     }
     public PaymentRequest sendPayment(PaymentRequest paymentRequest) throws Exception {
-
+        LOGGER.info(E.COFFEE+E.COFFEE+"Sending payment request ... "+ G.toJson(paymentRequest));
         SubmitTransactionResponse transactionResponse = submit(paymentRequest);
         KeyPair sourceKeyPair = KeyPair.fromSecretSeed(paymentRequest.getSeed());
         if (transactionResponse.isSuccess()) {

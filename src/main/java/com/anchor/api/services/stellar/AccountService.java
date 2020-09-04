@@ -478,8 +478,18 @@ public class AccountService {
 
     public AccountResponseBag addBFNAccount(AccountInfoDTO accountInfo) throws Exception {
 
-        AccountResponseBag bag = createAndFundUserAccount(userXLMStartingBalance, userFiatStartingBalance,userFiatLimit);
-        LOGGER.info(E.COFFEE+E.COFFEE+E.COFFEE+ "BFN Account now has an Account with the Stellar based Anchor "+E.RED_APPLE);
+        AccountResponseBag bag = createAndFundUserAccount(userXLMStartingBalance, userFiatStartingBalance, userFiatLimit);
+        accountInfo.setStellarAccount(bag.getAccountResponse().getAccountId());
+
+        try {
+            firebaseService.updateBFNAccount(accountInfo);
+        } catch (Exception e) {
+            firebaseService.createBFNAccount(accountInfo);
+        }
+
+
+        LOGGER.info(E.COFFEE+E.COFFEE+E.COFFEE+
+                "BFN Account now has an Account with the Stellar based Anchor "+E.RED_APPLE);
         return bag;
     }
 

@@ -1,6 +1,7 @@
 package com.anchor.api.controllers.payments;
 
 
+import com.anchor.api.services.payments.RipplePaymentService;
 import com.anchor.api.util.E;
 
 import com.google.gson.Gson;
@@ -21,21 +22,21 @@ import java.math.BigInteger;
 
 @RestController
 @CrossOrigin(maxAge = 3600)
-public class XpringController {
-    public static final Logger LOGGER = LoggerFactory.getLogger(XpringController.class.getSimpleName());
+public class RippleController {
+    public static final Logger LOGGER = LoggerFactory.getLogger(RippleController.class.getSimpleName());
     private static final Gson G = new GsonBuilder().setPrettyPrinting().create();
 
     @Autowired
-    private com.anchor.api.services.payments.XRPWalletService XRPWalletService;
+    private RipplePaymentService RipplePaymentService;
 
-    public XpringController() {
+    public RippleController() {
         LOGGER.info(E.DICE.concat(E.DICE.concat("RIPPLE: XpringController ready to go ... \uD83C\uDF4E")));
     }
 
     @GetMapping(value = "/getXRPWallet", produces = MediaType.APPLICATION_JSON_VALUE)
     public Wallet getXRPWallet(String seed) throws Exception {
         LOGGER.info(E.DICE + "  Network Payment Services creating Wallet from seed ...  \uD83C\uDF4E ");
-        Wallet wallet = XRPWalletService.getXRPWallet(seed);
+        Wallet wallet = RipplePaymentService.getXRPWallet(seed);
         String msg = E.FLOWER_RED.concat(E.FLOWER_RED.concat(" ... Network Payment Services: \uD83D\uDD35 \uD83D\uDD35 " +
                 "Wallet created  ...  \uD83C\uDF4E \uD83C\uDFB2 ".concat(E.YELLOW_BIRD.concat(E.YELLOW_BIRD))));
         LOGGER.info(msg);
@@ -44,7 +45,7 @@ public class XpringController {
     @GetMapping(value = "/getXRPWalletBalance", produces = MediaType.TEXT_PLAIN_VALUE)
     public String getXRPWalletBalance(String address) throws Exception {
         LOGGER.info(E.DICE + "  Network Payment Services: getXRPWalletBalance ...  \uD83C\uDF4E ");
-        BigInteger xrpWalletBalance = XRPWalletService.getXRPWalletBalance(address);
+        BigInteger xrpWalletBalance = RipplePaymentService.getXRPWalletBalance(address);
         String msg = E.FLOWER_RED.concat(E.FLOWER_RED.concat(" ... Network Payment Services: \uD83D\uDD35 \uD83D\uDD35 " +
                 "XRP Wallet balance found  ...  \uD83C\uDF4E \uD83C\uDFB2 "
                         .concat(xrpWalletBalance.toString().concat(" "))
@@ -56,7 +57,7 @@ public class XpringController {
     @GetMapping(value = "/getPayIdWalletBalance", produces = MediaType.APPLICATION_JSON_VALUE)
     public String getPayIdWalletBalance(String payId, String accountId, String accessToken) throws Exception {
         LOGGER.info(E.DICE + "....  Network Payment Services: getILPWalletBalance ...  \uD83C\uDF4E ");
-        AccountBalance accountBalance = XRPWalletService.getPayIdWalletBalance(payId,  accessToken);
+        AccountBalance accountBalance = RipplePaymentService.getPayIdWalletBalance(payId,  accessToken);
         String msg = E.FLOWER_RED.concat(E.FLOWER_RED.concat(" ... Network Payment Services: \uD83D\uDD35 \uD83D\uDD35 " +
                 "ILP (PayId) Wallet balance found  ...  \uD83C\uDF4E \uD83C\uDFB2 "
                         .concat(accountBalance.toString().concat(" "))

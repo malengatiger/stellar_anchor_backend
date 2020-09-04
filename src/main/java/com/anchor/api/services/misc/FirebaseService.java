@@ -1,6 +1,7 @@
 package com.anchor.api.services.misc;
 
 import com.anchor.api.controllers.stellar.AnchorController;
+import com.anchor.api.data.AccountInfoDTO;
 import com.anchor.api.data.AgentFundingRequest;
 import com.anchor.api.data.PaymentRequest;
 import com.anchor.api.data.anchor.*;
@@ -937,5 +938,59 @@ public class FirebaseService implements DatabaseServiceInterface {
         }
 
         return client;
+    }
+
+    @Override
+    public String createBFNAccount(AccountInfoDTO accountInfo) throws Exception {
+
+        Firestore fs = FirestoreClient.getFirestore();
+
+        ApiFuture<DocumentReference> future = fs.collection(Constants.BFN_ACCOUNTS).add(accountInfo);
+        LOGGER.info(E.LEAF+E.LEAF+E.LEAF + "createBFNAccount: Stellar account created for BFN player " + E.RED_APPLE);
+        return future.get().getPath();
+    }
+    @Override
+    public String updateBFNAccount(AccountInfoDTO accountInfo) throws Exception {
+
+        QueryDocumentSnapshot bfnAccountRef = getBFNAccountRef(accountInfo.getIdentifier());
+        if (!bfnAccountRef.exists()) {
+            throw new Exception("Account not found, cannot be updated");
+        }
+        ApiFuture<WriteResult> future = bfnAccountRef.getReference().set(accountInfo);
+
+        LOGGER.info(E.LEAF+E.LEAF+E.LEAF + "updateBFNAccount: Stellar account updated " + G.toJson(accountInfo) + E.RED_APPLE);
+        return future.get().getUpdateTime().toString();
+    }
+
+    @Override
+    public AccountInfoDTO getBFNAccount(String identifier) throws Exception {
+        Firestore fs = FirestoreClient.getFirestore();
+        AccountInfoDTO infoDTO = null;
+        ApiFuture<QuerySnapshot> future = fs.collection(Constants.BFN_ACCOUNTS)
+                .whereEqualTo("identifier", identifier)
+                .limit(1)
+                .get();
+        for (QueryDocumentSnapshot document : future.get().getDocuments()) {
+            Map<String, Object> map = document.getData();
+            infoDTO = G.fromJson(G.toJson(map), AccountInfoDTO.class);
+
+        }
+
+        return infoDTO;
+    }
+
+    private QueryDocumentSnapshot getBFNAccountRef(String identifier) throws Exception {
+        Firestore fs = FirestoreClient.getFirestore();
+        QueryDocumentSnapshot infoDTO = null;
+        ApiFuture<QuerySnapshot> future = fs.collection(Constants.BFN_ACCOUNTS)
+                .whereEqualTo("identifier", identifier)
+                .limit(1)
+                .get();
+        for (QueryDocumentSnapshot document : future.get().getDocuments()) {
+            infoDTO = document;
+
+        }
+
+        return infoDTO;
     }
 }

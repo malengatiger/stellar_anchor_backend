@@ -1,5 +1,9 @@
 package com.anchor.api.services.payments;
 
+import com.anchor.api.data.AccountInfoDTO;
+import com.anchor.api.services.misc.CryptoService;
+import com.anchor.api.services.misc.FirebaseService;
+import com.anchor.api.util.E;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.xpring.common.XrplNetwork;
@@ -10,11 +14,13 @@ import io.xpring.payid.PayIdException;
 import io.xpring.payid.XrpPayIdClient;
 import io.xpring.payid.generated.model.Address;
 import io.xpring.xrpl.Wallet;
+import io.xpring.xrpl.WalletGenerationResult;
 import io.xpring.xrpl.XrpClient;
 import io.xpring.xrpl.XrpException;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -22,20 +28,49 @@ import java.math.BigInteger;
 import java.util.List;
 
 @Service
-public class XRPWalletService {
+public class RipplePaymentService {
     private static final Logger LOGGER = LoggerFactory.getLogger(
-            XRPWalletService.class.getSimpleName());
+            RipplePaymentService.class.getSimpleName());
     private static final Gson G = new GsonBuilder().setPrettyPrinting().create();
 
     private static final String DEVELOPMENT_MODE = "dev", SEPARATOR = "$";
 
-    public XRPWalletService() {
-        LOGGER.info("\uD83D\uDC99 \uD83D\uDC99 XRP Wallet Service constructed and waiting for shit! \uD83E\uDD68");
+    @Autowired
+    private CryptoService cryptoService;
+    @Autowired
+    private FirebaseService firebaseService;
+
+    public RipplePaymentService() {
+        LOGGER.info(E.DICE+E.DICE+"Ripple Payment Service constructed and waiting for shit! \uD83E\uDD68");
     }
     @Value("${spring.profiles.active}")
     private String activeProfile;
+
     @Value("${xrpURL}")
     private String xrpURL;
+
+    public Wallet createWallet(AccountInfoDTO accountInfo) throws Exception {
+
+        LOGGER.info(E.DICE+E.DICE+ "Creating XRP Wallet .... ");
+        // Generate a random wallet.
+        WalletGenerationResult generationResult = Wallet.generateRandomWallet();
+        Wallet newWallet = generationResult.getWallet();
+
+        // Wallet can be recreated with the artifacts of the initial generation.
+        Wallet copyOfNewWallet = new Wallet(generationResult.getMnemonic(), generationResult.getDerivationPath());
+
+        cryptoService.encrypt(copyOfNewWallet.getAddress(), copyOfNewWallet.getPrivateKey());
+        accountInfo.setRippleAddress(copyOfNewWallet.getAddress());
+        accountInfo.setRipplePublicKey(copyOfNewWallet.getPublicKey());
+
+        try {
+            firebaseService.updateBFNAccount(accountInfo);
+            LOGGER.info(E.LEAF + E.LEAF + "Wallet created " + G.toJson(copyOfNewWallet));
+        } catch (Exception e) {
+            firebaseService.createBFNAccount(accountInfo);
+        }
+        return copyOfNewWallet;
+    }
 
     /*
     😎 😎 😎
@@ -43,7 +78,7 @@ public class XRPWalletService {
     The URL of the gRPC API on the remote rippled node
     An enum representing the XRPL Network the remote rippled node is attached to
      */
-    public BigInteger getXRPWalletBalance(String address) throws XrpException, PayIdException, IlpException {
+    public BigInteger getXRPWalletBalance(String address) throws XrpException{
         LOGGER.info("\uD83C\uDFB2 \uD83C\uDFB2 Get XRP Wallet Balance using WalletService:  \uD83E\uDD68 \uD83E\uDD68 \uD83E\uDD68 ...");
 
         XrpClient xrpClient = new XrpClient(xrpURL, activeProfile.equalsIgnoreCase(DEVELOPMENT_MODE)? XrplNetwork.TEST: XrplNetwork.MAIN);
@@ -54,7 +89,7 @@ public class XRPWalletService {
                 .concat((balance.divide(new BigInteger(String.valueOf(1000000)))).toString())
                 .concat(" XRP \uD83E\uDD66 \uD83E\uDD66"));
 
-        LOGGER.info("\uD83C\uDF4E \uD83C\uDF4E \uD83C\uDF4E ............. getXRPWalletBalance completed ".concat("\n\n"));
+        LOGGER.info(E.LEAF+E.LEAF+"\uD83C\uDF4E \uD83C\uDF4E \uD83C\uDF4E ............. getXRPWalletBalance completed ".concat(E.RED_APPLE));
 
         return balance;
     }
@@ -105,8 +140,5 @@ public class XRPWalletService {
         return accountBalance;
     }
 
-    public static void main(String[] args) throws Exception {
-        XRPWalletService service = new XRPWalletService();
-        service.getXRPWalletBalance("ssms4QXcpuBhFkGxU8w4czQCiKFNN");
-    }
+
 }
