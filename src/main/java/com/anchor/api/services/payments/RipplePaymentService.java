@@ -64,10 +64,12 @@ public class RipplePaymentService {
         accountInfo.setRipplePublicKey(copyOfNewWallet.getPublicKey());
 
         try {
-            firebaseService.updateBFNAccount(accountInfo);
+            String res = firebaseService.updateBFNAccount(accountInfo);
+            LOGGER.info(E.COFFEE+E.COFFEE+res);
             LOGGER.info(E.LEAF + E.LEAF + "Wallet created " + G.toJson(copyOfNewWallet));
         } catch (Exception e) {
-            firebaseService.createBFNAccount(accountInfo);
+            String res = firebaseService.createBFNAccount(accountInfo);
+            LOGGER.info(E.COFFEE+E.COFFEE+res);
         }
         return copyOfNewWallet;
     }

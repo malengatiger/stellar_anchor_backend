@@ -93,7 +93,8 @@ public class StellarPaymentService {
             paymentRequest.setAnchorId(anchor.getAnchorId());
             paymentRequest.setSeed(null);
             paymentRequest.setSourceAccount(sourceKeyPair.getAccountId());
-            firebaseService.addPaymentRequest(paymentRequest);
+            PaymentRequest res = firebaseService.addPaymentRequest(paymentRequest);
+            LOGGER.info(E.COFFEE+E.COFFEE+G.toJson(res)+E.RED_APPLE);
         } else {
             String err = E.NOT_OK.concat(E.ERROR) + "Payment Failed; \uD83D\uDD35  amount: "
                     .concat(paymentRequest.getAmount()).concat(" assetCode: ")

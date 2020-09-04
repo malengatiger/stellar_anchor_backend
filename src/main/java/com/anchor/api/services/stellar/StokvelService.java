@@ -156,7 +156,8 @@ public class StokvelService {
             savedPassword = member.getPassword();
             member.setPassword(null);
             member.setSecretSeed(null);
-            firebaseService.addMember(member);
+            String res = firebaseService.addMember(member);
+            LOGGER.info(E.COFFEE+E.COFFEE+res);
             //sendEmail(agent);
             LOGGER.info((E.LEAF + E.LEAF +
                     "Member has been added to Firestore without seed or password ").concat(member.getFullName()));

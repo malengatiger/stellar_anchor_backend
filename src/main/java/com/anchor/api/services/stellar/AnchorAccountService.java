@@ -164,7 +164,7 @@ public class AnchorAccountService {
 
         } catch (Exception e) {
             e.printStackTrace();
-            LOGGER.severe(E.NOT_OK + "Trustline/Asset creation failed" + E.ERROR);
+            LOGGER.severe(E.NOT_OK + "TrustLine/Asset creation failed" + E.ERROR);
             throw e;
         }
 
@@ -173,7 +173,8 @@ public class AnchorAccountService {
                 " " + anchor.getName());
         AnchorUser anchorUser = createAnchorUser(anchor, password);
         anchor.setAnchorUser(anchorUser);
-        firebaseService.addAnchor(anchor);
+        String res = firebaseService.addAnchor(anchor);
+        LOGGER.info(E.COFFEE+E.COFFEE+res);
         LOGGER.info(G.toJson(anchor));
         //todo - send email to confirm the anchor with link ...
         try {
@@ -221,8 +222,9 @@ public class AnchorAccountService {
         DateTime dateTime = new DateTime();
         anchorUser.setDate(dateTime.toDateTimeISO().toString());
         anchorUser.setActive(true);
-        firebaseService.addAnchorUser(anchorUser);
+        String res = firebaseService.addAnchorUser(anchorUser);
 
+        LOGGER.info(E.COFFEE+E.COFFEE+res);
         return anchorUser;
     }
 

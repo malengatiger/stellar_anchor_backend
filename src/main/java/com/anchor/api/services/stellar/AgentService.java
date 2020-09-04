@@ -209,7 +209,8 @@ public class AgentService {
         application.setLoanId(UUID.randomUUID().toString());
         application.setApprovedByAgent(false);
         application.setApprovedByClient(false);
-        firebaseService.addLoanApplication(application);
+        String res = firebaseService.addLoanApplication(application);
+        LOGGER.info(E.LEAF+E.LEAF+E.LEAF+ res);
         return application;
     }
 
@@ -321,7 +322,8 @@ public class AgentService {
         organization.setOrganizationId(UUID.randomUUID().toString());
         organization.setDateRegistered(new DateTime().toDateTimeISO().toString());
         organization.setDateUpdated(new DateTime().toDateTimeISO().toString());
-        firebaseService.addOrganization(organization);
+        String res = firebaseService.addOrganization(organization);
+        LOGGER.info(E.LEMON + E.LEMON + E.LEMON + res);
         return organization;
     }
 

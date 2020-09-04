@@ -737,7 +737,8 @@ public class AccountService {
                 LOGGER.info("\uD83C\uDF51 \uD83C\uDF51 Accounts Listener fired, "
                         + "accountResponse received, add to Firestore ...");
                 try {
-                    firebaseService.addAccountResponse(accountResponse);
+                    String res = firebaseService.addAccountResponse(accountResponse);
+                    LOGGER.info(E.COFFEE+E.COFFEE+res);
                 } catch (final Exception e) {
                     LOGGER.log(Level.SEVERE, "AccountListener failed", e);
                 }
