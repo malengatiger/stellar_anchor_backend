@@ -6,6 +6,7 @@ import com.anchor.api.data.AgentFundingRequest;
 import com.anchor.api.data.PaymentRequest;
 import com.anchor.api.data.anchor.*;
 import com.anchor.api.data.info.Info;
+import com.anchor.api.data.models.NetworkOperatorDTO;
 import com.anchor.api.data.stokvel.Member;
 import com.anchor.api.data.stokvel.Stokvel;
 import org.stellar.sdk.responses.AccountResponse;
@@ -16,6 +17,8 @@ import java.util.List;
 
 public interface DatabaseServiceInterface {
      List<Anchor> getAnchors() throws Exception;
+     List<NetworkOperatorDTO> getNetworkOperators() throws Exception;
+     String addNetworkOperator(NetworkOperatorDTO networkOperator) throws Exception;
      Agent getAgent(String agentId) throws Exception;
      String addLoanApplication(LoanApplication application) throws Exception;
      String addLoanPayment(LoanPayment loanPayment) throws Exception;

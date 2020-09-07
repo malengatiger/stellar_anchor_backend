@@ -6,6 +6,7 @@ import com.anchor.api.data.AgentFundingRequest;
 import com.anchor.api.data.PaymentRequest;
 import com.anchor.api.data.anchor.*;
 import com.anchor.api.data.info.Info;
+import com.anchor.api.data.models.NetworkOperatorDTO;
 import com.anchor.api.data.stokvel.Member;
 import com.anchor.api.data.stokvel.Stokvel;
 import com.anchor.api.util.Constants;
@@ -99,6 +100,24 @@ public class FirebaseService implements DatabaseServiceInterface {
             LOGGER.info("\uD83C\uDF51 \uD83C\uDF51 ANCHOR: #" + cnt +
                     " \uD83D\uDC99 " + anchor.getName() + "  \uD83E\uDD66 anchorId: "
                     + anchor.getAnchorId());
+            mList.add(anchor);
+        }
+        return mList;
+    }
+    @Override
+    public List<NetworkOperatorDTO> getNetworkOperators() throws Exception {
+        Firestore fs = FirestoreClient.getFirestore();
+        List<NetworkOperatorDTO> mList = new ArrayList<>();
+        ApiFuture<QuerySnapshot> future = fs.collection(Constants.NETWORK_OPERATORS).get();
+        int cnt = 0;
+        for (QueryDocumentSnapshot document : future.get().getDocuments()) {
+            Map<String, Object> map = document.getData();
+            String object = G.toJson(map);
+            NetworkOperatorDTO anchor = G.fromJson(object, NetworkOperatorDTO.class);
+            cnt++;
+            LOGGER.info("\uD83C\uDF51 \uD83C\uDF51 ANCHOR: #" + cnt +
+                    " \uD83D\uDC99 " + anchor.getName() + "  \uD83E\uDD66 anchorId: "
+                    + anchor.getEmail());
             mList.add(anchor);
         }
         return mList;
@@ -210,6 +229,17 @@ public class FirebaseService implements DatabaseServiceInterface {
         ApiFuture<DocumentReference> future = fs.collection(Constants.ANCHORS).add(anchor);
         LOGGER.info("\uD83C\uDF4F \uD83C\uDF4F Anchor added at path: ".concat(future.get().getPath()));
         return "\uD83C\uDF4F Anchor added";
+    }
+    @Override
+    public String addNetworkOperator(NetworkOperatorDTO networkOperator) throws Exception {
+        Firestore fs = FirestoreClient.getFirestore();
+        List<NetworkOperatorDTO> mList = getNetworkOperators();
+        if (!mList.isEmpty()) {
+            throw new Exception("One networkOperator already in database - surely cannot be more than one");
+        }
+        ApiFuture<DocumentReference> future = fs.collection(Constants.NETWORK_OPERATORS).add(networkOperator);
+        LOGGER.info("\uD83C\uDF4F \uD83C\uDF4F Network Operator added at path: ".concat(future.get().getPath()));
+        return "\uD83C\uDF4F  Network Operator added";
     }
 
     @Override
@@ -835,32 +865,15 @@ public class FirebaseService implements DatabaseServiceInterface {
 
     public void deleteCollections() throws Exception {
         LOGGER.info(E.WARNING.concat(E.WARNING.concat(E.WARNING)
-                .concat(" DELETING ALL DATA from Firestore .... ").concat(E.RED_DOT)));
+                .concat(" ....... DELETING ALL COLLECTIONS from Firestore .... ").concat(E.RED_DOT)));
         Firestore fs = FirestoreClient.getFirestore();
-        CollectionReference ref1 = fs.collection(Constants.ANCHORS);
-        deleteCollection(ref1, 1000);
-        CollectionReference ref2 = fs.collection(Constants.ANCHOR_USERS);
-        deleteCollection(ref2, 1000);
-        CollectionReference ref3 = fs.collection(Constants.AGENTS);
-        deleteCollection(ref3, 1000);
-        CollectionReference ref4 = fs.collection(Constants.LOAN_APPLICATIONS);
-        deleteCollection(ref4, 1000);
-        CollectionReference ref5 = fs.collection(Constants.LOAN_PAYMENTS);
-        deleteCollection(ref5, 1000);
-        CollectionReference ref6 = fs.collection(Constants.PAYMENT_REQUESTS);
-        deleteCollection(ref6, 1000);
-        CollectionReference ref7 = fs.collection(Constants.CLIENTS);
-        deleteCollection(ref7, 1000);
-        CollectionReference ref8 = fs.collection(Constants.STOKVELS);
-        deleteCollection(ref8, 1000);
-        CollectionReference ref9 = fs.collection(Constants.MEMBERS);
-        deleteCollection(ref9, 1000);
-        CollectionReference ref10 = fs.collection(Constants.MEMBER_PAYMENTS);
-        deleteCollection(ref10, 1000);
-        CollectionReference ref11 = fs.collection(Constants.STOKVEL_PAYMENTS);
-        deleteCollection(ref11, 1000);
-        CollectionReference ref12 = fs.collection(Constants.STOKVEL_GOALS);
-        deleteCollection(ref12, 1000);
+        for (CollectionReference listCollection : fs.listCollections()) {
+            LOGGER.info("Collection to delete: " + listCollection.document().getParent().toString());
+            deleteCollection(listCollection.document().getParent(), 1000);
+
+
+        }
+
         LOGGER.info(E.PEAR.concat(E.PEAR.concat(E.PEAR)
                 .concat(" DELETED ALL DATA from Firestore .... ").concat(E.RED_TRIANGLE)));
     }

@@ -1,6 +1,7 @@
 package com.anchor.api.controllers.stellar;
 
 import com.anchor.api.data.anchor.Anchor;
+import com.anchor.api.data.models.NetworkOperatorDTO;
 import com.anchor.api.data.stokvel.Member;
 import com.anchor.api.data.stokvel.Stokvel;
 import com.anchor.api.services.stellar.AccountService;
@@ -9,6 +10,7 @@ import com.anchor.api.services.stellar.AnchorAccountService;
 import com.anchor.api.services.misc.TOMLService;
 import com.anchor.api.util.DemoDataGenerator;
 import com.anchor.api.util.E;
+import com.anchor.api.util.NetworkUtil;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.moandjiezana.toml.Toml;
@@ -42,29 +44,41 @@ public class DataGenerationController {
     @Autowired
     private DemoDataGenerator demoDataGenerator;
     @Autowired
+    private NetworkUtil networkUtil;
+    @Autowired
     private TOMLService tomlService;
     @Value("${status}")
     private String status;
+    @Value("${bfnUrl}")
+    private String bfnUrl;
 
 
     @GetMapping(value = "/generateAnchor", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Anchor generateAnchor(String anchorName) throws Exception {
-        LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 StellarAnchorApplication /generateAnchor ...");
-        Anchor anchor = demoDataGenerator.createNewAnchor(anchorName);
+    public Anchor generateAnchor(@RequestParam String anchorName, @RequestParam String fundingSeed) throws Exception {
+        LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 StellarAnchorApplication /generateAnchor ... \uD83D\uDD35: "+ anchorName);
+        Anchor anchor = demoDataGenerator.createNewAnchor(anchorName, fundingSeed);
+
+        LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C GenerateDemoData:generateAnchor completed and returning anchor "
+                + new Date().toString() + " \uD83D\uDC99 \uD83D\uDC9C STATUS: " + status);
         LOGGER.info(E.DICE.concat(E.DICE.concat(E.DICE)
                 .concat("New Anchor Returned")
                 .concat(G.toJson(anchor))));
-        LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C GenerateDemoData:generateAnchor completed and returning external caller... "
-                + new Date().toString() + " \uD83D\uDC99 \uD83D\uDC9C STATUS: " + status);
 
+        NetworkOperatorDTO networkOperator = demoDataGenerator.createNetworkOperator(anchorName);
+        //todo - this operator is the BOSS of the BFN platform; so we need to call the BFN Web API server .... http call ...
+        NetworkOperatorDTO m = networkUtil.createBFNNetworkOperator(bfnUrl + "createNetworkOperator", networkOperator);
         LOGGER.info("\n\n \uD83C\uDF4E \uD83C\uDF4E \uD83C\uDF4E \uD83C\uDF4E");
         LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C ################################################################## \uD83D\uDC99 \uD83D\uDC9C");
-        LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C PREPARE STELLAR.TOML and ANCHOR.TOML - edit ANCHOR ID, ISSUING ACCOUNTS etc.  \uD83D\uDC99 \uD83D\uDC9C");
-        LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C UPLOAD STELLAR.TOML and ANCHOR.TOML to cloud storage               \uD83D\uDC99 \uD83D\uDC9C");
-        LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C Retrieve account info from Firestore or logs                       \uD83D\uDC99 \uD83D\uDC9C");
+        LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C 1. CHECK ANCHOR and NETWORK OPERATOR on Firestore  \uD83D\uDC99 \uD83D\uDC9C");
+        LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C 2. PREPARE STELLAR.TOML and ANCHOR.TOML - edit ANCHOR ID, ISSUING ACCOUNTS etc.  \uD83D\uDC99 \uD83D\uDC9C");
+        LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C 3. UPLOAD STELLAR.TOML and ANCHOR.TOML to cloud storage               \uD83D\uDC99 \uD83D\uDC9C");
+        LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C 4. Retrieve account info from Firestore or logs                       \uD83D\uDC99 \uD83D\uDC9C");
+        LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C 5. Generate Anchor Demo Data   \uD83D\uDC99 \uD83D\uDC9C");
+        LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C 6. Generate Network Operator Demo Data  \uD83D\uDC99 \uD83D\uDC9C");
         LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C ################################################################## \uD83D\uDC99 \uD83D\uDC9C");
         LOGGER.info("\n\n \uD83C\uDF4E \uD83C\uDF4E \uD83C\uDF4E \uD83C\uDF4E");
-        LOGGER.info(G.toJson(anchor));
+        LOGGER.info("NetworkOperator generated: \uD83C\uDFC8 \uD83C\uDFC8 on the Anchor server: " + G.toJson(networkOperator));
+        LOGGER.info("NetworkOperator generated: \uD83C\uDFC8 \uD83C\uDFC8 on the the BFN network: " + G.toJson(m));
 
         return anchor;
     }

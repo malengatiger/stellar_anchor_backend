@@ -3,6 +3,7 @@ package com.anchor.api.util;
 import com.anchor.api.controllers.stellar.AnchorController;
 import com.anchor.api.data.PaymentRequest;
 import com.anchor.api.data.anchor.*;
+import com.anchor.api.data.models.NetworkOperatorDTO;
 import com.anchor.api.data.stokvel.Member;
 import com.anchor.api.data.stokvel.Stokvel;
 import com.anchor.api.data.transfer.sep9.OrganizationKYCFields;
@@ -15,6 +16,7 @@ import com.anchor.api.services.stellar.AccountService;
 import com.anchor.api.services.stellar.AgentService;
 import com.anchor.api.services.stellar.AnchorAccountService;
 import com.anchor.api.services.stellar.StokvelService;
+import com.bfn.client.data.TradeMatrixItemDTO;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.moandjiezana.toml.Toml;
@@ -37,11 +39,6 @@ public class DemoDataGenerator {
         LOGGER.info(E.RED_CAR.concat(E.RED_CAR) + "Demo data DemoDataGenerator ready and able!");
     }
 
-    /*
-    🛎 🛎 🛎 🛎 UPDATE FUNDING SEED FROM STELLAR LAB .... 🛎 BEFORE THE RUN OF ANCHOR START
-     */
-    public static final String FUNDING_ACCOUNT = "GDFVUZNWT5MP4SZOW2HA2XP53PBNPLUKBI7DAW6OFN5CQZKO4VHJNO5P",
-            FUNDING_SEED = "SBBVHA723TU43FLZEZ4LYU7UXS46QLZPSN4ABM2VT53T63YKFBDZRGDK";
     @Autowired
     private ApplicationContext context;
     @Autowired
@@ -70,16 +67,29 @@ public class DemoDataGenerator {
     🛎🛎🛎
      */
 
-    public Anchor createNewAnchor(String anchorName) throws Exception {
+    private String seed;
+    public Anchor createNewAnchor(String anchorName, String fundingSeed) throws Exception {
         if (!status.equalsIgnoreCase("dev")) {
             throw new Exception(E.NOT_OK + "Demo Data Generation may not be run in PRODUCTION");
         }
+        seed = fundingSeed;
         deleteFirebaseArtifacts();
         Anchor mAnchor = addAnchor(anchorName);
         LOGGER.info(E.FERN.concat(E.FIRE.concat(E.FIRE.concat(E.FIRE)))
                 + "Start Anchor complete. Complete generation after copying anchorId to anchor.toml \uD83D\uDECE AND STELLAR.TOML");
-        LOGGER.info(E.RED_APPLE+ E.RED_APPLE+ G.toJson(mAnchor));
+        LOGGER.info(E.RED_APPLE + E.RED_APPLE + G.toJson(mAnchor));
         return mAnchor;
+    }
+
+    public NetworkOperatorDTO createNetworkOperator(String anchorName) throws Exception {
+        if (!status.equalsIgnoreCase("dev")) {
+            throw new Exception(E.NOT_OK + "Demo Data Generation may not be run in PRODUCTION");
+        }
+        NetworkOperatorDTO mOperator = addNetworkOperator(anchorName);
+        LOGGER.info(E.FERN.concat(E.FIRE.concat(E.FIRE.concat(E.FIRE)))
+                + "Start Network Operator complete. Complete generation after copying anchorId to anchor.toml \uD83D\uDECE AND STELLAR.TOML");
+        LOGGER.info(E.RED_APPLE + E.RED_APPLE + G.toJson(mOperator));
+        return mOperator;
     }
 
     public void startGeneration() throws Exception {
@@ -93,11 +103,11 @@ public class DemoDataGenerator {
                 .concat(G.toJson(mAnchor)).concat(" ")
                 .concat(E.HEART_BLUE.concat(E.HEART_BLUE)));
         if (mAnchor == null) {
-            throw new Exception(E.NOT_OK+E.NOT_OK + "Generator: Anchor is missing from Firestore ");
+            throw new Exception(E.NOT_OK + E.NOT_OK + "Generator: Anchor is missing from Firestore ");
         }
         Toml toml = tomlService.getAnchorToml();
         if (toml == null) {
-            throw new Exception(E.NOT_OK+E.NOT_OK + "Generator: Anchor TOML file is missing: ");
+            throw new Exception(E.NOT_OK + E.NOT_OK + "Generator: Anchor TOML file is missing: ");
         }
         String anchorId = mAnchor.getAnchorId();
         if (anchorId == null) {
@@ -105,7 +115,7 @@ public class DemoDataGenerator {
         }
         anchor = firebaseService.getAnchor();
         if (anchor == null) {
-            throw new Exception(E.ERROR +"Generator: Anchor is missing from Database: " + anchorId);
+            throw new Exception(E.ERROR + "Generator: Anchor is missing from Database: " + anchorId);
         }
 
         LOGGER.info("\n\n" + concat
@@ -230,7 +240,7 @@ public class DemoDataGenerator {
     }
 
     private void sendPaymentAndSaveOnFuckingDatabase(LoanApplication application, Client client, String clientSeed,
-            LoanPayment payment) throws Exception {
+                                                     LoanPayment payment) throws Exception {
 
         if (!isWithinBalance(payment)) {
             return;
@@ -253,8 +263,8 @@ public class DemoDataGenerator {
             payment.setPaymentRequestId(request.getPaymentRequestId());
             LOGGER.info(E.PRETZEL.concat(E.PRETZEL.concat(E.HAPPY))
                     + "MONTHLY LoanPayment made on Stellar and stored in database; getPaymentRequestId: "
-                            .concat(payment.getPaymentRequestId())
-                            .concat(" " + E.RED_TRIANGLE.concat(E.RED_TRIANGLE)));
+                    .concat(payment.getPaymentRequestId())
+                    .concat(" " + E.RED_TRIANGLE.concat(E.RED_TRIANGLE)));
         } catch (Exception e) {
             // ignore
             if (e.getMessage() == null) {
@@ -358,7 +368,7 @@ public class DemoDataGenerator {
             payment = agentService.addLoanPayment(payment);
             LOGGER.info(E.PRETZEL.concat(E.PRETZEL)
                     + "Weekly LoanPayment made on Stellar and stored in database; getPaymentRequestId: "
-                            .concat(payment.getPaymentRequestId()).concat(E.RED_TRIANGLE));
+                    .concat(payment.getPaymentRequestId()).concat(E.RED_TRIANGLE));
         } catch (Exception e) {
             // ignore
             if (e.getMessage() == null) {
@@ -552,14 +562,14 @@ public class DemoDataGenerator {
                             E.PANDA.concat(E.PANDA).concat(E.PANDA).concat("Generate LoanApplication for: ")
                                     .concat(client.getFullName()).concat("  \uD83C\uDF51 asset: ")
                                     .concat(assetBag.getAssetCode()).concat(" \uD83D\uDC26 interest rate: "
-                                            + app.getInterestRate() + " % ".concat("  \uD83C\uDFB2 ")));
+                                    + app.getInterestRate() + " % ".concat("  \uD83C\uDFB2 ")));
                     agentService.addLoanApplication(app);
                     cnt++;
                 } catch (Exception e) {
                     LOGGER.info(("..... \uD83D\uDE21 \uD83D\uDE21 \uD83D\uDE21 \uD83D\uDE21 " + "Interest Rate: "
                             + app.getInterestRate()
                             + " \uD83D\uDE21 LoanApplication failed; ignored for this purpose: ")
-                                    .concat(e.getMessage()));
+                            .concat(e.getMessage()));
                 }
             }
         }
@@ -603,7 +613,7 @@ public class DemoDataGenerator {
     private Anchor addAnchor(String anchorName) throws Exception {
         // create anchor bag ...
         AnchorBag bag = new AnchorBag();
-        bag.setFundingSeed(FUNDING_SEED);
+        bag.setFundingSeed(seed);
         bag.setAssetAmount("99999999000");
         bag.setStartingBalance("9900");
         bag.setPassword(basePassword);
@@ -616,9 +626,56 @@ public class DemoDataGenerator {
 
         bag.setAnchor(mAnchor);
         AnchorController controller = context.getBean(AnchorController.class);
-        controller.createAnchor(bag);
+        Anchor m = controller.createAnchor(bag);
+        LOGGER.info("\uD83D\uDC9A \uD83D\uDC9A \uD83D\uDC9A \uD83D\uDC9A Anchor: " + G.toJson(m));
 
-        return anchor;
+        LOGGER.info("\uD83D\uDC9A \uD83D\uDC9A \uD83D\uDC9A \uD83D\uDC9A Anchor: " + G.toJson(m));
+        return m;
+
+    }
+
+    private NetworkOperatorDTO addNetworkOperator(String anchorName) throws Exception {
+
+        List<TradeMatrixItemDTO> matrixItemDTOS = new ArrayList<>();
+
+        TradeMatrixItemDTO m1 = new TradeMatrixItemDTO(10000.00,
+                100000.00, 15.5, new DateTime().toDateTimeISO().toString());
+
+        TradeMatrixItemDTO m2 = new TradeMatrixItemDTO(100001.00,
+                500000.00, 10.0, new DateTime().toDateTimeISO().toString());
+
+        TradeMatrixItemDTO m3 = new TradeMatrixItemDTO(500001.00,
+                1000000.00, 6.5, new DateTime().toDateTimeISO().toString());
+
+        TradeMatrixItemDTO m4 = new TradeMatrixItemDTO(1000001.00,
+                25000000.00, 4.5, new DateTime().toDateTimeISO().toString());
+
+
+        matrixItemDTOS.add(m1);
+        matrixItemDTOS.add(m2);
+        matrixItemDTOS.add(m3);
+        matrixItemDTOS.add(m4);
+
+        NetworkOperatorDTO operator = new NetworkOperatorDTO(
+                "IssuedBy", "accountID",
+                10000.00,
+                1000000.00,
+                25000000.00,
+                30,
+                5,
+                matrixItemDTOS,
+                new DateTime().toDateTimeISO().toString(), anchorName,
+                "operator" + System.currentTimeMillis(),
+                "099 999 9999",
+                "pass123",
+                "uid"
+        );
+
+
+        AnchorController controller = context.getBean(AnchorController.class);
+        String dto = controller.createNetworkOperator(operator);
+        LOGGER.info("\uD83D\uDC9A \uD83D\uDC9A \uD83D\uDC9A \uD83D\uDC9A NetworkOperatorDTO: " + G.toJson(dto));
+        return operator;
 
     }
 

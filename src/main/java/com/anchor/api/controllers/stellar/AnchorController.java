@@ -6,6 +6,7 @@ import com.anchor.api.data.anchor.Anchor;
 import com.anchor.api.data.anchor.AnchorBag;
 import com.anchor.api.data.anchor.Client;
 import com.anchor.api.data.info.Info;
+import com.anchor.api.data.models.NetworkOperatorDTO;
 import com.anchor.api.services.misc.CryptoService;
 import com.anchor.api.services.misc.FirebaseService;
 import com.anchor.api.services.misc.TOMLService;
@@ -56,6 +57,9 @@ public class AnchorController {
     private AccountService accountService;
     @Autowired
     private DemoDataGenerator demoDataGenerator;
+
+    @Autowired
+    private FirebaseService firebaseService;
     @Value("${status}")
     private String status;
 
@@ -212,8 +216,6 @@ public class AnchorController {
         return mBalances;
     }
 
-    @Autowired
-    private FirebaseService firebaseService;
     @GetMapping(value = "/getAnchorClients", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Client> getClients() throws Exception {
         return firebaseService.getAnchorClients();
@@ -245,7 +247,21 @@ public class AnchorController {
                 + anchor.getName() + "  \uD83C\uDF4E anchorId: " + anchor.getAnchorId());
         LOGGER.info(E.LEAF + E.LEAF + E.LEAF + E.LEAF +
                 " ANCHOR CREATED: ".concat(G.toJson(anchor)));
+        LOGGER.info(G.toJson(anchor));
         return anchor;
+    }
+    @PostMapping(value = "/createNetworkOperator", produces = MediaType.APPLICATION_JSON_VALUE)
+    public String createNetworkOperator(@RequestBody NetworkOperatorDTO operator) throws Exception {
+        LOGGER.info(em + " AnchorController:createNetworkOperator on Firebase ...");
+
+        operator.setDate(new DateTime().toDateTimeISO().toString());
+        operator.setUid(UUID.randomUUID().toString());
+        String m = firebaseService.addNetworkOperator(operator);
+
+        LOGGER.info(E.LEAF + " AnchorController:createNetworkOperator returns: \uD83C\uDF4E "
+                + m );
+        LOGGER.info(G.toJson(operator));
+        return m;
     }
 
     @Autowired

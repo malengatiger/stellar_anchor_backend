@@ -105,6 +105,17 @@ public class RipplePaymentService {
         return seedWallet;
     }
 
+    public String sendXRP(String seed, String sourceAddress, String destinationAddress, String amount) throws Exception {
+        XrpClient xrpClient = new XrpClient(xrpURL, activeProfile.equalsIgnoreCase(DEVELOPMENT_MODE)? XrplNetwork.TEST: XrplNetwork.MAIN);
+        Wallet seedWallet = new Wallet(seed);
+
+        BigInteger amt = new BigInteger(amount);
+        String tx = xrpClient.send(amt, destinationAddress, seedWallet);
+        LOGGER.info(E.COFFEE+E.COFFEE+tx);
+        return tx;
+    }
+
+
     @Value("${gRPC}")
     private String gRPC; //so-called Hermes endpoint
 

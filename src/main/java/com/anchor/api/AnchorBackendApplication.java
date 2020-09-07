@@ -209,7 +209,7 @@ public class AnchorBackendApplication implements ApplicationListener<Application
 
             AccountBalance balance = ilpService.testILP();
             LOGGER.info("\uD83E\uDD6C\uD83E\uDD6C\uD83E\uDD6C\uD83E\uDD6C AccountBalance from ILP: ".concat(G.toJson(balance)));
-            publisherService.publish(msg, "ozow-success");
+//            publisherService.publish(msg, "ozow-success");
         } catch (Exception e) {
             LOGGER.info("\uD83D\uDC7F \uD83D\uDC4E\uD83C\uDFFD  \uD83D\uDC4E\uD83C\uDFFD \uD83D\uDC7D\uD83D\uDC7D\uD83D\uDC7D\uD83D\uDC7D PUBLISH FAILED: " + e.getMessage()
                     + " \uD83D\uDC7D\uD83D\uDC7D\uD83D\uDC7D\uD83D\uDC7D  \uD83D\uDC4E\uD83C\uDFFD \uD83D\uDC7F");
