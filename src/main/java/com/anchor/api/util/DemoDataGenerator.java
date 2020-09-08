@@ -93,7 +93,6 @@ public class DemoDataGenerator {
         NetworkOperatorDTO mOperator = buildNetworkOperator(anchorName);
 
         NetworkOperatorDTO operator = networkUtil.createBFNNetworkOperator(bfnUrl + "createNetworkOperator", mOperator);
-        firebaseService.addNetworkOperator(operator);
 
         LOGGER.info(E.FERN.concat(E.FIRE.concat(E.FIRE.concat(E.FIRE)))
                 + "createNetworkOperator: complete. Complete generation after checking all the shit!");
