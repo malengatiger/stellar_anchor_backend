@@ -19,10 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.List;
@@ -64,9 +61,9 @@ public class DataGenerationController {
                 .concat("New Anchor Returned")
                 .concat(G.toJson(anchor))));
 
-        NetworkOperatorDTO networkOperator = demoDataGenerator.createNetworkOperator(anchorName);
-        //todo - this operator is the BOSS of the BFN platform; so we need to call the BFN Web API server .... http call ...
-        NetworkOperatorDTO m = networkUtil.createBFNNetworkOperator(bfnUrl + "createNetworkOperator", networkOperator);
+//        NetworkOperatorDTO networkOperator = demoDataGenerator.createNetworkOperator(anchorName);
+//        //todo - this operator is the BOSS of the BFN platform; so we need to call the BFN Web API server .... http call ...
+//        NetworkOperatorDTO m = createBFNNetworkOperator(networkOperator);
         LOGGER.info("\n\n \uD83C\uDF4E \uD83C\uDF4E \uD83C\uDF4E \uD83C\uDF4E");
         LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C ################################################################## \uD83D\uDC99 \uD83D\uDC9C");
         LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C 1. CHECK ANCHOR and NETWORK OPERATOR on Firestore  \uD83D\uDC99 \uD83D\uDC9C");
@@ -77,10 +74,23 @@ public class DataGenerationController {
         LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C 6. Generate Network Operator Demo Data  \uD83D\uDC99 \uD83D\uDC9C");
         LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C ################################################################## \uD83D\uDC99 \uD83D\uDC9C");
         LOGGER.info("\n\n \uD83C\uDF4E \uD83C\uDF4E \uD83C\uDF4E \uD83C\uDF4E");
-        LOGGER.info("NetworkOperator generated: \uD83C\uDFC8 \uD83C\uDFC8 on the Anchor server: " + G.toJson(networkOperator));
-        LOGGER.info("NetworkOperator generated: \uD83C\uDFC8 \uD83C\uDFC8 on the the BFN network: " + G.toJson(m));
 
         return anchor;
+    }
+    @PostMapping(value = "/generateNetworkOperator", produces = MediaType.APPLICATION_JSON_VALUE)
+    public NetworkOperatorDTO createBFNNetworkOperator(NetworkOperatorDTO operator) throws Exception {
+        LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 StellarAnchorApplication /createBFNNetworkOperator ... \uD83D\uDD35: " + bfnUrl);
+        if (operator.getTradeMatrixItems() == null || operator.getTradeMatrixItems().isEmpty()) {
+            throw new Exception("Missing tradeMatrixItems");
+        }
+        LOGGER.info("\uD83D\uDC99 \uD83D\uDC9C Network Operator to be created: ".concat(G.toJson(operator)));
+        NetworkOperatorDTO m = networkUtil.createBFNNetworkOperator(bfnUrl + "createNetworkOperator", operator);
+        LOGGER.info("\uD83D\uDC99 \uD83D\uDC9C GenerateDemoData:generateNetworkOperator completed and returning anchor "
+                + new Date().toString() + " \uD83D\uDC99 \uD83D\uDC9C STATUS: " + status);
+        LOGGER.info(E.DICE.concat(E.DICE.concat(E.DICE)
+                .concat("New NetworkOperator Returned .... ")
+                .concat(G.toJson(m))));
+        return m;
     }
     @GetMapping(value = "/generateDemo", produces = MediaType.TEXT_PLAIN_VALUE)
     public String generateDemo() throws Exception {

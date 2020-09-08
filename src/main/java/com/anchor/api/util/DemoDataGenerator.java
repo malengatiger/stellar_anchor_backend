@@ -67,6 +67,10 @@ public class DemoDataGenerator {
     🛎🛎🛎
      */
 
+    @Autowired
+    private NetworkUtil networkUtil;
+    @Value("${bfnUrl}")
+    private String bfnUrl;
     private String seed;
     public Anchor createNewAnchor(String anchorName, String fundingSeed) throws Exception {
         if (!status.equalsIgnoreCase("dev")) {
@@ -78,6 +82,7 @@ public class DemoDataGenerator {
         LOGGER.info(E.FERN.concat(E.FIRE.concat(E.FIRE.concat(E.FIRE)))
                 + "Start Anchor complete. Complete generation after copying anchorId to anchor.toml \uD83D\uDECE AND STELLAR.TOML");
         LOGGER.info(E.RED_APPLE + E.RED_APPLE + G.toJson(mAnchor));
+        createNetworkOperator(anchorName);
         return mAnchor;
     }
 
@@ -85,10 +90,14 @@ public class DemoDataGenerator {
         if (!status.equalsIgnoreCase("dev")) {
             throw new Exception(E.NOT_OK + "Demo Data Generation may not be run in PRODUCTION");
         }
-        NetworkOperatorDTO mOperator = addNetworkOperator(anchorName);
+        NetworkOperatorDTO mOperator = buildNetworkOperator(anchorName);
+
+        NetworkOperatorDTO operator = networkUtil.createBFNNetworkOperator(bfnUrl + "createNetworkOperator", mOperator);
+        firebaseService.addNetworkOperator(operator);
+
         LOGGER.info(E.FERN.concat(E.FIRE.concat(E.FIRE.concat(E.FIRE)))
-                + "Start Network Operator complete. Complete generation after copying anchorId to anchor.toml \uD83D\uDECE AND STELLAR.TOML");
-        LOGGER.info(E.RED_APPLE + E.RED_APPLE + G.toJson(mOperator));
+                + "createNetworkOperator: complete. Complete generation after checking all the shit!");
+        LOGGER.info(E.RED_APPLE + E.RED_APPLE + G.toJson(operator));
         return mOperator;
     }
 
@@ -634,7 +643,7 @@ public class DemoDataGenerator {
 
     }
 
-    private NetworkOperatorDTO addNetworkOperator(String anchorName) throws Exception {
+    private NetworkOperatorDTO buildNetworkOperator(String anchorName) throws Exception {
 
         List<TradeMatrixItemDTO> matrixItemDTOS = new ArrayList<>();
 
@@ -656,25 +665,22 @@ public class DemoDataGenerator {
         matrixItemDTOS.add(m3);
         matrixItemDTOS.add(m4);
 
-        NetworkOperatorDTO operator = new NetworkOperatorDTO(
-                "IssuedBy", "accountID",
-                10000.00,
-                1000000.00,
-                25000000.00,
-                30,
-                5,
-                matrixItemDTOS,
-                new DateTime().toDateTimeISO().toString(), anchorName,
-                "operator" + System.currentTimeMillis(),
-                "099 999 9999",
-                "pass123",
-                "uid"
-        );
+        NetworkOperatorDTO operator = new NetworkOperatorDTO( );
 
+        operator.setIssuedBy("SELF");
+        operator.setAccountId(UUID.randomUUID().toString());
+        operator.setMinimumInvoiceAmount(10000.00);
+        operator.setMaximumInvoiceAmount(1000000.00);
+        operator.setMaximumInvestment(250000000.00);
+        operator.setTradeFrequencyInMinutes(30);
+        operator.setName(anchorName);
+        operator.setEmail("netoperator@bfn.com");
+        operator.setCellphone("099 999 9999");
+        operator.setPassword("pass123");
+        operator.setDefaultOfferDiscount(10);
+        operator.setTradeMatrixItems(matrixItemDTOS);
+        operator.setUid(UUID.randomUUID().toString());
 
-        AnchorController controller = context.getBean(AnchorController.class);
-        String dto = controller.createNetworkOperator(operator);
-        LOGGER.info("\uD83D\uDC9A \uD83D\uDC9A \uD83D\uDC9A \uD83D\uDC9A NetworkOperatorDTO: " + G.toJson(dto));
         return operator;
 
     }

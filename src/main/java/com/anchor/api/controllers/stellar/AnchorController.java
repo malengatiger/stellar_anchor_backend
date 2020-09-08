@@ -16,6 +16,7 @@ import com.anchor.api.services.stellar.AgentService;
 import com.anchor.api.services.stellar.AnchorAccountService;
 import com.anchor.api.util.DemoDataGenerator;
 import com.anchor.api.util.E;
+import com.anchor.api.util.NetworkUtil;
 import com.anchor.api.util.Util;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -250,19 +251,24 @@ public class AnchorController {
         LOGGER.info(G.toJson(anchor));
         return anchor;
     }
+    @Autowired
+    private NetworkUtil networkUtil;
+    @Value("${bfnUrl}")
+    private String bfnUrl;
+
     @PostMapping(value = "/createNetworkOperator", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String createNetworkOperator(@RequestBody NetworkOperatorDTO operator) throws Exception {
+    public NetworkOperatorDTO createNetworkOperator(@RequestBody NetworkOperatorDTO operator) throws Exception {
         LOGGER.info(em + " AnchorController:createNetworkOperator on Firebase ...");
 
         operator.setDate(new DateTime().toDateTimeISO().toString());
         operator.setUid(UUID.randomUUID().toString());
-        String m = firebaseService.addNetworkOperator(operator);
+        NetworkOperatorDTO n = networkUtil.createBFNNetworkOperator(bfnUrl + "createNetworkOperator", operator);
 
-        LOGGER.info(E.LEAF + " AnchorController:createNetworkOperator returns: \uD83C\uDF4E "
-                + m );
+        LOGGER.info(E.LEAF + " AnchorController:createNetworkOperator returns: \uD83C\uDF4E " );
         LOGGER.info(G.toJson(operator));
-        return m;
+        return n;
     }
+
 
     @Autowired
     private CryptoService cryptoService;

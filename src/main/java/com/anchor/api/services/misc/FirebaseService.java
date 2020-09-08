@@ -868,10 +868,8 @@ public class FirebaseService implements DatabaseServiceInterface {
                 .concat(" ....... DELETING ALL COLLECTIONS from Firestore .... ").concat(E.RED_DOT)));
         Firestore fs = FirestoreClient.getFirestore();
         for (CollectionReference listCollection : fs.listCollections()) {
-            LOGGER.info("Collection to delete: " + listCollection.document().getParent().toString());
+            LOGGER.info("Collection to delete: " + listCollection.document().getParent().getPath());
             deleteCollection(listCollection.document().getParent(), 1000);
-
-
         }
 
         LOGGER.info(E.PEAR.concat(E.PEAR.concat(E.PEAR)
