@@ -47,7 +47,7 @@ import java.util.List;
     The fields below should be placed in the request body using the multipart/form-data encoding.
 
     Name	        Type	Description
-    account	G...    string	The Stellar account ID to upload KYC data for
+    stellarAccountId	G...    string	The Stellar stellarAccountId ID to upload KYC data for
     memo	        string	(optional) Uniquely identifies individual customer in schemes where multiple wallet users share one Stellar address. If included, the KYC data will only apply to deposit/withdraw requests that include this memo.
     memo_type	    string	(optional) type of memo. One of text, id or hash
 
@@ -68,10 +68,10 @@ import java.util.List;
            "error": "'photo_id_front' cannot be decoded. Must be jpg or png."
         }
     🌼 🌼 SEP 009 🌼 🌼 Customer DELETE
-    🍎 Delete all personal information that the anchor has stored about a given customer. [account] is the Stellar account ID (G...) of the customer to delete. This request must be authenticated (via SEP-10) as coming from the owner of the account that will be deleted.
+    🍎 Delete all personal information that the anchor has stored about a given customer. [stellarAccountId] is the Stellar stellarAccountId ID (G...) of the customer to delete. This request must be authenticated (via SEP-10) as coming from the owner of the stellarAccountId that will be deleted.
 
     🍏 🍏  Request
-    DELETE [KYC_SERVER || TRANSFER_SERVER]/customer/[account]
+    DELETE [KYC_SERVER || TRANSFER_SERVER]/customer/[stellarAccountId]
 
     🍏 🍏 🍏 🍏 DELETE Responses
     🍏 🍏 Situation	                            Response
@@ -85,12 +85,12 @@ import java.util.List;
  */
 public class Client {
     private String anchorId,
-            clientId, startingFiatBalance;
+            clientId, startingFiatBalance, firstName, lastName;
     private double latitude, longitude;
     private String dateRegistered,
             dateUpdated,
             externalAccountId,
-            account,
+            stellarAccountId,
             memo,
             password,
             secretSeed;
@@ -100,107 +100,23 @@ public class Client {
     private PersonalKYCFields personalKYCFields;
     private boolean active;
 
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
-    public PersonalKYCFields getPersonalKYCFields() {
-        return personalKYCFields;
-    }
-    public void setPersonalKYCFields(PersonalKYCFields personalKYCFields) {
-        this.personalKYCFields = personalKYCFields;
-    }
-
-    public List<String> getAgentIds() {
-        return agentIds;
-    }
-
-    public void setAgentIds(List<String> agentIds) {
-        this.agentIds = agentIds;
-    }
-
-    public String getStartingFiatBalance() {
-        return startingFiatBalance;
-    }
-
-    public void setStartingFiatBalance(String startingFiatBalance) {
-        this.startingFiatBalance = startingFiatBalance;
-    }
-
-    public String getMemo() {
-        return memo;
-    }
-
-    public void setMemo(String memo) {
-        this.memo = memo;
-    }
-
-    public String getMemo_type() {
-        return memo_type;
-    }
-
-    public void setMemo_type(String memo_type) {
-        this.memo_type = memo_type;
-    }
-
-    public String getSecretSeed() {
-        return secretSeed;
-    }
-
-    public void setSecretSeed(String secretSeed) {
-        this.secretSeed = secretSeed;
-    }
-
-    public String getClientId() {
-        return clientId;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
-    }
-
     public String getFullName() {
-        if (personalKYCFields != null) {
-            return personalKYCFields.getFirst_name() + " " + personalKYCFields.getLast_name();
-        }
-        return null;
+        return firstName + " " + lastName;
+    }
+    public String getFirstName() {
+        return firstName;
     }
 
-
-    public String getExternalAccountId() {
-        return externalAccountId;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
-    public void setExternalAccountId(String externalAccountId) {
-        this.externalAccountId = externalAccountId;
+    public String getLastName() {
+        return lastName;
     }
 
-    public String getAccount() {
-        return account;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
-    }
-
-    public String getDateUpdated() {
-        return dateUpdated;
-    }
-
-    public void setDateUpdated(String dateUpdated) {
-        this.dateUpdated = dateUpdated;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public String getAnchorId() {
@@ -209,6 +125,22 @@ public class Client {
 
     public void setAnchorId(String anchorId) {
         this.anchorId = anchorId;
+    }
+
+    public String getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
+
+    public String getStartingFiatBalance() {
+        return startingFiatBalance;
+    }
+
+    public void setStartingFiatBalance(String startingFiatBalance) {
+        this.startingFiatBalance = startingFiatBalance;
     }
 
     public double getLatitude() {
@@ -233,5 +165,85 @@ public class Client {
 
     public void setDateRegistered(String dateRegistered) {
         this.dateRegistered = dateRegistered;
+    }
+
+    public String getDateUpdated() {
+        return dateUpdated;
+    }
+
+    public void setDateUpdated(String dateUpdated) {
+        this.dateUpdated = dateUpdated;
+    }
+
+    public String getExternalAccountId() {
+        return externalAccountId;
+    }
+
+    public void setExternalAccountId(String externalAccountId) {
+        this.externalAccountId = externalAccountId;
+    }
+
+    public String getStellarAccountId() {
+        return stellarAccountId;
+    }
+
+    public void setStellarAccountId(String stellarAccountId) {
+        this.stellarAccountId = stellarAccountId;
+    }
+
+    public String getMemo() {
+        return memo;
+    }
+
+    public void setMemo(String memo) {
+        this.memo = memo;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getSecretSeed() {
+        return secretSeed;
+    }
+
+    public void setSecretSeed(String secretSeed) {
+        this.secretSeed = secretSeed;
+    }
+
+    public List<String> getAgentIds() {
+        return agentIds;
+    }
+
+    public void setAgentIds(List<String> agentIds) {
+        this.agentIds = agentIds;
+    }
+
+    public String getMemo_type() {
+        return memo_type;
+    }
+
+    public void setMemo_type(String memo_type) {
+        this.memo_type = memo_type;
+    }
+
+    public PersonalKYCFields getPersonalKYCFields() {
+        return personalKYCFields;
+    }
+
+    public void setPersonalKYCFields(PersonalKYCFields personalKYCFields) {
+        this.personalKYCFields = personalKYCFields;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }

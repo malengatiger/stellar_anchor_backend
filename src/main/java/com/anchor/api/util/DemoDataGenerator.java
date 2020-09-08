@@ -111,7 +111,7 @@ public class DemoDataGenerator {
                 .concat(G.toJson(mAnchor)).concat(" ")
                 .concat(E.HEART_BLUE.concat(E.HEART_BLUE)));
         if (mAnchor == null) {
-            throw new Exception(E.NOT_OK + E.NOT_OK + "Generator: Anchor is missing from Firestore ");
+            throw new Exception(E.NOT_OK + E.NOT_OK + "Generator: Anchor is missing from Firestore " + E.NOT_OK + E.NOT_OK);
         }
         Toml toml = tomlService.getAnchorToml();
         if (toml == null) {
@@ -121,16 +121,12 @@ public class DemoDataGenerator {
         if (anchorId == null) {
             throw new Exception(E.NOT_OK + "anchorId is NULL");
         }
-        anchor = firebaseService.getAnchor();
-        if (anchor == null) {
-            throw new Exception(E.ERROR + "Generator: Anchor is missing from Database: " + anchorId);
-        }
 
         LOGGER.info("\n\n" + concat
                 + "........ Start Demo Data Generation ........".concat(E.HEART_BLUE.concat(E.HEART_BLUE)));
 
-        addAgents();
-        generateAgentClients(5);
+        addAgents(mAnchor);
+        generateAgentClients(3, mAnchor);
 
         LOGGER.info("\n\n\n"
                 .concat(E.PRETZEL.concat(E.PRETZEL.concat(E.PRETZEL).concat(E.ALIEN.concat(E.ALIEN))
@@ -216,7 +212,7 @@ public class DemoDataGenerator {
         int numberOfPayments = application.getLoanPeriodInMonths();
         Agent agent = firebaseService.getAgent(application.getAgentId());
         Client client = firebaseService.getClientById(application.getClientId());
-        String clientSeed = cryptoService.getDecryptedSeed(client.getAccount());
+        String clientSeed = cryptoService.getDecryptedSeed(client.getStellarAccountId());
         Calendar cal = Calendar.getInstance();
 
         for (int i = 0; i < numberOfPayments; i++) {
@@ -291,7 +287,7 @@ public class DemoDataGenerator {
         int numberOfPayments = application.getLoanPeriodInWeeks();
         Agent agent = firebaseService.getAgent(application.getAgentId());
         Client client = firebaseService.getClientById(application.getClientId());
-        String clientSeed = cryptoService.getDecryptedSeed(client.getAccount());
+        String clientSeed = cryptoService.getDecryptedSeed(client.getStellarAccountId());
         for (int i = 0; i < numberOfPayments; i++) {
             LoanPayment payment = new LoanPayment();
             payment.setAgentAccount(agent.getStellarAccountId());
@@ -562,7 +558,7 @@ public class DemoDataGenerator {
                 } else {
                     app.setLoanPeriodInWeeks(getLoanPeriodInWeeks());
                 }
-                app.setClientAccount(client.getAccount());
+                app.setClientAccount(client.getStellarAccountId());
                 app.setClientId(client.getClientId());
                 app.setDate(new DateTime().toDateTimeISO().toString());
                 try {
@@ -587,17 +583,17 @@ public class DemoDataGenerator {
     }
 
     private int getLoanPeriodInMonths() {
-        int num = rand.nextInt(6);
-        if (num == 0)
-            return 3;
-        return num;
+//        int num = rand.nextInt(6);
+//        if (num == 0)
+//            return 3;
+        return 3;
     }
 
     private int getLoanPeriodInWeeks() {
-        int num = rand.nextInt(4);
-        if (num == 0)
-            return 2;
-        return num;
+//        int num = rand.nextInt(4);
+//        if (num == 0)
+//            return 2;
+        return 2;
     }
 
     private String getRandomAmount() {
@@ -686,25 +682,27 @@ public class DemoDataGenerator {
 
     private List<Agent> agents = new ArrayList<>();
 
-    private void addAgents() throws Exception {
+    private void addAgents(Anchor anchor) throws Exception {
         LOGGER.info(E.ALIEN.concat(E.ALIEN.concat(E.LEAF))
                 + " - \uD83D\uDC26 Creating agents .....");
-        Agent agent1 = buildAgent();
+        Agent agent1 = buildAgent(anchor);
         agent1.getPersonalKYCFields().setFirst_name("Tiger");
         agent1.getPersonalKYCFields().setLast_name("Wannamaker");
+        agent1.setAnchorId(anchor.getAnchorId());
         agents.add(agentService.createAgent(agent1));
         LOGGER.info(E.ALIEN.concat(E.ALIEN.concat(E.LEAF))
                 .concat("Agent Wannamaker created OK: ".concat(G.toJson(agent1))));
 
-        Agent agent3 = buildAgent();
+        Agent agent3 = buildAgent(anchor);
         agent3.getPersonalKYCFields().setFirst_name("Kgabzela");
         agent3.getPersonalKYCFields().setLast_name("Marule-Smythe");
+        agent3.setAnchorId(anchor.getAnchorId());
         agents.add(agentService.createAgent(agent3));
         LOGGER.info(E.ALIEN.concat(E.ALIEN.concat(E.LEAF)).concat(agent3.getFullName()
                 + " - \uD83D\uDC26 Agent Marule-Smythe created OK: ".concat(agent3.getFullName())));
     }
 
-    public void generateAgentClients(int count) throws Exception {
+    public void generateAgentClients(int count, Anchor anchor) throws Exception {
         LOGGER.info(E.ALIEN.concat(E.ALIEN.concat(E.LEAF))
                 + " - \uD83D\uDC26 Creating clients for the agents .....");
         setFirstNames();
@@ -714,10 +712,10 @@ public class DemoDataGenerator {
             throw new Exception("Generator: Anchor TOML file is missing: ");
         }
         agents = firebaseService.getAgents();
-        anchor = firebaseService.getAnchor();
         for (Agent agent : agents) {
             for (int i = 0; i < count; i++) {
-                Client c1 = buildClient(agent.getAgentId());
+                Client c1 = buildClient(agent.getAgentId(), anchor);
+                c1.setAnchorId(anchor.getAnchorId());
                 Client result = agentService.createClient(c1);
                 LOGGER.info(E.LEMON.concat(E.LEMON).concat(".......... agent Client created: ")
                         .concat(result.getFullName()));
@@ -725,14 +723,14 @@ public class DemoDataGenerator {
         }
     }
 
-    private Client buildClient(String agentId) {
+    private Client buildClient(String agentId, Anchor mAnchor) {
         Client c = new Client();
-        c.setAnchorId(anchor.getAnchorId());
+        c.setAnchorId(mAnchor.getAnchorId());
         c.setAgentIds(new ArrayList<>());
         c.getAgentIds().add(agentId);
         c.setDateRegistered(new DateTime().toDateTimeISO().toString());
         c.setDateUpdated(new DateTime().toDateTimeISO().toString());
-        c.setPassword(basePassword);
+        c.setPassword("pass123");
         c.setStartingFiatBalance("0.01");
         PersonalKYCFields fields = new PersonalKYCFields();
         fields.setMobile_number("+27998001212");
@@ -746,14 +744,14 @@ public class DemoDataGenerator {
     @Value("${fiatLimit}")
     private String fiatLimit;
 
-    private Agent buildAgent() {
+    private Agent buildAgent(Anchor mAnchor) {
         Agent agent1 = new Agent();
-        agent1.setAnchorId(anchor.getAnchorId());
+        agent1.setAnchorId(mAnchor.getAnchorId());
         agent1.setDateRegistered(new DateTime().toDateTimeISO().toString());
         agent1.setDateUpdated(new DateTime().toDateTimeISO().toString());
         agent1.setFiatBalance("0.01");
         agent1.setFiatLimit(fiatLimit);
-        agent1.setPassword(basePassword);
+        agent1.setPassword("pass123");
         PersonalKYCFields fields = new PersonalKYCFields();
         fields.setMobile_number("+27998001212");
         fields.setEmail_address("a" + System.currentTimeMillis() + "@anchor.com");

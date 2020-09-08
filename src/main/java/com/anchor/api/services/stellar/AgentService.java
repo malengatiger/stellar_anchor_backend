@@ -418,7 +418,9 @@ public class AgentService {
         }
 
         encryptAndSave(client, bag);
-        LOGGER.info(E.BLUE_BIRD + E.BLUE_BIRD + " ....... Client created ....... " + client.getFullName());
+        client.setStellarAccountId(bag.getAccountResponse().getAccountId());
+        LOGGER.info(E.BLUE_BIRD + E.BLUE_BIRD + " ....... Client created ....... " + client.getStellarAccountId());
+        firebaseService.addClient(client);
         return client;
     }
 
@@ -429,7 +431,7 @@ public class AgentService {
         LOGGER.info(E.BLUE_BIRD + E.BLUE_BIRD + " Firebase auth user created, uid:  ".concat(record.getUid()));
         client.setClientId(record.getUid());
         client.setSecretSeed(null);
-        client.setAccount(bag.getAccountResponse().getAccountId());
+        client.setStellarAccountId(bag.getAccountResponse().getAccountId());
         client.setExternalAccountId("To Be Determined");
         client.setDateRegistered(new DateTime().toDateTimeISO().toString());
         client.setDateUpdated(new DateTime().toDateTimeISO().toString());
@@ -469,8 +471,10 @@ public class AgentService {
         Agent mAgent = firebaseService.getAgentByNameAndAnchor(
                 agent.getPersonalKYCFields().getFirst_name(), agent.getPersonalKYCFields().getLast_name());
         if (mAgent != null) {
-            LOGGER.info(E.ERROR.concat(anchor.getName()).concat(" ").concat(E.ERROR));
-            throw new Exception(E.ERROR + "Agent already exists for this Anchor");
+            String msg = E.ERROR + "Agent already exists for this Anchor";
+            LOGGER.info(E.ERROR.concat(anchor.getName()).concat(" ").concat(msg).concat(E.ERROR));
+             mAgent.setStellarAccountId(agent.getStellarAccountId());
+             mAgent.setAnchorId(agent.getAnchorId());
         }
         LOGGER.info(E.YELLOW_STAR + E.YELLOW_STAR + E.YELLOW_STAR + "....... Agent Stellar Account about to be created ....... ");
         AccountResponseBag bag = accountService.createAndFundUserAccount( agentStartingBalance,
@@ -479,7 +483,7 @@ public class AgentService {
                 .concat(agentStartingBalance).concat(" XLM; secretSeed: ".concat(bag.getSecretSeed())));
         cryptoService.encrypt(bag.getAccountResponse().getAccountId(), bag.getSecretSeed());
 
-        // todo - create trustlines and pay from anchor distribution account
+        // todo - create trustLines and pay from anchor distribution account
         List<AccountService.AssetBag> assetBags = accountService
                 .getDefaultAssets(anchor.getIssuingAccount().getAccountId());
 

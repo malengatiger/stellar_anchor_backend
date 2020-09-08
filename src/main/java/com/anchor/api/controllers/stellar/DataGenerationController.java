@@ -4,6 +4,7 @@ import com.anchor.api.data.anchor.Anchor;
 import com.anchor.api.data.models.NetworkOperatorDTO;
 import com.anchor.api.data.stokvel.Member;
 import com.anchor.api.data.stokvel.Stokvel;
+import com.anchor.api.services.misc.FirebaseService;
 import com.anchor.api.services.stellar.AccountService;
 import com.anchor.api.services.stellar.AgentService;
 import com.anchor.api.services.stellar.AnchorAccountService;
@@ -110,10 +111,13 @@ public class DataGenerationController {
         }
     }
 
+    @Autowired
+    private FirebaseService firebaseService;
     @GetMapping(value = "/generateAgentClients", produces = MediaType.TEXT_PLAIN_VALUE)
     public String generateAgentClients( @RequestParam int count) throws Exception {
         checkTOML();
-        demoDataGenerator.generateAgentClients(count);
+        Anchor anchor = firebaseService.getAnchor();
+        demoDataGenerator.generateAgentClients(count, anchor);
         return "\uD83D\uDC99 \uD83D\uDC9C generateAgentClients completed ... "
                 + new Date().toString() + " \uD83D\uDC99 \uD83D\uDC9C STATUS: " + status;
     }
@@ -138,7 +142,8 @@ public class DataGenerationController {
         LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 StellarAnchorApplication /generateClients ..." +
                  "  count: " + count);
         checkTOML();
-        demoDataGenerator.generateAgentClients( count);
+        Anchor anchor = firebaseService.getAnchor();
+        demoDataGenerator.generateAgentClients( count, anchor);
         String msg =  "\uD83D\uDC99 \uD83D\uDC9C generateAgentClients completed ... \uD83C\uDF3C \uD83C\uDF3C "
                + " \uD83D\uDC99 \uD83D\uDC9C STATUS: " + status;
         LOGGER.info(msg);

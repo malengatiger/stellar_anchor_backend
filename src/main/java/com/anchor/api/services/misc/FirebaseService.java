@@ -21,6 +21,7 @@ import com.google.firebase.cloud.FirestoreClient;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.moandjiezana.toml.Toml;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -253,16 +254,30 @@ public class FirebaseService implements DatabaseServiceInterface {
     @Override
     public String addClient(Client client) throws Exception {
         Firestore fs = FirestoreClient.getFirestore();
-        Client current = getClientByNameAndAnchor(
+        Client mClient = getClientByNameAndAnchor(
                 client.getPersonalKYCFields().getFirst_name(),
                 client.getPersonalKYCFields().getLast_name());
-        if (current == null) {
-            ApiFuture<DocumentReference> future = fs.collection(Constants.CLIENTS).add(client);
+        ApiFuture<DocumentReference> future = null;
+        if (mClient == null) {
+            future = fs.collection(Constants.CLIENTS).add(client);
             LOGGER.info("\uD83C\uDF4F \uD83C\uDF4F Client added at path: ".concat(future.get().getPath()));
             return "\uD83C\uDF4F Client added";
         } else {
-            throw new Exception("Client already exists for this Anchor");
+            mClient.setAnchorId(client.getAnchorId());
+            mClient.setClientId(client.getClientId());
+            mClient.setDateUpdated(new DateTime().toDateTimeISO().toString());
+            try {
+                DocumentReference ref = future.get();
+                ref.set(mClient);
+                String msg = "Client already exists for this Anchor; updated with new data";
+                LOGGER.info("\uD83C\uDF3C \uD83C\uDF3C " + msg);
+                return msg;
+            } catch (Exception e) {
+                LOGGER.info("\uD83C\uDF3C \uD83C\uDF3C Unable to update Client");
+            }
+            return null;
         }
+
     }
 
     @Override
@@ -271,12 +286,23 @@ public class FirebaseService implements DatabaseServiceInterface {
         Agent current = getAgentByNameAndAnchor(
                 agent.getPersonalKYCFields().getFirst_name(),
                 agent.getPersonalKYCFields().getLast_name());
+        ApiFuture<DocumentReference> future = null;
         if (current == null) {
-            ApiFuture<DocumentReference> future = fs.collection(Constants.AGENTS).add(agent);
+            future = fs.collection(Constants.AGENTS).add(agent);
             LOGGER.info("\uD83C\uDF4F \uD83C\uDF4F Agent added at path: ".concat(future.get().getPath()));
             return "\uD83C\uDF4F Agent added";
         } else {
-            throw new Exception("Agent already exists for this Anchor");
+            try {
+            DocumentReference ref = future.get();
+            current.setAgentId(agent.getAgentId());
+            current.setAnchorId(agent.getAnchorId());
+            current.setStellarAccountId(agent.getStellarAccountId());
+            ref.set(current);
+            return "\uD83C\uDF4F Agent already exists for this Anchor, updated with new data!";
+            } catch (Exception e) {
+                LOGGER.info("\uD83C\uDF3C \uD83C\uDF3C Unable to update Agent");
+            }
+            return null;
         }
     }
 
@@ -475,7 +501,7 @@ public class FirebaseService implements DatabaseServiceInterface {
         }
         String anchorId = toml.getString("anchorId");
         Firestore fs = FirestoreClient.getFirestore();
-        Anchor info;
+        Anchor mAnchor;
         List<Anchor> mList = new ArrayList<>();
         ApiFuture<QuerySnapshot> future = fs.collection(Constants.ANCHORS)
                 .whereEqualTo("anchorId", anchorId)
@@ -484,16 +510,17 @@ public class FirebaseService implements DatabaseServiceInterface {
         for (QueryDocumentSnapshot document : future.get().getDocuments()) {
             Map<String, Object> map = document.getData();
             String object = G.toJson(map);
-            Anchor mInfo = G.fromJson(object, Anchor.class);
-            mList.add(mInfo);
+            Anchor anchor = G.fromJson(object, Anchor.class);
+            mList.add(anchor);
         }
         if (mList.isEmpty()) {
+            LOGGER.info("\uD83C\uDF3C \uD83C\uDF3C \uD83C\uDF3C \uD83C\uDF3C No anchor found ... wtf? returning null");
             return null;
         } else {
-            info = mList.get(0);
+            mAnchor = mList.get(0);
         }
 
-        return info;
+        return mAnchor;
     }
 
     @Override
