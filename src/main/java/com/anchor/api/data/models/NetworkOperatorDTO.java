@@ -13,12 +13,30 @@ public class NetworkOperatorDTO {
             email,
             cellphone,
             password,
+            stellarAccountId,
+            rippleAccountId,
             uid;
     private double minimumInvoiceAmount,
             maximumInvoiceAmount,
             maximumInvestment,
             tradeFrequencyInMinutes,
             defaultOfferDiscount;
+
+    public String getRippleAccountId() {
+        return rippleAccountId;
+    }
+
+    public void setRippleAccountId(String rippleAccountId) {
+        this.rippleAccountId = rippleAccountId;
+    }
+
+    public String getStellarAccountId() {
+        return stellarAccountId;
+    }
+
+    public void setStellarAccountId(String stellarAccountId) {
+        this.stellarAccountId = stellarAccountId;
+    }
 
     public List<TradeMatrixItemDTO> getTradeMatrixItems() {
         return tradeMatrixItems;

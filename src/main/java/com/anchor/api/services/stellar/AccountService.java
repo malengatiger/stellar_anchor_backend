@@ -42,8 +42,7 @@ import java.util.logging.Logger;
 public class AccountService {
     public static final Logger LOGGER = Logger.getLogger(AccountService.class.getSimpleName());
     private static final Gson G = new GsonBuilder().setPrettyPrinting().create();
-    private static final String FRIEND_BOT = "https://friendbot.stellar.org/?addr=%s",
-            LUMENS = "lumens";
+    private static final String FRIEND_BOT = "https://friendbot.stellar.org/?addr=%s";
     private static final int TIMEOUT_IN_SECONDS = 180;
     private boolean isDevelopment;
     private Server server;
@@ -107,23 +106,7 @@ public class AccountService {
         if (anchor != null) {
             return;
         }
-        final Toml toml = tomlService.getAnchorToml();
-        if (toml == null) {
-            throw new Exception("anchor.toml has not been found. upload the file from your computer");
-        } else {
-            final String id = toml.getString("anchorId");
-            if (id == null) {
-                String msg = E.NOT_OK.concat("anchorId missing from anchor.toml ".concat(E.FIRE));
-                LOGGER.info(msg);
-                throw new Exception(msg);
-            }
-            anchor = firebaseService.getAnchor();
-            if (anchor == null) {
-                LOGGER.info(E.FIRE
-                        .concat(E.FIRE.concat(E.FIRE).concat("We are fucked! There is no ANCHOR !!!")));
-            }
-        }
-
+        anchor = firebaseService.getAnchor();
     }
 
     public AccountResponse getAccountUsingSeed(final String seed) throws IOException {
@@ -236,7 +219,10 @@ public class AccountService {
                 + " fiatLimit: " + fiatLimit);
         setServerAndNetwork();
         setAnchor();
-        AccountResponseBag accountResponseBag = null;
+        if (anchor == null) {
+            throw new Exception("Anchor is missing! Big problem, Boss! Please check collection names used");
+        }
+        AccountResponseBag accountResponseBag;
         try {
             LOGGER.info(E.PEAR.concat(E.PEAR.concat("Getting encrypted seed (BaseAccount AccountId)from storage; \uD83C\uDF4E \uD83C\uDF4E will decrypt and use ...")));
             final String baseSeed = cryptoService.getDecryptedSeed(anchor.getBaseAccount().getAccountId());
@@ -245,7 +231,8 @@ public class AccountService {
 
             final AccountResponse baseAccount = server.accounts().account(sourceKeyPair.getAccountId());
 
-            LOGGER.info(E.PEAR.concat(E.PEAR.concat("Getting encrypted seed (DistributionAccount AccountId)from storage; \uD83C\uDF4E \uD83C\uDF4E will decrypt and use ...")));
+            LOGGER.info(E.PEAR.concat(E.PEAR.concat("Getting encrypted seed (DistributionAccount AccountId)from storage; " +
+                    "\uD83C\uDF4E \uD83C\uDF4E will decrypt and use ...")));
 
             final String distributionSeed = cryptoService
                     .getDecryptedSeed(anchor.getDistributionAccount().getAccountId());
@@ -261,10 +248,10 @@ public class AccountService {
             final SubmitTransactionResponse submitTransactionResponse = server.submitTransaction(transaction);
 
             if (submitTransactionResponse.isSuccess()) {
-                // add trustlines and first payment for all fiat tokens
+                // add trustLines and first payment for all fiat tokens
                 LOGGER.info(E.LEAF.concat(E.LEAF).concat(E.LEAF).concat(E.LEAF)
                         + "Stellar account created: ".concat(E.LEAF).concat(E.LEAF).concat(" ")
-                        .concat(keyPair.getAccountId()).concat(" ... about to start creating trustlines ..."));
+                        .concat(keyPair.getAccountId()).concat(" ... about to start creating trustLines ..."));
                accountResponseBag = addTrustLinesAndOriginalBalances(fiatLimit,
                         startingFiatBalance, keyPair, distributionKeyPair);
                 LOGGER.info(E.LEAF.concat(E.LEAF.concat(E.LEAF))
@@ -298,30 +285,31 @@ public class AccountService {
 
         final List<AssetBag> assetBags = getDefaultAssets(anchor.getIssuingAccount().getAccountId());
         LOGGER.info(E.PEAR.concat(E.PEAR)
-                .concat(("addTrustlinesAndOriginalBalances: "
-                        + "Building transaction with trustline operations ... FIAT ASSETS: " + assetBags.size())
-                        .concat(E.RED_DOT)));
+                .concat(("addTrustLinesAndOriginalBalances: limit: "
+                        + limit + " startingFiatBalance: " + startingFiatBalance
+                        + "Building transaction with trustLine operations ... FIAT ASSETS: " + assetBags.size())
+                        .concat(" " + E.RED_DOT + E.RED_DOT)));
         final AccountResponse account = server.accounts().account(userKeyPair.getAccountId());
-        final Transaction.Builder trustlineTxBuilder = new Transaction.Builder(account, network);
+        final Transaction.Builder trustLineTxBuilder = new Transaction.Builder(account, network);
         for (final AssetBag assetBag : assetBags) {
-            trustlineTxBuilder.addOperation(new ChangeTrustOperation.Builder(assetBag.asset, limit).build());
+            trustLineTxBuilder.addOperation(new ChangeTrustOperation.Builder(assetBag.asset, limit).build());
         }
-        final Transaction userTrustlineTx = trustlineTxBuilder.addMemo(Memo.text("User Trustline Tx")).setTimeout(180)
+        final Transaction userTrustLineTx = trustLineTxBuilder.addMemo(Memo.text("User TrustLine Tx")).setTimeout(180)
                 .setBaseFee(100).build();
 
-        userTrustlineTx.sign(userKeyPair);
+        userTrustLineTx.sign(userKeyPair);
         LOGGER.info(E.PEAR.concat(E.PEAR)
-                .concat(("addTrustlinesAndOriginalBalances: " + "Submitting transaction with trustline operations ... ")
-                        .concat(E.RED_DOT)));
-        final SubmitTransactionResponse trustlineTransactionResponse = server.submitTransaction(userTrustlineTx);
+                .concat(("addTrustLinesAndOriginalBalances: " + "Submitting transaction with trustLine operations ... ")
+                        .concat(" " + E.RED_DOT + E.RED_DOT)));
+        final SubmitTransactionResponse trustLineTransactionResponse = server.submitTransaction(userTrustLineTx);
         LOGGER.info(
-                E.HAND1.concat(E.HAND2.concat(E.HAND3)) + "User Trustline transaction response; isSuccess: "
-                        .concat("" + trustlineTransactionResponse.isSuccess()));
-        if (trustlineTransactionResponse.isSuccess()) {
+                E.HAND1.concat(E.HAND2.concat(E.HAND3)) + "User TrustLine transaction response; isSuccess: "
+                        .concat("" + trustLineTransactionResponse.isSuccess()));
+        if (trustLineTransactionResponse.isSuccess()) {
             return sendFiatPayments(startingFiatBalance, userKeyPair, distributionKeyPair, assetBags);
         } else {
 //
-//            TransactionResult transactionResult = trustlineTransactionResponse.getDecodedTransactionResult().get();
+//            TransactionResult transactionResult = trustLineTransactionResponse.getDecodedTransactionResult().get();
 //            AllowTrustResult allowTrustResult = null;
 //            for (OperationResult result : transactionResult.getResult().getResults()) {
 //                if (result.getTr().getCreateAccountResult() != null) {
@@ -353,8 +341,8 @@ public class AccountService {
 //                    LOGGER.info(msg);
 //                    throw new Exception(msg);
 //            }
-            if (trustlineTransactionResponse.getExtras() != null) {
-                SubmitTransactionResponse.Extras.ResultCodes codes = trustlineTransactionResponse.getExtras().getResultCodes();
+            if (trustLineTransactionResponse.getExtras() != null) {
+                SubmitTransactionResponse.Extras.ResultCodes codes = trustLineTransactionResponse.getExtras().getResultCodes();
                 if (codes.getTransactionResultCode().contains("tx_failed")) {
                     LOGGER.info(E.PEPPER+ E.PEPPER + "CreateAccount Transaction failed ".concat(E.NOT_OK+ E.NOT_OK));
                     for (String code : codes.getOperationsResultCodes()) {
@@ -510,13 +498,13 @@ public class AccountService {
      * Error Code Description CHANGE_TRUST_MALFORMED -1 The input to this operation
      * is invalid. CHANGE_TRUST_NO_ISSUER -2 The issuer of the asset cannot be
      * found. CHANGE_TRUST_INVALID_LIMIT -3 The limit is not sufficient to hold the
-     * current balance of the trustline and still satisfy its buying liabilities.
+     * current balance of the trustLine and still satisfy its buying liabilities.
      * CHANGE_TRUST_LOW_RESERVE -4 This account does not have enough XLM to satisfy
-     * the minimum XLM reserve increase caused by adding a subentry and still
-     * satisfy its XLM selling liabilities. For every new trustline added to an
+     * the minimum XLM reserve increase caused by adding a subEntry and still
+     * satisfy its XLM selling liabilities. For every new trustLine added to an
      * account, the minimum reserve of XLM that account must hold increases.
      * CHANGE_TRUST_SELF_NOT_ALLOWED -5 The source account attempted to create a
-     * trustline for itself, which is not allowed.
+     * trustLine for itself, which is not allowed.
      */
     public SubmitTransactionResponse changeTrustLine(final String issuingAccount, final String userSeed,
                                                      final String limit, final String assetCode) throws Exception {

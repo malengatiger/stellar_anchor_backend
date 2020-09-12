@@ -27,7 +27,9 @@ import java.util.List;
 import java.util.logging.Logger;
 
 @CrossOrigin(maxAge = 3600)
+@RequestMapping("/data")
 @RestController
+
 public class DataGenerationController {
     public static final Logger LOGGER = Logger.getLogger(AnchorController.class.getSimpleName());
     private static final Gson G = new GsonBuilder().setPrettyPrinting().create();
@@ -53,7 +55,7 @@ public class DataGenerationController {
 
     @GetMapping(value = "/generateAnchor", produces = MediaType.APPLICATION_JSON_VALUE)
     public Anchor generateAnchor(@RequestParam String anchorName, @RequestParam String fundingSeed) throws Exception {
-        LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 StellarAnchorApplication /generateAnchor ... \uD83D\uDD35: "+ anchorName);
+        LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 StellarAnchorApplication data/generateAnchor ... \uD83D\uDD35: "+ anchorName);
         Anchor anchor = demoDataGenerator.createNewAnchor(anchorName, fundingSeed);
 
         LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C GenerateDemoData:generateAnchor completed and returning anchor "
@@ -62,9 +64,6 @@ public class DataGenerationController {
                 .concat("New Anchor Returned")
                 .concat(G.toJson(anchor))));
 
-//        NetworkOperatorDTO networkOperator = demoDataGenerator.createNetworkOperator(anchorName);
-//        //todo - this operator is the BOSS of the BFN platform; so we need to call the BFN Web API server .... http call ...
-//        NetworkOperatorDTO m = createBFNNetworkOperator(networkOperator);
         LOGGER.info("\n\n \uD83C\uDF4E \uD83C\uDF4E \uD83C\uDF4E \uD83C\uDF4E");
         LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C ################################################################## \uD83D\uDC99 \uD83D\uDC9C");
         LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C 1. CHECK ANCHOR and NETWORK OPERATOR on Firestore  \uD83D\uDC99 \uD83D\uDC9C");
@@ -78,6 +77,8 @@ public class DataGenerationController {
 
         return anchor;
     }
+
+
     @PostMapping(value = "/generateNetworkOperator", produces = MediaType.APPLICATION_JSON_VALUE)
     public NetworkOperatorDTO createBFNNetworkOperator(NetworkOperatorDTO operator) throws Exception {
         LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 StellarAnchorApplication /createBFNNetworkOperator ... \uD83D\uDD35: " + bfnUrl);
@@ -95,12 +96,13 @@ public class DataGenerationController {
     }
     @GetMapping(value = "/generateDemo", produces = MediaType.TEXT_PLAIN_VALUE)
     public String generateDemo() throws Exception {
-        LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 StellarAnchorApplication /generateDemo ...");
+        LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 StellarAnchorApplication data/generateDemo ...");
         checkTOML();
         demoDataGenerator.startGeneration();
         return "\n\n\uD83D\uDC99 \uD83D\uDC9C GenerateDemoData completed ... "
                 + new Date().toString() + " \uD83D\uDC99 \uD83D\uDC9C STATUS: " + status;
     }
+
 
     private void checkTOML() throws Exception {
         Toml toml = tomlService.getAnchorToml();

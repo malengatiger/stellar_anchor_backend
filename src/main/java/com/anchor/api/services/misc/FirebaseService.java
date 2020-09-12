@@ -493,18 +493,11 @@ public class FirebaseService implements DatabaseServiceInterface {
     private Toml toml;
     @Override
     public Anchor getAnchor() throws Exception {
-        if (toml == null) {
-           toml = tomlService.getAnchorToml();
-           if (toml == null) {
-               throw new Exception("Generator: Anchor TOML file is missing: ");
-           }
-        }
-        String anchorId = toml.getString("anchorId");
+
         Firestore fs = FirestoreClient.getFirestore();
         Anchor mAnchor;
         List<Anchor> mList = new ArrayList<>();
         ApiFuture<QuerySnapshot> future = fs.collection(Constants.ANCHORS)
-                .whereEqualTo("anchorId", anchorId)
                 .limit(1)
                 .get();
         for (QueryDocumentSnapshot document : future.get().getDocuments()) {
@@ -611,15 +604,11 @@ public class FirebaseService implements DatabaseServiceInterface {
 
     @Override
     public List<Agent> getAgents() throws Exception {
-        Toml toml = tomlService.getAnchorToml();
-        if (toml == null) {
-            throw new Exception("Generator: Anchor TOML file is missing: ");
-        }
-        String anchorId = toml.getString("anchorId");
+        Anchor anchor = getAnchor();
         Firestore fs = FirestoreClient.getFirestore();
         List<Agent> mList = new ArrayList<>();
         ApiFuture<QuerySnapshot> future = fs.collection(Constants.AGENTS)
-                .whereEqualTo("anchorId", anchorId).get();
+                .whereEqualTo("anchorId", anchor.getAnchorId()).get();
         for (QueryDocumentSnapshot document : future.get().getDocuments()) {
             Map<String, Object> map = document.getData();
             String object = G.toJson(map);

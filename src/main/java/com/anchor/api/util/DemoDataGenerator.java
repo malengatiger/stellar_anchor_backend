@@ -71,34 +71,37 @@ public class DemoDataGenerator {
     private NetworkUtil networkUtil;
     @Value("${bfnUrl}")
     private String bfnUrl;
+    @Value("${bfnCustomerUrl}")
+    private String bfnCustomerUrl;
     private String seed;
+
+    String concat = E.FERN.concat(E.FIRE.concat(E.FIRE.concat(E.FIRE)));
+
     public Anchor createNewAnchor(String anchorName, String fundingSeed) throws Exception {
         if (!status.equalsIgnoreCase("dev")) {
             throw new Exception(E.NOT_OK + "Demo Data Generation may not be run in PRODUCTION");
         }
+
+        LOGGER.info(concat
+                + "Start createNewAnchor .... createNetworkOperator  \uD83D\uDECE AND STELLAR.TOML for " + anchorName);
         seed = fundingSeed;
         deleteFirebaseArtifacts();
+        LOGGER.info(concat
+                + "Firebase collections and users have been deleted for \uD83D\uDD06 " + anchorName);
         Anchor mAnchor = addAnchor(anchorName);
-        LOGGER.info(E.FERN.concat(E.FIRE.concat(E.FIRE.concat(E.FIRE)))
-                + "Start Anchor complete. Complete generation after copying anchorId to anchor.toml \uD83D\uDECE AND STELLAR.TOML");
+        if (mAnchor == null) {
+            String msg = "\uD83D\uDD06 \uD83D\uDD06 \uD83D\uDD06 createNewAnchor: Anchor missing; is NULL";
+            LOGGER.info(" \uD83C\uDF40  \uD83C\uDF40 " + msg);
+            throw new Exception(msg);
+        }
+        LOGGER.info(concat
+                + "Start Anchor complete. Complete generation after copying anchorId to anchor.toml " +
+                "\uD83D\uDECE AND updating STELLAR.TOML. Will start creating NetworkOperator");
         LOGGER.info(E.RED_APPLE + E.RED_APPLE + G.toJson(mAnchor));
-        createNetworkOperator(anchorName);
+
         return mAnchor;
     }
 
-    public NetworkOperatorDTO createNetworkOperator(String anchorName) throws Exception {
-        if (!status.equalsIgnoreCase("dev")) {
-            throw new Exception(E.NOT_OK + "Demo Data Generation may not be run in PRODUCTION");
-        }
-        NetworkOperatorDTO mOperator = buildNetworkOperator(anchorName);
-
-        NetworkOperatorDTO operator = networkUtil.createBFNNetworkOperator(bfnUrl + "createNetworkOperator", mOperator);
-
-        LOGGER.info(E.FERN.concat(E.FIRE.concat(E.FIRE.concat(E.FIRE)))
-                + "createNetworkOperator: complete. Complete generation after checking all the shit!");
-        LOGGER.info(E.RED_APPLE + E.RED_APPLE + G.toJson(operator));
-        return mOperator;
-    }
 
     public void startGeneration() throws Exception {
         if (!status.equalsIgnoreCase("dev")) {
@@ -123,7 +126,7 @@ public class DemoDataGenerator {
         }
 
         LOGGER.info("\n\n" + concat
-                + "........ Start Demo Data Generation ........".concat(E.HEART_BLUE.concat(E.HEART_BLUE)));
+                + "........ Start Demo Data Generation : Agents and Clients ........".concat(E.HEART_BLUE.concat(E.HEART_BLUE)));
 
         addAgents(mAnchor);
         generateAgentClients(3, mAnchor);
@@ -388,8 +391,12 @@ public class DemoDataGenerator {
 
     private void deleteFirebaseArtifacts() throws Exception {
         // delete users and collections
+        LOGGER.info(concat
+                + "Start deleteFirebaseArtifacts .... deleteAuthUsers  \uD83D\uDECE");
         firebaseService.deleteAuthUsers();
         LOGGER.info(E.SOCCER_BALL.concat(E.SOCCER_BALL) + "Firebase auth users have been cleaned out");
+        LOGGER.info(concat
+                + "Start deleteFirebaseArtifacts .... deleteCollections  \uD83D\uDECE");
         firebaseService.deleteCollections();
         LOGGER.info(E.BASKET_BALL.concat(E.BASKET_BALL) + "Firestore collections have been cleaned out");
     }
@@ -618,7 +625,7 @@ public class DemoDataGenerator {
         // create anchor bag ...
         AnchorBag bag = new AnchorBag();
         bag.setFundingSeed(seed);
-        bag.setAssetAmount("99999999000");
+        bag.setAssetAmount("1000000000");
         bag.setStartingBalance("9900");
         bag.setPassword(basePassword);
 
@@ -660,7 +667,7 @@ public class DemoDataGenerator {
         matrixItemDTOS.add(m3);
         matrixItemDTOS.add(m4);
 
-        NetworkOperatorDTO operator = new NetworkOperatorDTO( );
+        NetworkOperatorDTO operator = new NetworkOperatorDTO();
 
         operator.setIssuedBy("SELF");
         operator.setAccountId(UUID.randomUUID().toString());
@@ -668,7 +675,7 @@ public class DemoDataGenerator {
         operator.setMaximumInvoiceAmount(1000000.00);
         operator.setMaximumInvestment(250000000.00);
         operator.setTradeFrequencyInMinutes(30);
-        operator.setName(anchorName);
+        operator.setName(anchorName + " (Network Operator)");
         operator.setEmail("netoperator@bfn.com");
         operator.setCellphone("099 999 9999");
         operator.setPassword("pass123");

@@ -1,7 +1,10 @@
 package com.anchor.api.controllers.stellar;
 
+import com.anchor.api.data.AccountInfoDTO;
 import com.anchor.api.data.AgentFundingRequest;
 import com.anchor.api.data.PaymentRequest;
+import com.anchor.api.data.account.AccountResponseBag;
+import com.anchor.api.data.account.StellarResponse;
 import com.anchor.api.data.anchor.Anchor;
 import com.anchor.api.data.anchor.AnchorBag;
 import com.anchor.api.data.anchor.Client;
@@ -224,7 +227,8 @@ public class AnchorController {
 
     @PostMapping(value = "/createAnchor", produces = MediaType.APPLICATION_JSON_VALUE)
     public Anchor createAnchor(@RequestBody AnchorBag anchorBag) throws Exception {
-        LOGGER.info(em + " AnchorController:createAnchor ...");
+        LOGGER.info(em + " ,,,,,, AnchorController:createAnchor started by DemoDataController ,,,,,,,,,,,,,," + em);
+        LOGGER.info(G.toJson(anchorBag));
         if (anchorBag.getFundingSeed() == null) {
             throw new Exception("Funding Account Seed missing");
         }
@@ -237,6 +241,8 @@ public class AnchorController {
         if (anchorBag.getStartingBalance() == null) {
             throw new Exception("StartingBalance  missing");
         }
+        LOGGER.info(em + " ,,,,,, AnchorController:createAnchor started by DemoDataController :" +
+                " anchorAccountService.createAnchorAccounts starting ,,,,,,,,,,,,,," + em);
         Anchor anchor = anchorAccountService.createAnchorAccounts(
                 anchorBag.getAnchor(),
                 anchorBag.getPassword(),
@@ -255,18 +261,24 @@ public class AnchorController {
     private NetworkUtil networkUtil;
     @Value("${bfnUrl}")
     private String bfnUrl;
+    @Value("${startingXLMBalance}")
+    private String startingXLMBalance;
+    @Value("${startingFiatBalance}")
+    private String startingFiatBalance;
+    @Value("${fiatLimit}")
+    private String fiatLimit;
 
-    @PostMapping(value = "/createNetworkOperator", produces = MediaType.APPLICATION_JSON_VALUE)
-    public NetworkOperatorDTO createNetworkOperator(@RequestBody NetworkOperatorDTO operator) throws Exception {
-        LOGGER.info(em + " AnchorController:createNetworkOperator on Firebase ...");
+    @PostMapping(value = "/createStellarAccount", produces = MediaType.APPLICATION_JSON_VALUE)
+    public StellarResponse createStellarAccount() throws Exception {
+        LOGGER.info(em + " AnchorController:createStellarAccount on the anchor platform ...");
 
-        operator.setDate(new DateTime().toDateTimeISO().toString());
-        operator.setUid(UUID.randomUUID().toString());
-        NetworkOperatorDTO n = networkUtil.createBFNNetworkOperator(bfnUrl + "createNetworkOperator", operator);
+        AccountResponseBag account = accountService.createAndFundUserAccount(
+                startingXLMBalance,startingFiatBalance,fiatLimit);
 
-        LOGGER.info(E.LEAF + " AnchorController:createNetworkOperator returns: \uD83C\uDF4E " );
-        LOGGER.info(G.toJson(operator));
-        return n;
+        LOGGER.info(E.LEAF + " AnchorController:createStellarAccount returns: \uD83C\uDF4E " );
+        LOGGER.info(G.toJson(account));
+        return new StellarResponse(account.getAccountResponse().getAccountId(),
+                account.getSecretSeed());
     }
 
 

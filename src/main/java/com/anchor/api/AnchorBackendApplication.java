@@ -28,11 +28,16 @@ import org.springframework.boot.Banner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
+import org.springframework.boot.web.server.WebServerFactoryCustomizer;
+import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.stereotype.Component;
 
 import java.io.PrintStream;
 import java.lang.reflect.Method;
@@ -237,6 +242,18 @@ public class AnchorBackendApplication implements ApplicationListener<Application
         }
 
         return true;
+    }
+
+    @Component
+    public class Configurer implements
+            WebServerFactoryCustomizer<TomcatServletWebServerFactory> {
+
+        @Override
+        public void customize(TomcatServletWebServerFactory factory) {
+            factory.setContextPath("/anchor");
+//            factory.setPort(8080);
+            LOGGER.info("\uD83C\uDFB2 \uD83C\uDFB2 \uD83C\uDFB2... context path has been set to /anchor \uD83C\uDFB2");
+        }
     }
 }
 //11140
