@@ -94,6 +94,7 @@ public class DataGenerationController {
                 .concat(G.toJson(m))));
         return m;
     }
+
     @GetMapping(value = "/generateDemo", produces = MediaType.TEXT_PLAIN_VALUE)
     public String generateDemo() throws Exception {
         LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 StellarAnchorApplication data/generateDemo ...");

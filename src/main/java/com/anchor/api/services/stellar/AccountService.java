@@ -140,6 +140,7 @@ public class AccountService {
         return seed;
     }
 
+    private static final int STELLAR_TIMEOUT_IN_SECONDS = 360, STELLAR_BASE_FEE = 100;
     public AccountResponseBag createAndFundAnchorAccount(final String seed, final String startingBalance)
             throws Exception {
         LOGGER.info("\n\n\uD83D\uDC99 \uD83D\uDC99 \uD83D\uDC99 \uD83C\uDF4E... ... ... ... AccountService: createAndFundAnchorAccount starting ....... startingBalance: "
@@ -156,7 +157,9 @@ public class AccountService {
             final Transaction transaction = new Transaction.Builder(sourceAccount, network)
                     .addOperation(new CreateAccountOperation.Builder(newAccountKeyPair.getAccountId(), startingBalance)
                             .build())
-                    .addMemo(Memo.text("CreateAccount Tx")).setTimeout(180).setBaseFee(100).build();
+                    .addMemo(Memo.text("CreateAccount Tx"))
+                    .setTimeout(STELLAR_TIMEOUT_IN_SECONDS)
+                    .setBaseFee(STELLAR_BASE_FEE).build();
 
             transaction.sign(sourceKeyPair);
 
@@ -173,8 +176,11 @@ public class AccountService {
                 cryptoService.encrypt(bag.getAccountResponse().getAccountId(), secret);
                 return bag;
             } else {
+                LOGGER.info("\uD83D\uDC7F \uD83D\uDE21 Things have not gone well, Senor! " +
+                        "\uD83D\uDC7F \uD83D\uDE21 submitTransactionResponse: " + submitTransactionResponse.toString());
                 if (submitTransactionResponse.getExtras() != null) {
                     SubmitTransactionResponse.Extras.ResultCodes codes = submitTransactionResponse.getExtras().getResultCodes();
+                    LOGGER.info("\uD83D\uDC7F \uD83D\uDE21 SubmitTransactionResponse: getTransactionResultCode: " + codes.getTransactionResultCode());
                     if (codes.getTransactionResultCode().contains("tx_failed")) {
                         LOGGER.info(E.PEPPER+ E.PEPPER + "CreateAccount Transaction failed ".concat(E.NOT_OK+ E.NOT_OK));
                         for (String code : codes.getOperationsResultCodes()) {
@@ -599,13 +605,10 @@ public class AccountService {
             LOGGER.info(
                     "\uD83C\uDF3C \uD83C\uDF3C ... currencies from stellar.toml: \uD83C\uDF3C \uD83C\uDF3C : " + currencies.size());
             for (final HashMap currency : currencies) {
-                LOGGER.info(G.toJson(currency));
-                LOGGER.info(
-                        "\uD83C\uDF3C \uD83C\uDF3C ... currency from stellar.toml: \uD83C\uDF3C \uD83C\uDF3C : " + currency.values().toString());
-//                if (issuingAccount.equalsIgnoreCase(currency.get("issuer").toString())) {
+
                 final String code = currency.get("code").toString();
                 mList.add(new AssetBag(code, Asset.createNonNativeAsset(code, issuingAccount)));
-//                }
+//
             }
         } else {
             LOGGER.info(" \uD83C\uDF45 stellar.toml : File NOT found. this is where .toml needs to go;  \uD83C\uDF45 ");
@@ -619,25 +622,7 @@ public class AccountService {
             mList.add(new AssetBag("USD", Asset.createNonNativeAsset("USD", issuingAccount)));
             mList.add(new AssetBag("GBP", Asset.createNonNativeAsset("GBP", issuingAccount)));
             mList.add(new AssetBag("EUR", Asset.createNonNativeAsset("EUR", issuingAccount)));
-            // mList.add(new AssetBag("CHF", Asset.createNonNativeAsset("CHF",
-            // issuingAccount)));
-            // mList.add(new AssetBag("CNY", Asset.createNonNativeAsset("CNY",
-            // issuingAccount)));
-            // Currencies in Africa
-            // mList.add(new AssetBag("BWP", Asset.createNonNativeAsset("BWP",
-            // issuingAccount)));
-            // mList.add(new AssetBag("ETB", Asset.createNonNativeAsset("ETB",
-            // issuingAccount)));
-            // mList.add(new AssetBag("NGN", Asset.createNonNativeAsset("NGN",
-            // issuingAccount)));
-            // mList.add(new AssetBag("KES", Asset.createNonNativeAsset("KES",
-            // issuingAccount)));
-            // mList.add(new AssetBag("RWF", Asset.createNonNativeAsset("RWF",
-            // issuingAccount)));
-            // mList.add(new AssetBag("MUR", Asset.createNonNativeAsset("MUR",
-            // issuingAccount)));
 
-            // todo - write currencies to stellar.toml
         }
 
         return mList;

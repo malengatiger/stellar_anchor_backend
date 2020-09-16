@@ -85,7 +85,7 @@ import java.util.List;
  */
 public class Client {
     private String anchorId,
-            clientId, startingFiatBalance, firstName, lastName;
+            clientId, startingFiatBalance;
     private double latitude, longitude;
     private String dateRegistered,
             dateUpdated,
@@ -99,25 +99,6 @@ public class Client {
     private String memo_type;
     private PersonalKYCFields personalKYCFields;
     private boolean active;
-
-    public String getFullName() {
-        return firstName + " " + lastName;
-    }
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
 
     public String getAnchorId() {
         return anchorId;

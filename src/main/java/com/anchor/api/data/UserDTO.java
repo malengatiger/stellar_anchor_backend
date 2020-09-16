@@ -5,7 +5,25 @@ public class UserDTO {
             email,
             password,
             cellphone,
-            uid;
+            uid,
+            stellarAccountId,
+            rippleAccountId;
+
+    public String getStellarAccountId() {
+        return stellarAccountId;
+    }
+
+    public void setStellarAccountId(String stellarAccountId) {
+        this.stellarAccountId = stellarAccountId;
+    }
+
+    public String getRippleAccountId() {
+        return rippleAccountId;
+    }
+
+    public void setRippleAccountId(String rippleAccountId) {
+        this.rippleAccountId = rippleAccountId;
+    }
 
     public String getName() {
         return name;

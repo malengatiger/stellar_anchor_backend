@@ -571,7 +571,7 @@ public class DemoDataGenerator {
                 try {
                     LOGGER.info(
                             E.PANDA.concat(E.PANDA).concat(E.PANDA).concat("Generate LoanApplication for: ")
-                                    .concat(client.getFullName()).concat("  \uD83C\uDF51 asset: ")
+                                    .concat(client.getPersonalKYCFields().getFirst_name()).concat("  \uD83C\uDF51 asset: ")
                                     .concat(assetBag.getAssetCode()).concat(" \uD83D\uDC26 interest rate: "
                                     + app.getInterestRate() + " % ".concat("  \uD83C\uDFB2 ")));
                     agentService.addLoanApplication(app);
@@ -725,7 +725,7 @@ public class DemoDataGenerator {
                 c1.setAnchorId(anchor.getAnchorId());
                 Client result = agentService.createClient(c1);
                 LOGGER.info(E.LEMON.concat(E.LEMON).concat(".......... agent Client created: ")
-                        .concat(result.getFullName()));
+                        .concat(result.getPersonalKYCFields().getFirst_name()));
             }
         }
     }

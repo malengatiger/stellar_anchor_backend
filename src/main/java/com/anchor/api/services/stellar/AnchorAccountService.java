@@ -83,6 +83,7 @@ public class AnchorAccountService {
 
     To trust an issuing account, you create a trustline. Trustlines are entries that persist in the Stellar ledger. They track the limit for which your account trusts the issuing account and the amount of credit from the issuing account that your account currently holds.
  */
+    private final String err = "\uD83D\uDC7F \uD83D\uDE21";
     public Anchor createAnchorAccounts(Anchor newAnchor, String password,
                                        String assetAmount, String fundingSeed, String startingBalance)
             throws Exception {
@@ -98,12 +99,30 @@ public class AnchorAccountService {
         anchor.setCellphone(newAnchor.getCellphone());
         anchor.setAnchorId(UUID.randomUUID().toString());
 
-        AccountResponseBag baseAccount = accountService.createAndFundAnchorAccount(
-                fundingSeed,startingBalance);
-        AccountResponseBag distributionAccount = accountService.createAndFundAnchorAccount(
-                baseAccount.getSecretSeed(),anchorStartingBalance);
-        AccountResponseBag issuingAccount = accountService.createAndFundAnchorAccount(
-                baseAccount.getSecretSeed(),anchorStartingBalance);
+        AccountResponseBag baseAccount = null;
+        AccountResponseBag distributionAccount = null;
+        AccountResponseBag issuingAccount = null;
+        try {
+            baseAccount = accountService.createAndFundAnchorAccount(
+                    fundingSeed, startingBalance);
+             distributionAccount = accountService.createAndFundAnchorAccount(
+                    baseAccount.getSecretSeed(), anchorStartingBalance);
+             issuingAccount = accountService.createAndFundAnchorAccount(
+                    baseAccount.getSecretSeed(), anchorStartingBalance);
+        } catch (Exception e) {
+            String msg = err + "The Anchor set of Stellar accounts failed to complete creation.  " + err;
+            if (baseAccount == null) {
+                msg += " Base Account failed to create ";
+            }
+            if (distributionAccount == null) {
+                msg += " Distribution Account failed to create ";
+            }
+            if (issuingAccount == null) {
+                msg += " IssuingAccount Account failed to create ";
+            }
+            LOGGER.severe(msg);
+            throw e;
+        }
 
         Account base = new Account();
         base.setAccountId(baseAccount.getAccountResponse().getAccountId());
@@ -145,6 +164,13 @@ public class AnchorAccountService {
 
                 LOGGER.info(E.FLOWER_RED + E.FLOWER_RED + "AnchorAccountService: createTrustLine for asset: " + assetBag.assetCode +
                         ".... "+ E.HAPPY+" TrustLine Response isSuccess:  " + createTrustResponse.isSuccess());
+                if (createTrustResponse.isSuccess()) {
+                    LOGGER.info(E.LEAF.concat(E.LEAF).concat("TrustLine created OK: "
+                            + assetBag.assetCode).concat(" " + E.RED_APPLE));
+                } else {
+                    LOGGER.info(E.ERROR.concat(E.ERROR).concat("TrustLine failed to create: "
+                            + assetBag.assetCode).concat(" please tell someone, motherf*cker! " + E.RED_APPLE));
+                }
             }
 
             for (AccountService.AssetBag assetBag : assets) {
@@ -160,16 +186,21 @@ public class AnchorAccountService {
                         .concat(" Asset " + assetBag.assetCode + " \uD83C\uDF4E created? "
                                 + createAssetResponse.isSuccess())
                 .concat(" asset amount: ").concat(assetAmount));
+                if (createAssetResponse.isSuccess()) {
+                    LOGGER.info(E.LEAF.concat(E.LEAF).concat("Anchor Asset created OK: " + assetBag.assetCode).concat(" " + E.RED_APPLE));
+                } else {
+                    LOGGER.info(E.ERROR.concat(E.ERROR).concat("Anchor Asset failed to create: " + assetBag.assetCode).concat(" please tell someone, Ben! " + E.RED_APPLE));
+                }
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            LOGGER.severe(E.NOT_OK + "TrustLine/Asset creation failed" + E.ERROR);
+            LOGGER.info(E.NOT_OK +E.NOT_OK +E.NOT_OK + "TrustLine/Asset creation failed" + E.ERROR);
             throw e;
         }
 
         LOGGER.info(E.LEAF + E.LEAF + E.LEAF +
-                "Anchor created and will be added to Firestore: " +
+                " ............... Anchor created and will be added to Firestore: " +
                 " " + anchor.getName());
         AnchorUser anchorUser = createAnchorUser(anchor, password);
         anchor.setAnchorUser(anchorUser);
