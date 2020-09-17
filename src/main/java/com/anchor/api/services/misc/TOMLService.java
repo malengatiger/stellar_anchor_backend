@@ -103,13 +103,13 @@ public class TOMLService {
         }
         try {
             String data = cryptoService.getDecryptedSeed(ANCHOR_TOML);
-            LOGGER.info(E.LEAF.concat(E.LEAF).concat((".............." +
-                    "anchor.toml decrypted data: ").concat(data)));
+//            LOGGER.info(E.LEAF.concat(E.LEAF).concat((".............." +
+//                    "anchor.toml decrypted data: ").concat(data)));
 
             Path mPath = Files.write(Paths.get(DOWNLOAD_PATH.concat("" + new Date().getTime())), data.getBytes());
-            LOGGER.info(E.LEAF.concat(E.LEAF).concat((".............. path to downloaded file: " + mPath.toAbsolutePath().toString())));
+//            LOGGER.info(E.LEAF.concat(E.LEAF).concat((".............. path to downloaded file: " + mPath.toAbsolutePath().toString())));
             anchorToml = new Toml().read(mPath.toFile());
-            LOGGER.info(E.PRESCRIPTION + E.PRESCRIPTION + E.PRESCRIPTION + "....... anchor.toml file found from encrypted storage.");
+//            LOGGER.info(E.PRESCRIPTION + E.PRESCRIPTION + E.PRESCRIPTION + "....... anchor.toml file found from encrypted storage.");
             boolean isDeleted = mPath.toFile().delete();
             LOGGER.info(E.PRESCRIPTION + E.PRESCRIPTION + E.PRESCRIPTION + "....... temporary download file deleted: " + isDeleted);
             LOGGER.info(anchorToml.toString());

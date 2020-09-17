@@ -66,12 +66,19 @@ public class DataGenerationController {
 
         LOGGER.info("\n\n \uD83C\uDF4E \uD83C\uDF4E \uD83C\uDF4E \uD83C\uDF4E");
         LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C ################################################################## \uD83D\uDC99 \uD83D\uDC9C");
+        LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C 0. Create Stellar Anchor: localhost:8084/anchor/data/generateAnchor  \uD83D\uDC99 \uD83D\uDC9C");
         LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C 1. CHECK ANCHOR and NETWORK OPERATOR on Firestore  \uD83D\uDC99 \uD83D\uDC9C");
         LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C 2. PREPARE STELLAR.TOML and ANCHOR.TOML - edit ANCHOR ID, ISSUING ACCOUNTS etc.  \uD83D\uDC99 \uD83D\uDC9C");
         LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C 3. UPLOAD STELLAR.TOML and ANCHOR.TOML to cloud storage               \uD83D\uDC99 \uD83D\uDC9C");
-        LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C 4. Retrieve account info from Firestore or logs                       \uD83D\uDC99 \uD83D\uDC9C");
-        LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C 5. Generate Anchor Demo Data   \uD83D\uDC99 \uD83D\uDC9C");
-        LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C 6. Generate Network Operator Demo Data  \uD83D\uDC99 \uD83D\uDC9C");
+        LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C 4. Generate Stellar Anchor Demo Data: localhost:8084/anchor/data/generateDemo  \uD83D\uDC99 \uD83D\uDC9C");
+
+
+        LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C 5. Start clean BFN Network: ./scripts/justnodes.sh   \uD83D\uDC99 \uD83D\uDC9C");
+        LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C 6. Create Network Operator with Accounts:: localhost:10050/bfn/demo/generateAnchorNodeData?numberOfAccounts=4  \uD83D\uDC99 \uD83D\uDC9C");
+
+        LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C 7. Generate Customers: localhost:10053/bfn/demo/generateCustomerNodeData  \uD83D\uDC99 \uD83D\uDC9C");
+        LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C 8. Generate BFN Anchor Node Demo Data: localhost:10050/bfn/demo/generateAnchorNodeAccounts?numberOfAccounts=4  \uD83D\uDC99 \uD83D\uDC9C");
+
         LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C ################################################################## \uD83D\uDC99 \uD83D\uDC9C");
         LOGGER.info("\n\n \uD83C\uDF4E \uD83C\uDF4E \uD83C\uDF4E \uD83C\uDF4E");
 

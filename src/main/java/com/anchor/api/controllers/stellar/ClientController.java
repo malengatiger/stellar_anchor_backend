@@ -50,7 +50,7 @@ public class ClientController {
 
         Client mClient = agentService.createClient(client);
         LOGGER.info(E.LEAF.concat(E.LEAF) + "AgentService returns Client with brand new Stellar account: \uD83C\uDF4E "
-                + mClient.getFullName());
+                + mClient.getPersonalKYCFields().getFirst_name());
         return mClient;
 
     }

@@ -229,7 +229,7 @@ public class FirebaseService implements DatabaseServiceInterface {
         }
         ApiFuture<DocumentReference> future = fs.collection(Constants.ANCHORS).add(anchor);
         LOGGER.info("\uD83C\uDF4F \uD83C\uDF4F Anchor added at path: ".concat(future.get().getPath()));
-        return "\uD83C\uDF4F Anchor added";
+        return "\uD83C\uDF4F Anchor added ...";
     }
     @Override
     public String addNetworkOperator(NetworkOperatorDTO networkOperator) throws Exception {

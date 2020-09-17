@@ -638,9 +638,9 @@ public class DemoDataGenerator {
         bag.setAnchor(mAnchor);
         AnchorController controller = context.getBean(AnchorController.class);
         Anchor m = controller.createAnchor(bag);
-        LOGGER.info("\uD83D\uDC9A \uD83D\uDC9A \uD83D\uDC9A \uD83D\uDC9A Anchor: " + G.toJson(m));
+        LOGGER.info("\uD83D\uDC9A \uD83D\uDC9A \uD83D\uDC9A \uD83D\uDC9A Anchor created: "
+        + m.getName());
 
-        LOGGER.info("\uD83D\uDC9A \uD83D\uDC9A \uD83D\uDC9A \uD83D\uDC9A Anchor: " + G.toJson(m));
         return m;
 
     }

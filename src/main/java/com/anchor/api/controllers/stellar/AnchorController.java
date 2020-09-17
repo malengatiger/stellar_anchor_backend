@@ -253,7 +253,7 @@ public class AnchorController {
         LOGGER.info(E.LEAF + " AnchorAccountService returns Anchor: \uD83C\uDF4E "
                 + anchor.getName() + "  \uD83C\uDF4E anchorId: " + anchor.getAnchorId());
         LOGGER.info(E.LEAF + E.LEAF + E.LEAF + E.LEAF +
-                " ANCHOR CREATED: ".concat(G.toJson(anchor)));
+                " ANCHOR CREATED");
         LOGGER.info(G.toJson(anchor));
         return anchor;
     }

@@ -365,7 +365,8 @@ public class AgentService {
     Toml toml;
     public Client createClient(Client client) throws Exception {
 
-        LOGGER.info(E.LEMON + E.LEMON + E.LEMON + " ....... creating Client (check client duplicates) ....... " + client.getFullName());
+        LOGGER.info(E.LEMON + E.LEMON + E.LEMON + " ....... creating Client (check client duplicates) ....... "
+                + client.getPersonalKYCFields().getFirst_name());
         if (toml == null) {
             toml = tomlService.getAnchorToml();
             if (toml == null) {
@@ -426,7 +427,7 @@ public class AgentService {
 
     private void encryptAndSave(Client client, AccountResponseBag bag) throws Exception {
         // create firebase auth user
-        UserRecord record = firebaseService.createUser(client.getFullName(),
+        UserRecord record = firebaseService.createUser(client.getPersonalKYCFields().getFirst_name(),
                 client.getPersonalKYCFields().getEmail_address(), client.getPassword());
         LOGGER.info(E.BLUE_BIRD + E.BLUE_BIRD + " Firebase auth user created, uid:  ".concat(record.getUid()));
         client.setClientId(record.getUid());
@@ -450,7 +451,8 @@ public class AgentService {
 
         LOGGER.info(
                 (E.BLUE_DOT + E.BLUE_DOT + E.BLUE_DOT + E.BLUE_DOT +
-                        " \uD83C\uDF4E \uD83C\uDF4E Client has been added to Firestore. ").concat(client.getFullName())
+                        " \uD83C\uDF4E \uD83C\uDF4E Client has been added to Firestore. ")
+                        .concat(client.getPersonalKYCFields().getFirst_name())
         .concat(E.BLUE_DOT + E.BLUE_DOT));
     }
 
@@ -587,7 +589,7 @@ public class AgentService {
             request.setBody(mail.build());
             Response response = sg.api(request);
             LOGGER.info("\uD83C\uDF3C \uD83C\uDF3C Registration email sent to Anchor user: \uD83E\uDD66  "
-                    + agent.getFullName() + " \uD83E\uDD66 status code: " + response.getStatusCode());
+                    + agent.getPersonalKYCFields().getFirst_name() + " \uD83E\uDD66 status code: " + response.getStatusCode());
 
         } catch (IOException ex) {
             throw ex;
