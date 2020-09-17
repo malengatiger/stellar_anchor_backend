@@ -134,9 +134,7 @@ public class CryptoService {
     }
 
     public void uploadFile(String id) throws IOException {
-        LOGGER.info(
-                "... \uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 Uploading file \uD83C\uDF4E bucketName: " + bucketName + " id: " + id
-        + " projectId: " + projectId);
+
         Storage storage = StorageOptions.newBuilder().setProjectId(projectId)
                 .build().getService();
         BlobId blobId = BlobId.of(bucketName, id);
@@ -150,10 +148,6 @@ public class CryptoService {
                     + ".......temporary file deleted: " + deleted);
         }
 
-        LOGGER.info(
-                "... \uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 Yebo!! \uD83C\uDF4E " +
-                        "Encrypted Seed File \uD83C\uDF4E \uD83C\uDF4E " + FILE_PATH.concat(id) + " \uD83C\uDF4E \uD83C\uDF4E uploaded to \uD83C\uDF3C " +
-                        "bucketName: " + bucketName + " \uD83C\uDF3C as object: " + id);
     }
     public static final String DOWNLOAD_PATH = "downloaded_seed";
 
@@ -164,16 +158,9 @@ public class CryptoService {
     }
 
     private void downloadSeedFile(String accountId) throws Exception {
-        LOGGER.info(E.YELLOW_BIRD.concat(E.YELLOW_BIRD).concat(" .... about to download seed file for accountId: "
-                .concat(accountId).concat(" bucketName: ").concat(bucketName).concat( " " + E.RED_APPLE
-                .concat(" projectId: ".concat(projectId)))
-        .concat(" object: ".concat(objectName)).concat(" ").concat(E.RED_APPLE)));
-        String name = getPath(accountId);
+
         Path destFilePath = Paths.get(DOWNLOAD_PATH.concat(accountId));
         Storage storage = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
-        LOGGER.info(E.YELLOW_BIRD.concat(E.YELLOW_BIRD)
-                .concat(" serviceAccount email: ")
-                .concat(storage.getServiceAccount(projectId).getEmail()));
         Blob blob = storage.get(BlobId.of(bucketName, accountId));
         if (blob == null) {
             LOGGER.info(E.NOT_OK.concat(E.NOT_OK).concat(E.PEPPER).concat("Blob for downloading is fucking NULL? \uD83D\uDE21 WTF? \uD83D\uDE21 name: "
@@ -181,9 +168,6 @@ public class CryptoService {
             throw new Exception(E.NOT_OK + "KMS Blob for downloading is fucking NULL? WTF?");
         }
         blob.downloadTo(destFilePath);
-        LOGGER.info(E.YELLOW_BIRD.concat(E.YELLOW_BIRD)
-                .concat(" seed file has been downloaded OK into: ".concat(destFilePath.toString()))
-                .concat(destFilePath.toAbsolutePath().toString()));
     }
 
     @NotNull

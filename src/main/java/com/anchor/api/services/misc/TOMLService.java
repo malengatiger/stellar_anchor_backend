@@ -103,20 +103,17 @@ public class TOMLService {
         }
         try {
             String data = cryptoService.getDecryptedSeed(ANCHOR_TOML);
-//            LOGGER.info(E.LEAF.concat(E.LEAF).concat((".............." +
-//                    "anchor.toml decrypted data: ").concat(data)));
 
             Path mPath = Files.write(Paths.get(DOWNLOAD_PATH.concat("" + new Date().getTime())), data.getBytes());
-//            LOGGER.info(E.LEAF.concat(E.LEAF).concat((".............. path to downloaded file: " + mPath.toAbsolutePath().toString())));
             anchorToml = new Toml().read(mPath.toFile());
-//            LOGGER.info(E.PRESCRIPTION + E.PRESCRIPTION + E.PRESCRIPTION + "....... anchor.toml file found from encrypted storage.");
             boolean isDeleted = mPath.toFile().delete();
-            LOGGER.info(E.PRESCRIPTION + E.PRESCRIPTION + E.PRESCRIPTION + "....... temporary download file deleted: " + isDeleted);
-            LOGGER.info(anchorToml.toString());
+            LOGGER.info(E.PRESCRIPTION + E.PRESCRIPTION + E.PRESCRIPTION +
+                    "....... temporary download file deleted: " + isDeleted);
         } catch (Exception e) {
             e.printStackTrace();
             LOGGER.info(E.PEPPER + E.PEPPER + E.PEPPER + "....... Failed to get anchor.toml file from encrypted storage." +
-                    " solve this by uploading anchor.toml via AnchorController.uploadTOML \uD83D\uDE21 \uD83D\uDE21 \uD83D\uDE21 ");
+                    " solve this by uploading anchor.toml via AnchorController.uploadTOML " +
+                    "\uD83D\uDE21 \uD83D\uDE21 \uD83D\uDE21 ");
         }
         return anchorToml;
     }

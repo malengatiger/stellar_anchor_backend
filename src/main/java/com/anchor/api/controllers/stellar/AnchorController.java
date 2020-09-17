@@ -147,7 +147,6 @@ public class AnchorController {
 
     @GetMapping(value = "/.well-known/stellar.toml", produces = MediaType.APPLICATION_JSON_VALUE)
     public  Map<String, Object> getWellKnownStellarToml() throws Exception {
-        LOGGER.info(em + " get stellar.toml file and return to caller ...");
 
             Toml toml = tomlService.getStellarToml();
             if (toml == null) {
@@ -275,8 +274,10 @@ public class AnchorController {
         AccountResponseBag account = accountService.createAndFundUserAccount(
                 startingXLMBalance,startingFiatBalance,fiatLimit);
 
-        LOGGER.info(E.LEAF + " AnchorController:createStellarAccount returns: \uD83C\uDF4E " );
-        LOGGER.info(G.toJson(account));
+        LOGGER.info("\n" + E.LEAF + E.LEAF + E.LEAF + E.LEAF + E.LEAF +
+                " AnchorController:createStellarAccount returns accountId:: \uD83C\uDF4E " +
+                account.getAccountResponse().getAccountId() + "\n\n" );
+
         return new StellarResponse(account.getAccountResponse().getAccountId(),
                 account.getSecretSeed());
     }
