@@ -75,9 +75,13 @@ public class StellarPaymentService {
         return server.submitTransaction(transaction);
     }
     public PaymentRequest sendPayment(PaymentRequest paymentRequest) throws Exception {
-        LOGGER.info(E.COFFEE+E.COFFEE+"Sending payment request ... "+ G.toJson(paymentRequest));
+        LOGGER.info(E.COFFEE+E.COFFEE+"Sending Stellar payment request ... "+ G.toJson(paymentRequest));
+        String seed = cryptoService.getDecryptedSeed(paymentRequest.getSourceAccount());
+        paymentRequest.setSeed(seed);
         SubmitTransactionResponse transactionResponse = submit(paymentRequest);
-        KeyPair sourceKeyPair = KeyPair.fromSecretSeed(paymentRequest.getSeed());
+
+
+        KeyPair sourceKeyPair = KeyPair.fromSecretSeed(seed);
         if (transactionResponse.isSuccess()) {
             //save to database
             String msg = E.OK.concat(E.HAND2.concat(E.HAND2))
