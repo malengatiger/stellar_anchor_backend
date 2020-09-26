@@ -1,6 +1,5 @@
-package com.anchor.api.controllers.payments;
+package com.anchor.api.controllers.stellar;
 
-import com.anchor.api.controllers.stellar.NotFoundException;
 import com.anchor.api.data.Fee;
 import com.anchor.api.data.GetTransactionsResponse;
 import com.anchor.api.data.account.Options;
@@ -197,14 +196,14 @@ public class TransferController {
     }
 
     @GetMapping(value = "/auth", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> auth(@RequestParam String account) throws Exception {
+    public ResponseEntity<?> auth(@RequestParam String account) {
         LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 TransferController:auth ... authorizing account: ".concat(account));
         try {
             ChallengeResponse response = anchorSep10Challenge.newChallenge(account);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            String msg = "Authentication Failed";
-            LOGGER.info(msg);
+            String msg = E.NOT_OK + "Authentication Failed : " + e.getMessage();
+            LOGGER.severe(msg);
             return ResponseEntity.badRequest()
                     .body(msg);
         }
@@ -222,11 +221,11 @@ public class TransferController {
     public ResponseEntity<?> token(@RequestParam String transaction) throws Exception {
         try {
             String token = anchorSep10Challenge.getToken(transaction);
-            LOGGER.info(emm + "Token returned: ".concat(token).concat(emm));
+            LOGGER.info(emm + "JWT Token returned: ".concat(token).concat(emm));
             return ResponseEntity.ok(new JWTToken(token));
         } catch (Exception e) {
             String msg = E.ERROR + "Token acquisition failed " + E.ERROR + e.getMessage();
-            LOGGER.info(msg);
+            LOGGER.severe(msg);
             return ResponseEntity.badRequest()
                     .body(msg);
         }

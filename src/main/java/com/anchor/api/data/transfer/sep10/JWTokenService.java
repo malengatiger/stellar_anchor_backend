@@ -66,10 +66,9 @@ public class JWTokenService {
     public Claims decodeJWT(String jwt) {
 
         //This line will throw an exception if it is not a signed JWS (as expected)
-        Claims claims = Jwts.parser()
+        return Jwts.parser()
                 .setSigningKey(DatatypeConverter.parseBase64Binary(jwtKey))
                 .parseClaimsJws(jwt).getBody();
-        return claims;
     }
 
 

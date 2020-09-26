@@ -144,7 +144,6 @@ public class AnchorController {
         return toml.toMap();
     }
 
-
     @GetMapping(value = "/.well-known/stellar.toml", produces = MediaType.APPLICATION_JSON_VALUE)
     public  Map<String, Object> getWellKnownStellarToml() throws Exception {
 
