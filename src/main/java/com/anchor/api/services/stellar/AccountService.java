@@ -417,50 +417,60 @@ public class AccountService {
     }
 
     public static void processPaymentError(SubmitTransactionResponse payTransactionResponse) throws Exception {
-        TransactionResult transactionResult = payTransactionResponse.getDecodedTransactionResult().get();
-        PaymentResult paymentResult = null;
-        for (OperationResult result : transactionResult.getResult().getResults()) {
-            if (result.getTr().getCreateAccountResult() != null) {
-                paymentResult = result.getTr().getPaymentResult();
+        if (payTransactionResponse.getDecodedTransactionResult().isPresent()) {
+            TransactionResult transactionResult = payTransactionResponse.getDecodedTransactionResult().get();
+            PaymentResult paymentResult = null;
+            for (OperationResult result : transactionResult.getResult().getResults()) {
+                if (result.getTr().getCreateAccountResult() != null) {
+                    paymentResult = result.getTr().getPaymentResult();
+                }
             }
-        }
-        if (paymentResult == null) {
-            throw  new Exception("PaymentOperation failed");
-        }
-        final String msgx = E.NOT_OK
-                .concat(E.NOT_OK.concat(E.ERROR).concat("Payment Transaction Failed : "));
-        switch (paymentResult.getDiscriminant().getValue()) {
-            case -1:
-                LOGGER.info(msgx + "PAYMENT_MALFORMED");
-                throw new Exception("PAYMENT_MALFORMED");
-            case -2:
-                LOGGER.info(msgx + "PAYMENT_UNDERFUNDED");
-                throw new Exception("PAYMENT_UNDERFUNDED");
-            case -3:
-                LOGGER.info(msgx + "PAYMENT_SRC_NO_TRUST");
-                throw new Exception("PAYMENT_SRC_NO_TRUST");
-            case -4:
-                LOGGER.info(msgx + "PAYMENT_SRC_NOT_AUTHORIZED");
-                throw new Exception("PAYMENT_SRC_NOT_AUTHORIZED");
-            case -5:
-                LOGGER.info(msgx + "PAYMENT_NO_DESTINATION");
-                throw new Exception("PAYMENT_NO_DESTINATION");
-            case -6:
-                LOGGER.info(msgx + "PAYMENT_NO_TRUST");
-                throw new Exception("PAYMENT_NO_TRUST");
-            case -7:
-                LOGGER.info(msgx + "PAYMENT_NOT_AUTHORIZED");
-                throw new Exception("PAYMENT_NOT_AUTHORIZED");
-            case -8:
-                LOGGER.info(msgx + "PAYMENT_LINE_FULL");
-                throw new Exception("PAYMENT_LINE_FULL");
-            case -9:
-                LOGGER.info(msgx + "PAYMENT_NO_ISSUER");
-                throw new Exception("PAYMENT_NO_ISSUER");
-            default:
-                throw new Exception(msgx + " UNKNOWN ERROR");
+            if (paymentResult == null) {
+                throw new Exception("\uD83C\uDF3C PaymentOperation failed ");
+            }
+            final String msgx = E.NOT_OK
+                    .concat(E.NOT_OK.concat(E.ERROR).concat("Payment Transaction Failed : "));
+            switch (paymentResult.getDiscriminant().getValue()) {
+                case -1:
+                    LOGGER.info(msgx + "PAYMENT_MALFORMED");
+                    throw new Exception("PAYMENT_MALFORMED");
+                case -2:
+                    LOGGER.info(msgx + "PAYMENT_UNDERFUNDED");
+                    throw new Exception("PAYMENT_UNDERFUNDED");
+                case -3:
+                    LOGGER.info(msgx + "PAYMENT_SRC_NO_TRUST");
+                    throw new Exception("PAYMENT_SRC_NO_TRUST");
+                case -4:
+                    LOGGER.info(msgx + "PAYMENT_SRC_NOT_AUTHORIZED");
+                    throw new Exception("PAYMENT_SRC_NOT_AUTHORIZED");
+                case -5:
+                    LOGGER.info(msgx + "PAYMENT_NO_DESTINATION");
+                    throw new Exception("PAYMENT_NO_DESTINATION");
+                case -6:
+                    LOGGER.info(msgx + "PAYMENT_NO_TRUST");
+                    throw new Exception("PAYMENT_NO_TRUST");
+                case -7:
+                    LOGGER.info(msgx + "PAYMENT_NOT_AUTHORIZED");
+                    throw new Exception("PAYMENT_NOT_AUTHORIZED");
+                case -8:
+                    LOGGER.info(msgx + "PAYMENT_LINE_FULL");
+                    throw new Exception("PAYMENT_LINE_FULL");
+                case -9:
+                    LOGGER.info(msgx + "PAYMENT_NO_ISSUER");
+                    throw new Exception("PAYMENT_NO_ISSUER");
+                default:
+                    throw new Exception(msgx + " UNKNOWN ERROR");
+            }
+        } else {
+            String msg = payTransactionResponse.getResultXdr().get();
+            LOGGER.info("Error happened in AccountService: " + msg);
+            if (msg.contains(PAYMENT_LINE_FULL)) {
+                throw new Exception(E.NOT_OK + E.NOT_OK + E.NOT_OK.concat(E.ERROR) + " PAYMENT_LINE_FULL ERROR");
+            }
+            throw new Exception(E.NOT_OK.concat(E.ERROR) + " UNKNOWN ERROR");
         }
     }
+    private static final String  PAYMENT_LINE_FULL = "AAAAAAAAAGT/////AAAAAQAAAAAAAAAB////+AAAAAA=";
 
     @Value("${userXLMStartingBalance}")
     private String userXLMStartingBalance;

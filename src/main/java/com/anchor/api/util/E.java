@@ -59,7 +59,7 @@ public class E {
             FLOWER_YELLOW = "\uD83C\uDF3C ",    // 🌼
             FERN = "\uD83C\uDF3F ",             // 🌿
             RAIN_DROP = "\uD83D\uDCA7 ",        // 💧
-            RAIN_DROPS = "\uD83D\uDCA6 ",       // 💦
+            RAIN_DROPS = "\uD83D\uDCA6 \uD83D\uDCA6 \uD83D\uDCA6 ",       // 💦
             GEAR = "⚙️ ",                       // ⚙️
             DIAMOND = "\uD83D\uDC8E ",          // 💎
             CANCEL = "❎ ",                     // ❎

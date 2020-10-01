@@ -75,7 +75,14 @@ public class StellarPaymentService {
         return server.submitTransaction(transaction);
     }
     public PaymentRequest sendPayment(PaymentRequest paymentRequest) throws Exception {
-        LOGGER.info(E.COFFEE+E.COFFEE+"Sending Stellar payment request ... "+ G.toJson(paymentRequest));
+        LOGGER.info(E.COFFEE+E.COFFEE+E.COFFEE+E.COFFEE+
+                "Sending Stellar payment request ... "+ G.toJson(paymentRequest)+E.COFFEE+E.COFFEE);
+        if (paymentRequest == null) {
+            throw new Exception(E.ERROR+"Invalid payment request");
+        }
+        if (paymentRequest.getSourceAccount() == null) {
+            throw new Exception(E.ERROR+"Invalid source account");
+        }
         String seed = cryptoService.getDecryptedSeed(paymentRequest.getSourceAccount());
         paymentRequest.setSeed(seed);
         SubmitTransactionResponse transactionResponse = submit(paymentRequest);

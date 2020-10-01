@@ -39,29 +39,29 @@ public class SchedulerToo {
                 "\uD83C\uDF3C CALCULATE LOAN BALANCES or OTHER NECESSARY WORK: " + new DateTime().toDateTimeISO().toString()
                 + " " + E.RED_APPLE);
 
-        try {
-
-            FirebaseService firebaseService = context.getBean(FirebaseService.class);
-            List<Anchor> anchors = firebaseService.getAnchors();
-            if (!anchors.isEmpty()) {
-                Anchor anchor = anchors.get(0);
-
-                List<Agent> list = firebaseService.getAgents();
-                for (Agent agent : list) {
-                    LOGGER.info(E.DICE.concat(E.DICE) + "Agent: ".concat(agent.getFullName()).concat(" ")
-                            .concat(E.HEART_BLUE));
-                }
-                Toml toml = tomlService.getAnchorToml();
-                if (toml != null) {
-                    LOGGER.info(E.DICE.concat(E.DICE) + "  ANCHOR TOML FILE " + E.RED_APPLE + E.RED_APPLE);
-                    LOGGER.info("\n" + E.DICE.concat(E.DICE) + toml.toMap().toString() + E.DICE.concat(E.DICE));
-                }
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            LOGGER.info(E.NOT_OK.concat(E.NOT_OK) + "Firebase query or anchor toml retrieval fell down");
-        }
+//        try {
+//
+//            FirebaseService firebaseService = context.getBean(FirebaseService.class);
+//            List<Anchor> anchors = firebaseService.getAnchors();
+//            if (!anchors.isEmpty()) {
+//                Anchor anchor = anchors.get(0);
+//
+//                List<Agent> list = firebaseService.getAgents();
+//                for (Agent agent : list) {
+//                    LOGGER.info(E.DICE.concat(E.DICE) + "Agent: ".concat(agent.getFullName()).concat(" ")
+//                            .concat(E.HEART_BLUE));
+//                }
+//                Toml toml = tomlService.getAnchorToml();
+//                if (toml != null) {
+//                    LOGGER.info(E.DICE.concat(E.DICE) + "  ANCHOR TOML FILE " + E.RED_APPLE + E.RED_APPLE);
+//                    LOGGER.info("\n" + E.DICE.concat(E.DICE) + toml.toMap().toString() + E.DICE.concat(E.DICE));
+//                }
+//            }
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            LOGGER.info(E.NOT_OK.concat(E.NOT_OK) + "Firebase query or anchor toml retrieval fell down");
+//        }
     }
 
     public void fileCleanUp() {

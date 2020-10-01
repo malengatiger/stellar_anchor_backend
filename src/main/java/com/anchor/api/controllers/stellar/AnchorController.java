@@ -314,12 +314,18 @@ public class AnchorController {
                 .concat(cryptoKey));
         return cryptoKey;
     }
+
     @PostMapping(value = "/sendPayment", produces = MediaType.APPLICATION_JSON_VALUE)
-    public PaymentRequest sendPayment(PaymentRequest paymentRequest) throws Exception {
-        LOGGER.info(E.RAIN_DROP.concat(E.RAIN_DROP) +
-            "............. send payment ... ".concat(G.toJson(paymentRequest)));
-        PaymentRequest response = stellarPaymentService.sendPayment(paymentRequest);
-        LOGGER.info(E.LEAF.concat(E.LEAF) + "Payment has been successfully sent: ".concat(G.toJson(response)));
+    public PaymentRequest sendPayment(@RequestBody  PaymentRequest paymentRequest) throws Exception {
+        LOGGER.info(E.RAIN_DROP.concat(E.RAIN_DROP+E.RAIN_DROP+E.RAIN_DROP) +
+            "............. receiving send payment request; check for nulls!! ... "
+                    .concat(G.toJson(paymentRequest)));
+
+        PaymentRequest response = stellarPaymentService
+                .sendPayment(paymentRequest);
+
+        LOGGER.info(E.LEAF.concat(E.LEAF)
+                + "Payment has been successfully sent: ".concat(G.toJson(response)));
         return response;
     }
 
