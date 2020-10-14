@@ -871,10 +871,12 @@ public class FirebaseService implements DatabaseServiceInterface {
                 .concat(" DELETING ALL AUTH USERS from Firebase .... ").concat(E.RED_DOT)));
         List<ExportedUserRecord> list = getAuthUsers();
         for (ExportedUserRecord exportedUserRecord : list) {
-            FirebaseAuth.getInstance().deleteUser(exportedUserRecord.getUid());
-            if (exportedUserRecord.getDisplayName() != null) {
-                LOGGER.info(E.OK.concat(E.RED_APPLE) + "Successfully deleted user: "
-                        .concat(exportedUserRecord.getDisplayName()));
+            if (!exportedUserRecord.getEmail().contains("bfnadmin@bfn.com")) {
+                FirebaseAuth.getInstance().deleteUserAsync(exportedUserRecord.getUid());
+                if (exportedUserRecord.getDisplayName() != null) {
+                    LOGGER.info(E.OK.concat(E.RED_APPLE) + "Successfully deleted user: "
+                            .concat(exportedUserRecord.getDisplayName()));
+                }
             }
         }
     }

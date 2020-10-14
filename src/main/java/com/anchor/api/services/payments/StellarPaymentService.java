@@ -75,14 +75,18 @@ public class StellarPaymentService {
         return server.submitTransaction(transaction);
     }
     public PaymentRequest sendPayment(PaymentRequest paymentRequest) throws Exception {
-        LOGGER.info(E.COFFEE+E.COFFEE+E.COFFEE+E.COFFEE+
-                "Sending Stellar payment request ... "+ G.toJson(paymentRequest)+E.COFFEE+E.COFFEE);
+        LOGGER.info(E.COFFEE+E.COFFEE+E.COFFEE+E.COFFEE+E.RED_APPLE+
+                "Sending Stellar payment request ... "+ G.toJson(paymentRequest) + "  " + E.COFFEE+E.COFFEE);
         if (paymentRequest == null) {
             throw new Exception(E.ERROR+"Invalid payment request");
         }
         if (paymentRequest.getSourceAccount() == null) {
-            throw new Exception(E.ERROR+"Invalid source account");
+            throw new Exception(E.NOT_OK+"Invalid source account");
         }
+        if (paymentRequest.getDestinationAccount() == null) {
+            throw new Exception(E.NOT_OK+"Invalid destination account");
+        }
+        //todo -  🔵 🔵 CUSTODIAL WALLET - refactor security around secret seed ....  🔵 🔵
         String seed = cryptoService.getDecryptedSeed(paymentRequest.getSourceAccount());
         paymentRequest.setSeed(seed);
         SubmitTransactionResponse transactionResponse = submit(paymentRequest);
@@ -95,7 +99,6 @@ public class StellarPaymentService {
                     + "Payment Succeeded; \uD83D\uDD35  amount: "
                     .concat(paymentRequest.getAmount()).concat(" assetCode: ")
                     .concat(paymentRequest.getAssetCode()
-                            .concat(" ").concat(paymentRequest.getDate())
                             .concat(" sourceAccount: ")
                             .concat(sourceKeyPair.getAccountId()).concat(" ").concat(E.HAPPY));
             LOGGER.info(msg);
@@ -109,9 +112,8 @@ public class StellarPaymentService {
         } else {
             String err = E.NOT_OK.concat(E.ERROR) + "Payment Failed; \uD83D\uDD35  amount: "
                     .concat(paymentRequest.getAmount()).concat(" assetCode: ")
-                    .concat(" ").concat(paymentRequest.getDate())
                     .concat(paymentRequest.getAssetCode().concat(" sourceAccount: ")
-                    .concat(sourceKeyPair.getAccountId()));
+                    .concat(paymentRequest.getSourceAccount()));
             LOGGER.info(E.NOT_OK.concat(E.NOT_OK).concat(err));
             AccountService.processPaymentError(transactionResponse);
         }

@@ -62,7 +62,35 @@ public class AnchorAccountService {
         LOGGER.info(E.DRUM + E.DRUM + "AnchorAccountService Constructor fired ..." +
                 E.HEART_ORANGE + "manages the setup of Anchor base and issuing accounts");
     }
-/*
+
+    public Anchor createAnchorAccounts(Anchor mAnchor, String password,
+                                       String assetAmount, String fundingSeed,
+                                       String startingBalance, String distributionBalance)
+            throws Exception {
+        LOGGER.info(E.FERN + E.FERN + "AnchorAccountService: creating Anchor Accounts " +
+                ".... \uD83C\uDF40 DEV STATUS: " + status + " \uD83C\uDF51 " +
+                "startingBalance: " + startingBalance + " \uD83C\uDF51 seed: " + fundingSeed);
+        Anchor anchor = new Anchor();
+
+        DateTime dateTime = new DateTime();
+        anchor.setDate(dateTime.toDateTimeISO().toString());
+        anchor.setName(mAnchor.getName());
+        anchor.setEmail(mAnchor.getEmail());
+        anchor.setCellphone(mAnchor.getCellphone());
+        anchor.setAnchorId(UUID.randomUUID().toString());
+
+        AccountResponseBag baseAccount = null;
+        AccountResponseBag distributionAccount = null;
+        AccountResponseBag issuingAccount = null;
+        try {
+            baseAccount = accountService.createAndFundAnchorAccount(
+                    fundingSeed, startingBalance);
+             distributionAccount = accountService.createAndFundAnchorAccount(
+                    baseAccount.getSecretSeed(), anchorStartingBalance);
+             issuingAccount = accountService.createAndFundAnchorAccount(
+                    baseAccount.getSecretSeed(), anchorStartingBalance);
+        } catch (Exception e) {
+            /*
     🍎 🍎 🍎 Assets
     The Stellar distributed network can be used to track, hold, and transfer any type of asset: dollars, euros, bitcoin, stocks, gold, and other tokens of value. Any asset on the network can be traded and exchanged with any other.
 
@@ -83,33 +111,7 @@ public class AnchorAccountService {
 
     To trust an issuing account, you create a trustline. Trustlines are entries that persist in the Stellar ledger. They track the limit for which your account trusts the issuing account and the amount of credit from the issuing account that your account currently holds.
  */
-    private final String err = "\uD83D\uDC7F \uD83D\uDE21";
-    public Anchor createAnchorAccounts(Anchor newAnchor, String password,
-                                       String assetAmount, String fundingSeed, String startingBalance)
-            throws Exception {
-        LOGGER.info(E.FERN + E.FERN + "AnchorAccountService: creating Anchor Accounts " +
-                ".... \uD83C\uDF40 DEV STATUS: " + status + " \uD83C\uDF51 " +
-                "startingBalance: " + startingBalance + " \uD83C\uDF51 seed: " + fundingSeed);
-        Anchor anchor = new Anchor();
-
-        DateTime dateTime = new DateTime();
-        anchor.setDate(dateTime.toDateTimeISO().toString());
-        anchor.setName(newAnchor.getName());
-        anchor.setEmail(newAnchor.getEmail());
-        anchor.setCellphone(newAnchor.getCellphone());
-        anchor.setAnchorId(UUID.randomUUID().toString());
-
-        AccountResponseBag baseAccount = null;
-        AccountResponseBag distributionAccount = null;
-        AccountResponseBag issuingAccount = null;
-        try {
-            baseAccount = accountService.createAndFundAnchorAccount(
-                    fundingSeed, startingBalance);
-             distributionAccount = accountService.createAndFundAnchorAccount(
-                    baseAccount.getSecretSeed(), anchorStartingBalance);
-             issuingAccount = accountService.createAndFundAnchorAccount(
-                    baseAccount.getSecretSeed(), anchorStartingBalance);
-        } catch (Exception e) {
+            String err = "\uD83D\uDC7F \uD83D\uDE21";
             String msg = err + "The Anchor set of Stellar accounts failed to complete creation.  " + err;
             if (baseAccount == null) {
                 msg += " Base Account failed to create ";
@@ -155,7 +157,7 @@ public class AnchorAccountService {
         try {
             List< AccountService.AssetBag > assets = accountService.getDefaultAssets(
                     issuingAccount.getAccountResponse().getAccountId());
-            // Create trustlines for all asset types
+            // Create trustLines for all asset types
             for (AccountService.AssetBag assetBag : assets) {
                 SubmitTransactionResponse createTrustResponse = accountService.changeTrustLine(
                         issuingAccount.getAccountResponse().getAccountId(),
@@ -169,18 +171,18 @@ public class AnchorAccountService {
                             + assetBag.assetCode).concat(" " + E.RED_APPLE));
                 } else {
                     LOGGER.info(E.ERROR.concat(E.ERROR).concat("TrustLine failed to create: "
-                            + assetBag.assetCode).concat(" please tell someone, motherf*cker! " + E.RED_APPLE));
+                            + assetBag.assetCode).concat(" please tell someone, motherfucker! " + E.RED_APPLE));
                 }
             }
 
             for (AccountService.AssetBag assetBag : assets) {
-                LOGGER.info(E.YELLOW_BIRD.concat(E.YELLOW_BIRD) +
+                LOGGER.info(E.YELLOW_BIRD.concat(E.YELLOW_BIRD).concat(E.YELLOW_BIRD) +
                         "Creating Asset .... ".concat(assetBag.assetCode)
                                 .concat(" with assetAmount: ".concat(assetAmount)));
                 SubmitTransactionResponse createAssetResponse = accountService.createAsset(
                         issuingAccount.getSecretSeed(),
                         distributionAccount.getAccountResponse().getAccountId(),
-                        assetBag.assetCode,assetAmount);
+                        assetBag.assetCode, assetAmount);
 
                 LOGGER.info(E.HASH.concat(E.HAND2)
                         .concat(" Asset " + assetBag.assetCode + " \uD83C\uDF4E created? "

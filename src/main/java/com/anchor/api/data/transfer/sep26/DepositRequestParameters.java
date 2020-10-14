@@ -36,15 +36,18 @@ public class DepositRequestParameters {
     @SerializedName("asset_issuer")
     @Expose
     private String assetIssuer;
+
     private String account;
     @SerializedName("memo_type")
     @Expose
     private String memoType;
     private String memo;
+
     @SerializedName("email_address")
     @Expose
     private String emailAddress;
     private String type;
+
     @SerializedName("wallet_name")
     @Expose
     private String walletName;

@@ -92,6 +92,7 @@ public class TransferController {
     public DepositOKResponse deposit(@RequestBody DepositRequestParameters requestParameters) throws Exception {
         LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 TransferController:deposit ... fiat money into normal account, " +
                 "\uD83C\uDF4E \uD83C\uDF4E then issue token for the equivalent value");
+
         // 1. write request to firestore
         // 2. do payment transaction for xlm token (stablecoin)
 

@@ -625,8 +625,9 @@ public class DemoDataGenerator {
         // create anchor bag ...
         AnchorBag bag = new AnchorBag();
         bag.setFundingSeed(seed);
-        bag.setAssetAmount("1000000000");
+        bag.setAssetAmount("100000000000");
         bag.setStartingBalance("9900");
+        bag.setDistributionBalance("100000000000.00");
         bag.setPassword(basePassword);
 
         Anchor mAnchor = new Anchor();

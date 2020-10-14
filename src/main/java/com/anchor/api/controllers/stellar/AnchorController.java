@@ -208,6 +208,7 @@ public class AnchorController {
         AccountResponse response = accountService.getAccountUsingAccount(accountId);
         LOGGER.info( E.LEAF.concat(E.LEAF) +" AnchorController getAccount returned: "
                 + response.getAccountId() + E.LEAF);
+
         AccountResponse.Balance[] balances = response.getBalances();
         List<AccountResponse.Balance> balanceList = new ArrayList<>();
         Collections.addAll(balanceList, balances);
@@ -246,7 +247,7 @@ public class AnchorController {
                 anchorBag.getPassword(),
                 anchorBag.getAssetAmount(),
                 anchorBag.getFundingSeed(),
-                anchorBag.getStartingBalance());
+                anchorBag.getStartingBalance(), anchorBag.getDistributionBalance());
 
         LOGGER.info(E.LEAF + " AnchorAccountService returns Anchor: \uD83C\uDF4E "
                 + anchor.getName() + "  \uD83C\uDF4E anchorId: " + anchor.getAnchorId());
@@ -315,16 +316,18 @@ public class AnchorController {
         return cryptoKey;
     }
 
-    @PostMapping(value = "/sendPayment", produces = MediaType.APPLICATION_JSON_VALUE)
-    public PaymentRequest sendPayment(@RequestBody  PaymentRequest paymentRequest) throws Exception {
+    @PostMapping(value = "/sendPayment",
+            headers = "Accept=*/*",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.APPLICATION_JSON_VALUE)
+    public PaymentRequest sendPayment(@RequestBody PaymentRequest paymentRequest) throws Exception {
         LOGGER.info(E.RAIN_DROP.concat(E.RAIN_DROP+E.RAIN_DROP+E.RAIN_DROP) +
-            "............. receiving send payment request; check for nulls!! ... "
-                    .concat(G.toJson(paymentRequest)));
+            "............. receiving send payment request; check for valid object passed in ... " );
 
         PaymentRequest response = stellarPaymentService
                 .sendPayment(paymentRequest);
 
-        LOGGER.info(E.LEAF.concat(E.LEAF)
+        LOGGER.info(E.LEAF.concat(E.LEAF).concat(E.LEAF)
                 + "Payment has been successfully sent: ".concat(G.toJson(response)));
         return response;
     }

@@ -8,6 +8,20 @@ public class Anchor {
     AnchorUser anchorUser;
     String date;
 
+    public Anchor() {
+    }
+
+    public Anchor(String anchorId, String name, String cellphone, String email, Account baseAccount, Account issuingAccount, Account distributionAccount, String date) {
+        this.anchorId = anchorId;
+        this.name = name;
+        this.cellphone = cellphone;
+        this.email = email;
+        this.baseAccount = baseAccount;
+        this.issuingAccount = issuingAccount;
+        this.distributionAccount = distributionAccount;
+        this.date = date;
+    }
+
     public String getDate() {
         return date;
     }

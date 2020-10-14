@@ -19,10 +19,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
-import org.stellar.sdk.*;
 import org.stellar.sdk.Asset;
 import org.stellar.sdk.Memo;
 import org.stellar.sdk.Transaction;
+import org.stellar.sdk.*;
 import org.stellar.sdk.requests.EventListener;
 import org.stellar.sdk.responses.AccountResponse;
 import org.stellar.sdk.responses.RootResponse;
@@ -141,6 +141,7 @@ public class AccountService {
     }
 
     private static final int STELLAR_TIMEOUT_IN_SECONDS = 360, STELLAR_BASE_FEE = 100;
+
     public AccountResponseBag createAndFundAnchorAccount(final String seed, final String startingBalance)
             throws Exception {
         LOGGER.info("\n\n\uD83D\uDC99 \uD83D\uDC99 \uD83D\uDC99 \uD83C\uDF4E... ... ... ... AccountService: createAndFundAnchorAccount starting ....... startingBalance: "
@@ -165,7 +166,6 @@ public class AccountService {
 
             final SubmitTransactionResponse submitTransactionResponse = server.submitTransaction(transaction);
 
-
             if (submitTransactionResponse.isSuccess()) {
                 accountResponse = server.accounts().account(newAccountKeyPair.getAccountId());
                 LOGGER.info("\uD83D\uDC99 \uD83D\uDC99 \uD83D\uDC99 \uD83D\uDC99  "
@@ -182,18 +182,18 @@ public class AccountService {
                     SubmitTransactionResponse.Extras.ResultCodes codes = submitTransactionResponse.getExtras().getResultCodes();
                     LOGGER.info("\uD83D\uDC7F \uD83D\uDE21 SubmitTransactionResponse: getTransactionResultCode: " + codes.getTransactionResultCode());
                     if (codes.getTransactionResultCode().contains("tx_failed")) {
-                        LOGGER.info(E.PEPPER+ E.PEPPER + "CreateAccount Transaction failed ".concat(E.NOT_OK+ E.NOT_OK));
+                        LOGGER.info(E.PEPPER + E.PEPPER + "CreateAccount Transaction failed ".concat(E.NOT_OK + E.NOT_OK));
                         for (String code : codes.getOperationsResultCodes()) {
-                            LOGGER.info(E.PEPPER+ E.PEPPER + "OperationsResultCode: " + code + " " + E.NOT_OK);
+                            LOGGER.info(E.PEPPER + E.PEPPER + "OperationsResultCode: " + code + " " + E.NOT_OK);
                         }
                     }
                 }
-                throw new Exception(E.PEPPER+ E.PEPPER + "Stellar CreateAccount Transaction failed ".concat(E.NOT_OK));
+                throw new Exception(E.PEPPER + E.PEPPER + "Stellar CreateAccount Transaction failed ".concat(E.NOT_OK));
 
             }
 
         } catch (final IOException e) {
-            LOGGER.info(E.ERROR+ E.ERROR + "Failed to create account - see below ...");
+            LOGGER.info(E.ERROR + E.ERROR + "Failed to create account - see below ...");
             throw new Exception("\uD83D\uDD34 Unable to create Account", e);
         }
     }
@@ -258,7 +258,7 @@ public class AccountService {
                 LOGGER.info(E.LEAF.concat(E.LEAF).concat(E.LEAF).concat(E.LEAF)
                         + "Stellar account created: ".concat(E.LEAF).concat(E.LEAF).concat(" ")
                         .concat(keyPair.getAccountId()).concat(" ... about to start creating trustLines ..."));
-               accountResponseBag = addTrustLinesAndOriginalBalances(fiatLimit,
+                accountResponseBag = addTrustLinesAndOriginalBalances(fiatLimit,
                         startingFiatBalance, keyPair, distributionKeyPair);
                 LOGGER.info(E.LEAF.concat(E.LEAF.concat(E.LEAF))
                         + " .......... It is indeed possible that everything worked. \uD83D\uDE21 WTF?");
@@ -271,13 +271,13 @@ public class AccountService {
                 if (submitTransactionResponse.getExtras() != null) {
                     SubmitTransactionResponse.Extras.ResultCodes codes = submitTransactionResponse.getExtras().getResultCodes();
                     if (codes.getTransactionResultCode().contains("tx_failed")) {
-                        LOGGER.info(E.PEPPER+ E.PEPPER + "CreateAccount Transaction failed ".concat(E.NOT_OK+ E.NOT_OK));
+                        LOGGER.info(E.PEPPER + E.PEPPER + "CreateAccount Transaction failed ".concat(E.NOT_OK + E.NOT_OK));
                         for (String code : codes.getOperationsResultCodes()) {
-                            LOGGER.info(E.PEPPER+ E.PEPPER + "OperationsResultCode: " + code + " " + E.NOT_OK);
+                            LOGGER.info(E.PEPPER + E.PEPPER + "OperationsResultCode: " + code + " " + E.NOT_OK);
                         }
                     }
                 }
-                throw new Exception(E.PEPPER+ E.PEPPER + "Stellar CreateAccount Transaction failed ".concat(E.NOT_OK));
+                throw new Exception(E.PEPPER + E.PEPPER + "Stellar CreateAccount Transaction failed ".concat(E.NOT_OK));
             }
 
         } catch (final IOException e) {
@@ -350,13 +350,13 @@ public class AccountService {
             if (trustLineTransactionResponse.getExtras() != null) {
                 SubmitTransactionResponse.Extras.ResultCodes codes = trustLineTransactionResponse.getExtras().getResultCodes();
                 if (codes.getTransactionResultCode().contains("tx_failed")) {
-                    LOGGER.info(E.PEPPER+ E.PEPPER + "CreateAccount Transaction failed ".concat(E.NOT_OK+ E.NOT_OK));
+                    LOGGER.info(E.PEPPER + E.PEPPER + "CreateAccount Transaction failed ".concat(E.NOT_OK + E.NOT_OK));
                     for (String code : codes.getOperationsResultCodes()) {
-                        LOGGER.info(E.PEPPER+ E.PEPPER + "OperationsResultCode: " + code + " " + E.NOT_OK);
+                        LOGGER.info(E.PEPPER + E.PEPPER + "OperationsResultCode: " + code + " " + E.NOT_OK);
                     }
                 }
             }
-            throw new Exception(E.PEPPER+ E.PEPPER + "Stellar CreateAccount Transaction failed ".concat(E.NOT_OK));
+            throw new Exception(E.PEPPER + E.PEPPER + "Stellar CreateAccount Transaction failed ".concat(E.NOT_OK));
         }
 
     }
@@ -408,10 +408,77 @@ public class AccountService {
             }
             return bag;
         } else {
-
             processPaymentError(payTransactionResponse);
+        }
+        return null;
+    }
 
+    private PaymentRequest sendAssetPayment(final String sourceSeed,
+                                            final String destinationAccountId,
+                                            final String amount,
+                                            final String assetCode,
+                                            final String memo) throws Exception {
 
+        if (sourceSeed == null) {
+            throw new IllegalArgumentException("Source seed not found");
+        }
+        if (destinationAccountId == null) {
+            throw new IllegalArgumentException("destinationAccountId not found");
+        }
+        if (assetCode == null) {
+            throw new IllegalArgumentException("Asset Code not found");
+        }
+        KeyPair sourceKeyPair = KeyPair.fromSecretSeed(sourceSeed);
+        LOGGER.info(E.BLUE_BIRD.concat(E.BLUE_BIRD)
+                .concat("sendAssetPayment: Creating payment transaction ... " + assetCode
+                        + " FIAT asset to be paid; destinationAccountId: ".concat(destinationAccountId)
+                        .concat(" sourceAccount: ").concat(sourceKeyPair.getAccountId()).concat(E.FIRE)
+                        .concat(E.FIRE))
+                .concat(" ----- check AMOUNT: ").concat(amount));
+        setAnchor();
+        List<AccountService.AssetBag> assetBags = getDefaultAssets(anchor.getIssuingAccount().getAccountId());
+
+        Asset asset = null;
+        for (AssetBag assetBag : assetBags) {
+            if (assetBag.assetCode.equalsIgnoreCase(assetCode)) {
+                asset = assetBag.asset;
+                break;
+            }
+        }
+        if (asset == null) {
+            throw new Exception("Asset ".concat(assetCode).concat(" not found"));
+        }
+        setServerAndNetwork();
+        final AccountResponse sourceAccount = server.accounts().account(sourceKeyPair.getAccountId());
+        final Transaction.Builder paymentTxBuilder = new Transaction.Builder(sourceAccount, network);
+        paymentTxBuilder.addOperation(
+                new PaymentOperation.Builder(destinationAccountId, asset, amount).build());
+        final Transaction paymentTx = paymentTxBuilder.addMemo(Memo.text(memo)).setTimeout(180)
+                .setBaseFee(100).build();
+
+        paymentTx.sign(sourceKeyPair);
+        LOGGER.info(E.PEAR.concat(E.PEAR).concat(
+                ("sendPayment: " + "Submitting transaction with payment operation ... ").concat(E.RED_DOT)));
+        final SubmitTransactionResponse payTransactionResponse = server.submitTransaction(paymentTx);
+        if (payTransactionResponse.isSuccess()) {
+            final String msg = E.LEAF.concat(E.LEAF.concat(E.LEAF)
+                    .concat("Payment Transaction is successful. \uD83D\uDE21 Check fiat balances on user account \uD83D\uDE21"));
+            LOGGER.info(msg);
+            final AccountResponse userAccountResponse = server.accounts().account(destinationAccountId);
+            // add payment to database
+            final PaymentRequest request = new PaymentRequest();
+            request.setAmount(amount);
+            request.setAnchorId(anchor.getAnchorId());
+            request.setDate(new DateTime().toDateTimeISO().toString());
+            request.setAssetCode(assetCode);
+            request.setSourceAccount(sourceKeyPair.getAccountId());
+            request.setDestinationAccount(destinationAccountId);
+            request.setLedger(payTransactionResponse.getLedger());
+            request.setPaymentRequestId(UUID.randomUUID().toString());
+            firebaseService.addPaymentRequest(request);
+            return request;
+        } else {
+            processPaymentError(payTransactionResponse);
         }
         return null;
     }
@@ -470,15 +537,16 @@ public class AccountService {
             throw new Exception(E.NOT_OK.concat(E.ERROR) + " UNKNOWN ERROR");
         }
     }
-    private static final String  PAYMENT_LINE_FULL = "AAAAAAAAAGT/////AAAAAQAAAAAAAAAB////+AAAAAA=";
+
+    private static final String PAYMENT_LINE_FULL = "AAAAAAAAAGT/////AAAAAQAAAAAAAAAB////+AAAAAA=";
 
     @Value("${userXLMStartingBalance}")
     private String userXLMStartingBalance;
 
     @Value("${userFiatStartingBalance}")
-    private String  userFiatStartingBalance;
+    private String userFiatStartingBalance;
     @Value("${userXLMStartingBalance}")
-    private String  userFiatLimit;
+    private String userFiatLimit;
 
     public AccountResponseBag addBFNAccount(AccountInfoDTO accountInfo) throws Exception {
 
@@ -492,8 +560,8 @@ public class AccountService {
         }
 
 
-        LOGGER.info(E.COFFEE+E.COFFEE+E.COFFEE+
-                "BFN Account now has an Account with the Stellar based Anchor "+E.RED_APPLE);
+        LOGGER.info(E.COFFEE + E.COFFEE + E.COFFEE +
+                "BFN Account now has an Account with the Stellar based Anchor " + E.RED_APPLE);
         return bag;
     }
 
@@ -559,7 +627,7 @@ public class AccountService {
                     }
                 }
                 if (changeTrustResult == null) {
-                    throw  new Exception("ChangeTrustOperation failed");
+                    throw new Exception("ChangeTrustOperation failed");
                 }
                 final String msgx = E.NOT_OK
                         .concat(E.NOT_OK.concat(E.ERROR).concat("ChangeTrustOperation Failed : "));
@@ -611,10 +679,10 @@ public class AccountService {
                             + " issuingAccount: ".concat(issuingAccount).concat(" toml path: ")
                             + TOML_FILE.getAbsolutePath());
             final Toml toml = new Toml().read(TOML_FILE);
-            final List<HashMap> currencies = toml.getList("CURRENCIES");
+            final List<HashMap<String,String>> currencies = toml.getList("CURRENCIES");
             LOGGER.info(
                     "\uD83C\uDF3C \uD83C\uDF3C ... currencies from stellar.toml: \uD83C\uDF3C \uD83C\uDF3C : " + currencies.size());
-            for (final HashMap currency : currencies) {
+            for (final HashMap<String,String> currency : currencies) {
 
                 final String code = currency.get("code").toString();
                 mList.add(new AssetBag(code, Asset.createNonNativeAsset(code, issuingAccount)));
@@ -629,9 +697,9 @@ public class AccountService {
             LOGGER.info(E.RED_DOT.concat(E.RED_DOT.concat(E.RED_DOT)
                     .concat("Currencies missing from STELLAR TOML file. Please add issuing account after creation ")));
             mList.add(new AssetBag("ZAR", Asset.createNonNativeAsset("ZAR", issuingAccount)));
-            mList.add(new AssetBag("USD", Asset.createNonNativeAsset("USD", issuingAccount)));
-            mList.add(new AssetBag("GBP", Asset.createNonNativeAsset("GBP", issuingAccount)));
-            mList.add(new AssetBag("EUR", Asset.createNonNativeAsset("EUR", issuingAccount)));
+//            mList.add(new AssetBag("USD", Asset.createNonNativeAsset("USD", issuingAccount)));
+//            mList.add(new AssetBag("GBP", Asset.createNonNativeAsset("GBP", issuingAccount)));
+//            mList.add(new AssetBag("EUR", Asset.createNonNativeAsset("EUR", issuingAccount)));
 
         }
 
@@ -721,7 +789,7 @@ public class AccountService {
                         + "accountResponse received, add to Firestore ...");
                 try {
                     String res = firebaseService.addAccountResponse(accountResponse);
-                    LOGGER.info(E.COFFEE+E.COFFEE+res);
+                    LOGGER.info(E.COFFEE + E.COFFEE + res);
                 } catch (final Exception e) {
                     LOGGER.log(Level.SEVERE, "AccountListener failed", e);
                 }
@@ -831,7 +899,7 @@ public class AccountService {
                 }
             }
             if (setOptionsResult == null) {
-                throw  new Exception("SetOptionsOperation failed");
+                throw new Exception("SetOptionsOperation failed");
             }
             final String msgx = E.NOT_OK
                     .concat(E.NOT_OK.concat(E.ERROR).concat("SetOptionsOperation Failed : "));

@@ -1,10 +1,12 @@
 package com.anchor.api.data.anchor;
 
 public class AnchorBag {
-    String assetAmount, password, fundingSeed, startingBalance;
+    String assetAmount, password, fundingSeed, startingBalance, distributionBalance;
     Anchor anchor;
 
-    public AnchorBag(String assetAmount, String password, String fundingSeed, String startingBalance, Anchor anchor) {
+    public AnchorBag(String assetAmount, String password, String fundingSeed,
+                     String startingBalance,
+                     String distributionBalance, Anchor anchor) {
         this.assetAmount = assetAmount;
         this.password = password;
         this.fundingSeed = fundingSeed;
@@ -13,6 +15,14 @@ public class AnchorBag {
     }
 
     public AnchorBag() {
+    }
+
+    public String getDistributionBalance() {
+        return distributionBalance;
+    }
+
+    public void setDistributionBalance(String distributionBalance) {
+        this.distributionBalance = distributionBalance;
     }
 
     public String getStartingBalance() {
