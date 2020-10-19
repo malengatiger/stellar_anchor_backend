@@ -89,11 +89,6 @@ public class DemoDataGenerator {
         LOGGER.info(concat
                 + "Firebase collections and users have been deleted for \uD83D\uDD06 " + anchorName);
         Anchor mAnchor = addAnchor(anchorName);
-        if (mAnchor == null) {
-            String msg = "\uD83D\uDD06 \uD83D\uDD06 \uD83D\uDD06 createNewAnchor: Anchor missing; is NULL";
-            LOGGER.info(" \uD83C\uDF40  \uD83C\uDF40 " + msg);
-            throw new Exception(msg);
-        }
         LOGGER.info(concat
                 + "Start Anchor complete. Complete generation after copying anchorId to anchor.toml " +
                 "\uD83D\uDECE AND updating STELLAR.TOML. Will start creating NetworkOperator");
