@@ -77,7 +77,7 @@ public class DemoDataGenerator {
 
     String concat = E.FERN.concat(E.FIRE.concat(E.FIRE.concat(E.FIRE)));
 
-    public Anchor createNewAnchor(String anchorName, String fundingSeed) throws Exception {
+    public Anchor createNewAnchor(String anchorName, String fundingSeed, String token) throws Exception {
         if (!status.equalsIgnoreCase("dev")) {
             throw new Exception(E.NOT_OK + "Demo Data Generation may not be run in PRODUCTION");
         }
@@ -88,7 +88,7 @@ public class DemoDataGenerator {
         deleteFirebaseArtifacts();
         LOGGER.info(concat
                 + "Firebase collections and users have been deleted for \uD83D\uDD06 " + anchorName);
-        Anchor mAnchor = addAnchor(anchorName);
+        Anchor mAnchor = addAnchor(anchorName, token);
         LOGGER.info(concat
                 + "Start Anchor complete. Complete generation after copying anchorId to anchor.toml " +
                 "\uD83D\uDECE AND updating STELLAR.TOML. Will start creating NetworkOperator");
@@ -616,7 +616,7 @@ public class DemoDataGenerator {
     @Autowired
     private TOMLService tomlService;
 
-    private Anchor addAnchor(String anchorName) throws Exception {
+    private Anchor addAnchor(String anchorName, String token) throws Exception {
         // create anchor bag ...
         AnchorBag bag = new AnchorBag();
         bag.setFundingSeed(seed);
@@ -632,8 +632,7 @@ public class DemoDataGenerator {
         mAnchor.setDate(new DateTime().toDateTimeISO().toString());
 
         bag.setAnchor(mAnchor);
-        AnchorController controller = context.getBean(AnchorController.class);
-        Anchor m = controller.createAnchor(bag);
+        Anchor m = anchorAccountService.assembleAnchor(bag);
         LOGGER.info("\uD83D\uDC9A \uD83D\uDC9A \uD83D\uDC9A \uD83D\uDC9A Anchor created: "
         + m.getName());
 

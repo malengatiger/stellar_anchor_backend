@@ -24,6 +24,7 @@ import com.anchor.api.util.Util;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.moandjiezana.toml.Toml;
+import org.jetbrains.annotations.NotNull;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -225,37 +226,13 @@ public class AnchorController {
     }
 
     @PostMapping(value = "/createAnchor", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Anchor createAnchor(@RequestBody AnchorBag anchorBag) throws Exception {
+    public Anchor createAnchor(@RequestBody AnchorBag anchorBag,
+                               @RequestHeader("Authorization") String token) throws Exception {
         LOGGER.info(em + " ,,,,,, AnchorController:createAnchor started by DemoDataController ,,,,,,,,,,,,,," + em);
         LOGGER.info(G.toJson(anchorBag));
-        if (anchorBag.getFundingSeed() == null) {
-            throw new Exception("Funding Account Seed missing");
-        }
-        if (anchorBag.getAnchor() == null) {
-            throw new Exception("Anchor missing");
-        }
-        if (anchorBag.getAssetAmount() == null) {
-            throw new Exception("Asset Amount missing");
-        }
-        if (anchorBag.getStartingBalance() == null) {
-            throw new Exception("StartingBalance  missing");
-        }
-        LOGGER.info(em + " ,,,,,, AnchorController:createAnchor started by DemoDataController :" +
-                " anchorAccountService.createAnchorAccounts starting ,,,,,,,,,,,,,," + em);
-        Anchor anchor = anchorAccountService.createAnchorAccounts(
-                anchorBag.getAnchor(),
-                anchorBag.getPassword(),
-                anchorBag.getAssetAmount(),
-                anchorBag.getFundingSeed(),
-                anchorBag.getStartingBalance(), anchorBag.getDistributionBalance());
-
-        LOGGER.info(E.LEAF + " AnchorAccountService returns Anchor: \uD83C\uDF4E "
-                + anchor.getName() + "  \uD83C\uDF4E anchorId: " + anchor.getAnchorId());
-        LOGGER.info(E.LEAF + E.LEAF + E.LEAF + E.LEAF +
-                " ANCHOR CREATED");
-        LOGGER.info(G.toJson(anchor));
-        return anchor;
+        return anchorAccountService.assembleAnchor(anchorBag);
     }
+
     @Autowired
     private NetworkUtil networkUtil;
     @Value("${bfnUrl}")

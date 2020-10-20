@@ -3,6 +3,7 @@ package com.anchor.api.services.stellar;
 import com.anchor.api.data.account.Account;
 import com.anchor.api.data.account.AccountResponseBag;
 import com.anchor.api.data.anchor.Anchor;
+import com.anchor.api.data.anchor.AnchorBag;
 import com.anchor.api.data.anchor.AnchorUser;
 import com.anchor.api.services.misc.CryptoService;
 import com.anchor.api.services.misc.FirebaseService;
@@ -61,6 +62,36 @@ public class AnchorAccountService {
     public AnchorAccountService() {
         LOGGER.info(E.DRUM + E.DRUM + "AnchorAccountService Constructor fired ..." +
                 E.HEART_ORANGE + "manages the setup of Anchor base and issuing accounts");
+    }
+
+    public Anchor assembleAnchor(AnchorBag anchorBag) throws Exception {
+        if (anchorBag.getFundingSeed() == null) {
+            throw new Exception("Funding Account Seed missing");
+        }
+        if (anchorBag.getAnchor() == null) {
+            throw new Exception("Anchor missing");
+        }
+        if (anchorBag.getAssetAmount() == null) {
+            throw new Exception("Asset Amount missing");
+        }
+        if (anchorBag.getStartingBalance() == null) {
+            throw new Exception("StartingBalance  missing");
+        }
+        LOGGER.info( " ,,,,,, AnchorController:createAnchor started by DemoDataController :" +
+                " anchorAccountService.createAnchorAccounts starting ,,,,,,,,,,,,,," );
+        Anchor anchor = createAnchorAccounts(
+                anchorBag.getAnchor(),
+                anchorBag.getPassword(),
+                anchorBag.getAssetAmount(),
+                anchorBag.getFundingSeed(),
+                anchorBag.getStartingBalance(), anchorBag.getDistributionBalance());
+
+        LOGGER.info(E.LEAF + " AnchorAccountService returns Anchor: \uD83C\uDF4E "
+                + anchor.getName() + "  \uD83C\uDF4E anchorId: " + anchor.getAnchorId());
+        LOGGER.info(E.LEAF + E.LEAF + E.LEAF + E.LEAF +
+                " ANCHOR CREATED");
+        LOGGER.info(G.toJson(anchor));
+        return anchor;
     }
 
     public Anchor createAnchorAccounts(Anchor mAnchor, String password,

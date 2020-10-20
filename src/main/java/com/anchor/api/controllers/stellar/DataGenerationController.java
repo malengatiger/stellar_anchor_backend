@@ -54,14 +54,24 @@ public class DataGenerationController {
 
 
     @GetMapping(value = "/generateAnchor", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Anchor generateAnchor(@RequestParam String anchorName, @RequestParam String fundingSeed) throws Exception {
-        LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 StellarAnchorApplication data/generateAnchor ... \uD83D\uDD35: "+ anchorName);
-        Anchor anchor = demoDataGenerator.createNewAnchor(anchorName, fundingSeed);
+    public Anchor generateAnchor(@RequestParam String anchorName, @RequestParam String fundingSeed,
+                                 @RequestHeader("Authorization") String token) throws Exception {
+        LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 " +
+                "DataGenerationController:generateAnchor ... \uD83D\uDD35: "+ anchorName);
+        Anchor anchor;
+
+        if (token != null) {
+            String mToken = token.substring(7);
+            LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C generateAnchor: auth mToken:" + mToken + " \uD83D\uDC9C");
+            anchor = demoDataGenerator.createNewAnchor(anchorName, fundingSeed, mToken);
+        } else {
+            anchor = demoDataGenerator.createNewAnchor(anchorName, fundingSeed, null);
+        }
 
         LOGGER.info( "\uD83D\uDC99 \uD83D\uDC9C GenerateDemoData:generateAnchor completed and returning anchor "
                 + new Date().toString() + " \uD83D\uDC99 \uD83D\uDC9C STATUS: " + status);
         LOGGER.info(E.DICE.concat(E.DICE.concat(E.DICE)
-                .concat("New Anchor Returned")
+                .concat("New Anchor Returned: ")
                 .concat(G.toJson(anchor))));
 
         LOGGER.info("\n\n \uD83C\uDF4E \uD83C\uDF4E \uD83C\uDF4E \uD83C\uDF4E");
