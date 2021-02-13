@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+//Anchor Stellar Account: GBD552IFC6M3C7NYAMIIG6S3KLLKQV6Y2VKPVTVFGRPR5KXQUZV4UIM7
+//SCPLI2HYKCEIDVUJJIBMCKIORDTEK7FA5SKSBIYQYJPYZIY5JQ5PKZ47
 @Service
 public class AnchorAccountService {
     public static final Logger LOGGER = Logger.getLogger(AnchorAccountService.class.getSimpleName());
@@ -121,39 +123,19 @@ public class AnchorAccountService {
              issuingAccount = accountService.createAndFundAnchorAccount(
                     baseAccount.getSecretSeed(), anchorStartingBalance);
         } catch (Exception e) {
-            /*
-    🍎 🍎 🍎 Assets
-    The Stellar distributed network can be used to track, hold, and transfer any type of asset: dollars, euros, bitcoin, stocks, gold, and other tokens of value. Any asset on the network can be traded and exchanged with any other.
-
-    Other than lumens (see below), all assets have
-
-    Asset type: e.g., USD or BTC
-    Issuer: the account that created the asset
-    Trustlines
-    When you hold assets in Stellar, you’re actually holding credit from a particular issuer.
-    The issuer has agreed that it will trade you its credit on the Stellar network for the corresponding asset–e.g.,
-    fiat currency, precious metal–outside of Stellar. Let’s say that Scott issues oranges as credit on the network.
-    If you hold orange credits, you and Scott have an agreement based on trust, or a trustline: you both agree that when you give Scott an orange credit, he gives you an orange.
-
-    When you hold an asset, you must trust the issuer to properly redeem its credit.
-    Since users of Stellar will not want to trust just any issuer, accounts must explicitly
-    trust an issuing account before they’re able to hold the issuer’s credit.
-    In the example above, you must explicitly trust Scott before you can hold orange credits.
-
-    To trust an issuing account, you create a trustline. Trustlines are entries that persist in the Stellar ledger. They track the limit for which your account trusts the issuing account and the amount of credit from the issuing account that your account currently holds.
- */
             String err = "\uD83D\uDC7F \uD83D\uDE21";
             String msg = err + "The Anchor set of Stellar accounts failed to complete creation.  " + err;
             if (baseAccount == null) {
                 msg += " Base Account failed to create ";
             }
             if (distributionAccount == null) {
-                msg += " Distribution Account failed to create ";
+                msg += "  \uD83D\uDE21 Distribution Account failed to create ";
             }
             if (issuingAccount == null) {
-                msg += " IssuingAccount Account failed to create ";
+                msg += "  \uD83D\uDE21 IssuingAccount Account failed to create ";
             }
             LOGGER.severe(msg);
+            e.printStackTrace();
             throw e;
         }
 

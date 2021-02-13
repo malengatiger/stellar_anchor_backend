@@ -16,7 +16,10 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.*;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
-import com.google.firebase.auth.*;
+import com.google.firebase.auth.ExportedUserRecord;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.ListUsersPage;
+import com.google.firebase.auth.UserRecord;
 import com.google.firebase.cloud.FirestoreClient;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -48,6 +51,7 @@ public class FirebaseService implements DatabaseServiceInterface {
     private String databaseUrl;
 
     private boolean isInitialized = false;
+
     public void initializeFirebase() throws Exception {
         LOGGER.info("\uD83C\uDFBD \uD83C\uDFBD \uD83C\uDFBD \uD83C\uDFBD  FirebaseService: initializeFirebase: ... \uD83C\uDF4F" +
                 ".... \uD83D\uDC99 \uD83D\uDC99 isInitialized: " + isInitialized + " \uD83D\uDC99 \uD83D\uDC99 FIREBASE URL: "
@@ -67,6 +71,8 @@ public class FirebaseService implements DatabaseServiceInterface {
                         "\uD83D\uDC99 URL: " + app.getOptions().getDatabaseUrl() + E.HAPPY);
                 LOGGER.info(E.HEART_BLUE + E.HEART_BLUE + "Firebase has been set up and initialized. " +
                         "\uD83E\uDD66 Name: " + app.getName() + E.HEART_ORANGE + E.HEART_GREEN);
+                LOGGER.info(E.HEART_BLUE + E.HEART_BLUE + "Firebase has been set up and initialized. " +
+                        "\uD83E\uDD66 ProjectId: " + app.getOptions().getProjectId() + E.HEART_ORANGE + E.HEART_GREEN);
                 Firestore fs = FirestoreClient.getFirestore();
                 int cnt = 0;
                 for (CollectionReference listCollection : fs.listCollections()) {
@@ -82,7 +88,6 @@ public class FirebaseService implements DatabaseServiceInterface {
             LOGGER.info(msg);
             throw new Exception(msg, e);
         }
-
 
 
     }
@@ -105,6 +110,7 @@ public class FirebaseService implements DatabaseServiceInterface {
         }
         return mList;
     }
+
     @Override
     public List<NetworkOperatorDTO> getNetworkOperators() throws Exception {
         Firestore fs = FirestoreClient.getFirestore();
@@ -123,8 +129,10 @@ public class FirebaseService implements DatabaseServiceInterface {
         }
         return mList;
     }
+
     @Autowired
     private TOMLService tomlService;
+
     public Anchor getAnchorByName(String name) throws Exception {
         //tomlService.getAnchorToml()
         Firestore fs = FirestoreClient.getFirestore();
@@ -137,7 +145,7 @@ public class FirebaseService implements DatabaseServiceInterface {
         for (QueryDocumentSnapshot document : future.get().getDocuments()) {
             Map<String, Object> map = document.getData();
             String object = G.toJson(map);
-             anchor = G.fromJson(object, Anchor.class);
+            anchor = G.fromJson(object, Anchor.class);
             cnt++;
             LOGGER.info("\uD83C\uDF51 \uD83C\uDF51 \uD83C\uDF51 ANCHOR: #" + cnt +
                     " \uD83D\uDC99 " + anchor.getName() + "  \uD83E\uDD66 anchorId: "
@@ -145,6 +153,7 @@ public class FirebaseService implements DatabaseServiceInterface {
         }
         return anchor;
     }
+
     public Anchor getAnchorById(String anchorId) throws Exception {
         //tomlService.getAnchorToml()
         Firestore fs = FirestoreClient.getFirestore();
@@ -231,6 +240,7 @@ public class FirebaseService implements DatabaseServiceInterface {
         LOGGER.info("\uD83C\uDF4F \uD83C\uDF4F Anchor added at path: ".concat(future.get().getPath()));
         return "\uD83C\uDF4F Anchor added ...";
     }
+
     @Override
     public String addNetworkOperator(NetworkOperatorDTO networkOperator) throws Exception {
         Firestore fs = FirestoreClient.getFirestore();
@@ -293,12 +303,12 @@ public class FirebaseService implements DatabaseServiceInterface {
             return "\uD83C\uDF4F Agent added";
         } else {
             try {
-            DocumentReference ref = future.get();
-            current.setAgentId(agent.getAgentId());
-            current.setAnchorId(agent.getAnchorId());
-            current.setStellarAccountId(agent.getStellarAccountId());
-            ref.set(current);
-            return "\uD83C\uDF4F Agent already exists for this Anchor, updated with new data!";
+                DocumentReference ref = future.get();
+                current.setAgentId(agent.getAgentId());
+                current.setAnchorId(agent.getAnchorId());
+                current.setStellarAccountId(agent.getStellarAccountId());
+                ref.set(current);
+                return "\uD83C\uDF4F Agent already exists for this Anchor, updated with new data!";
             } catch (Exception e) {
                 LOGGER.info("\uD83C\uDF3C \uD83C\uDF3C Unable to update Agent");
             }
@@ -386,8 +396,8 @@ public class FirebaseService implements DatabaseServiceInterface {
                 "AgentFundingRequest added to Database: "
                         .concat(" amount: ").concat(agentFundingRequest.getAmount())
                         .concat(" ").concat(agentFundingRequest.getDate())
-                        + " path: "
-                        .concat(future.get().getPath());
+                + " path: "
+                .concat(future.get().getPath());
         LOGGER.info(msg);
         return agentFundingRequest;
     }
@@ -491,6 +501,7 @@ public class FirebaseService implements DatabaseServiceInterface {
 
 
     private Toml toml;
+
     @Override
     public Anchor getAnchor() throws Exception {
 
@@ -871,13 +882,18 @@ public class FirebaseService implements DatabaseServiceInterface {
                 .concat(" DELETING ALL AUTH USERS from Firebase .... ").concat(E.RED_DOT)));
         List<ExportedUserRecord> list = getAuthUsers();
         for (ExportedUserRecord exportedUserRecord : list) {
-            if (!exportedUserRecord.getEmail().contains("bfnadmin@bfn.com")) {
+
+            if (exportedUserRecord.getEmail().contains("bfnadmin@bfn.com")
+                    || exportedUserRecord.getEmail().contains("aubrey@gmail.com")) {
+                LOGGER.info(E.OK.concat(E.RED_APPLE) + "Ignoring internal users");
+            } else {
                 FirebaseAuth.getInstance().deleteUserAsync(exportedUserRecord.getUid());
                 if (exportedUserRecord.getDisplayName() != null) {
                     LOGGER.info(E.OK.concat(E.RED_APPLE) + "Successfully deleted user: "
                             .concat(exportedUserRecord.getDisplayName()));
                 }
             }
+
         }
     }
 
@@ -975,9 +991,10 @@ public class FirebaseService implements DatabaseServiceInterface {
         Firestore fs = FirestoreClient.getFirestore();
 
         ApiFuture<DocumentReference> future = fs.collection(Constants.BFN_ACCOUNTS).add(accountInfo);
-        LOGGER.info(E.LEAF+E.LEAF+E.LEAF + "createBFNAccount: Stellar account created for BFN player " + E.RED_APPLE);
+        LOGGER.info(E.LEAF + E.LEAF + E.LEAF + "createBFNAccount: Stellar account created for BFN player " + E.RED_APPLE);
         return future.get().getPath();
     }
+
     @Override
     public String updateBFNAccount(AccountInfoDTO accountInfo) throws Exception {
 
@@ -987,7 +1004,7 @@ public class FirebaseService implements DatabaseServiceInterface {
         }
         ApiFuture<WriteResult> future = bfnAccountRef.getReference().set(accountInfo);
 
-        LOGGER.info(E.LEAF+E.LEAF+E.LEAF + "updateBFNAccount: Stellar account updated " + G.toJson(accountInfo) + E.RED_APPLE);
+        LOGGER.info(E.LEAF + E.LEAF + E.LEAF + "updateBFNAccount: Stellar account updated " + G.toJson(accountInfo) + E.RED_APPLE);
         return future.get().getUpdateTime().toString();
     }
 

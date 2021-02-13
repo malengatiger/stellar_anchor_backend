@@ -30,17 +30,31 @@ public class BFNAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(@NotNull HttpServletRequest httpServletRequest,
                                     @NotNull HttpServletResponse httpServletResponse,
-                                    FilterChain filterChain) throws ServletException, IOException {
+                                    @NotNull FilterChain filterChain) throws ServletException, IOException {
 
+        String url = httpServletRequest.getRequestURL().toString();
+        LOGGER.info(E.BELL + "Authenticating this url: " + E.BELL + " " + url);
+
+        if (url.contains("getNetworkNodes")
+                || url.contains("generate")
+                || url.contains("uploadAnchorTOML")
+                || url.contains("uploadStellarTOML")) {
+
+            LOGGER.info(E.ANGRY + "this request is not subject to authentication: "
+                    + E.HAND2 + url);
+            doFilter(httpServletRequest, httpServletResponse, filterChain);
+            return;
+        }
         String m = httpServletRequest.getHeader("Authorization");
         if (m == null) {
             String msg = "\uD83D\uDD06 \uD83D\uDD06 \uD83D\uDD06 " +
-                    "Authorization Header is missing. Needs token! \uD83C\uDF4E "
+                    "Authorization Header is missing. Needs JWT token! \uD83C\uDF4E "
                     + httpServletRequest.getContextPath() + " \uD83C\uDF4E \uD83C\uDF4E";
             LOGGER.info(msg);
             throw new ServletException(msg);
         }
         String token = m.substring(7);
+        LOGGER.info("\uD83D\uDE21 Authentication token retrieved: " + token);
         try {
             ApiFuture<FirebaseToken> future = FirebaseAuth.getInstance().verifyIdTokenAsync(token, true);
             FirebaseToken mToken = future.get();

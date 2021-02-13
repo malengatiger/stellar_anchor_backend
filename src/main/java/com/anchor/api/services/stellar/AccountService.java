@@ -142,18 +142,32 @@ public class AccountService {
 
     private static final int STELLAR_TIMEOUT_IN_SECONDS = 360, STELLAR_BASE_FEE = 100;
 
-    public AccountResponseBag createAndFundAnchorAccount(final String seed, final String startingBalance)
+    public AccountResponseBag createAndFundAnchorAccount(
+            final String seed,
+            final String startingBalance)
             throws Exception {
-        LOGGER.info("\n\n\uD83D\uDC99 \uD83D\uDC99 \uD83D\uDC99 \uD83C\uDF4E... ... ... ... AccountService: createAndFundAnchorAccount starting ....... startingBalance: "
+        LOGGER.info("\n\n\uD83D\uDC99 \uD83D\uDC99 \uD83D\uDC99 \uD83C\uDF4E" +
+                " ... ... ... ... AccountService: createAndFundAnchorAccount starting ....... startingBalance: "
                 + startingBalance);
+
         setServerAndNetwork();
         AccountResponse accountResponse;
+        AccountResponse sourceAccount;
 
         try {
             final KeyPair newAccountKeyPair = KeyPair.random();
             final KeyPair sourceKeyPair = KeyPair.fromSecretSeed(seed);
             final String secret = new String(newAccountKeyPair.getSecretSeed());
-            final AccountResponse sourceAccount = server.accounts().account(sourceKeyPair.getAccountId());
+            try {
+                sourceAccount = server.accounts().account(sourceKeyPair.getAccountId());
+            } catch (Exception e) {
+                LOGGER.info(E.ERROR+E.ERROR
+                        + " Basic Stellar SDK call not working. What the fuck!!! "+E.ERROR+E.ERROR+E.ERROR);
+                LOGGER.severe(E.NOT_OK + E.NOT_OK +
+                        " Unable to obtain accountResponse for the funding seed account on Stellar "
+                + E.ERROR);
+                throw e;
+            }
 
             final Transaction transaction = new Transaction.Builder(sourceAccount, network)
                     .addOperation(new CreateAccountOperation.Builder(newAccountKeyPair.getAccountId(), startingBalance)
@@ -192,9 +206,10 @@ public class AccountService {
 
             }
 
-        } catch (final IOException e) {
+        } catch (final Exception e) {
             LOGGER.info(E.ERROR + E.ERROR + "Failed to create account - see below ...");
-            throw new Exception("\uD83D\uDD34 Unable to create Account", e);
+            e.printStackTrace();
+            throw new Exception("\uD83D\uDD34 Unable to create Account \uD83D\uDD34");
         }
     }
 
@@ -675,7 +690,7 @@ public class AccountService {
         }
         if (TOML_FILE.exists()) {
             LOGGER.info(
-                    "\uD83C\uDF3C \uD83C\uDF3C ... stellar.toml File has been found: \uD83C\uDF3C \uD83C\uDF3C : "
+                    "\uD83C\uDF3C \uD83C\uDF3C ... stellar.toml File has been found at well-known/stellar.toml: \uD83C\uDF3C \uD83C\uDF3C : "
                             + " issuingAccount: ".concat(issuingAccount).concat(" toml path: ")
                             + TOML_FILE.getAbsolutePath());
             final Toml toml = new Toml().read(TOML_FILE);
@@ -689,14 +704,15 @@ public class AccountService {
 //
             }
         } else {
-            LOGGER.info(" \uD83C\uDF45 stellar.toml : File NOT found. this is where .toml needs to go;  \uD83C\uDF45 ");
+            LOGGER.info(" \uD83C\uDF45 stellar.toml : File NOT found. this is where .toml needs to go; " +
+                    " \uD83C\uDF45 _well-known/stellar.toml \uD83C\uDF45 ");
             throw new Exception("stellar.toml not found");
         }
 
         if (mList.isEmpty()) {
             LOGGER.info(E.RED_DOT.concat(E.RED_DOT.concat(E.RED_DOT)
                     .concat("Currencies missing from STELLAR TOML file. Please add issuing account after creation ")));
-            mList.add(new AssetBag("ZAR", Asset.createNonNativeAsset("ZAR", issuingAccount)));
+            mList.add(new AssetBag("ZARK", Asset.createNonNativeAsset("ZARK", issuingAccount)));
 //            mList.add(new AssetBag("USD", Asset.createNonNativeAsset("USD", issuingAccount)));
 //            mList.add(new AssetBag("GBP", Asset.createNonNativeAsset("GBP", issuingAccount)));
 //            mList.add(new AssetBag("EUR", Asset.createNonNativeAsset("EUR", issuingAccount)));

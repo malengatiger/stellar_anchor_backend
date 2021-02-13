@@ -3,6 +3,10 @@
 
 ## 🌺 🌺 🌺 Build container image for cloud run
 gcloud builds submit --tag gcr.io/paymentplatform-33/anchor
+gcloud run deploy --image gcr.io/paymentplatform-33/anchor --platform managed
+
+gcloud builds submit --tag gcr.io/stellar-anchor-333/anchor
+gcloud run deploy --image gcr.io/stellar-anchor-333/anchor --platform managed
 
 OR (BEST PRACTICE and faster cold starts ...)
 ##  🌺 🌺 🌺 use Jib to create container image - see plugin in pom.xml (name of image defined here)
@@ -10,19 +14,32 @@ OR (BEST PRACTICE and faster cold starts ...)
 
 
 #  🌼  🌼  🌼 Deploy container
-gcloud run deploy --image gcr.io/paymentplatform-33/anchor --platform managed
 
 
-# KILL PROCESS on PORT
+
+#################################### KILL PROCESS on PORT
 sudo lsof -i :8084
 sudo kill -9 <PID>
 
 gcloud kms keyrings create "aubsKeyRing"  --location "global"
-
 gcloud kms keys create "stellarKey"  --location "global"  --keyring "aubsKeyRing"  --purpose "encryption"
+
+################ Stellar KMS
+gcloud kms keyrings create "payKeyRing"  --location "global"
+gcloud kms keys create "payKey"  --location "global"  --keyring "payKeyRing"  --purpose "encryption"
+
+gcloud kms keys add-iam-policy-binding \
+  payKey --location global --keyring payKeyRing \
+  --member serviceAccount:paymentservice-2021@appspot.gserviceaccount.com \
+  --role roles/cloudkms.cryptoKeyEncrypterDecrypter
+
+
+
 
 
 //PROMETHEUS Monitor
 docker run -d --name=prometheus -p 9090:9090 -v /Users/aubs/WORK/STELLAR-ANCHOR/stellar_anchor_backend/prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus --config.file=/etc/prometheus/prometheus.yml
 docker run -d --name=grafana -p 3000:3000 grafana/grafana
+
+
 

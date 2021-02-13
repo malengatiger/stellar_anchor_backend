@@ -3,24 +3,27 @@ VERSION="2.0.0"
 # 🎽 The endpoint which clients should query to resolve stellar addresses
 #   for users on your domain.
 
+# 🛎 🛎 🛎 🛎 UPDATE THIS FILE AFTER THE ANCHOR HAS BEEN CREATED; ACCOUNTS AND THE REST OF THE INFO REQUIRED 🛎 🛎
+
 NETWORK_PASSPHRASE="Public Global Stellar Network ; September 2015"
 FEDERATION_SERVER="https://api.domain.com/federation"
-AUTH_SERVER="https://api.domain.com/auth"
+DIRECT_PAYMENT_SERVER="https://api.domain.com/"
+WEB_AUTH_ENDPOINT="https://api.domain.com/auth"
+KYC_SERVER="https://api.domain.com/kycc"
 TRANSFER_SERVER="https://api.domain.com"
 SIGNING_KEY="GBBHQ7H4V6RRORKYLHTCAWP6MOHNORRFJSDPXDFYDGJB2LPZUFPXUEW3"
 HORIZON_URL="https://horizon.domain.com"
 ACCOUNTS=[
-"GD5DJQDDBKGAYNEAXU562HYGOOSYAEOO6AS53PZXBOZGCP5M2OPGMZV3",
-"GAENZLGHJGJRCMX5VCHOLHQXU3EMCU5XWDNU4BGGJFNLI2EL354IVBK7",
-"GAOO3LWBC4XF6VWRP5ESJ6IBHAISVJMSBTALHOQM2EZG7Q477UWA6L7U"
+    "GD5DJQDDBKGAYNEAXU562HYGOOSYAEOO6AS53PZXBOZGCP5M2OPGMZV3",
+    "GAENZLGHJGJRCMX5VCHOLHQXU3EMCU5XWDNU4BGGJFNLI2EL354IVBK7",
+    "GAOO3LWBC4XF6VWRP5ESJ6IBHAISVJMSBTALHOQM2EZG7Q477UWA6L7U"
 ]
-
 #   🥦 Any validation public keys that are declared
 #   to be used by this domain for validating ledgers and are
 #   authorized signers for the domain.
 OUR_VALIDATORS=[
-"$sdf_watcher2",
-"GCGB2S2KGYARPVIA37HYZXVRM2YZUEXA6S33ZU5BUDC6THSB62LZSTYH"
+    "$sdf_watcher2",
+    "GCGB2S2KGYARPVIA37HYZXVRM2YZUEXA6S33ZU5BUDC6THSB62LZSTYH"
 ]
 
 # 🎽 DESIRED_BASE_FEE (integer)
@@ -36,27 +39,27 @@ DESIRED_MAX_TX_PER_LEDGER=400
 #   Port is optional.
 #   By convention, IPs are listed from most to least trusted, if that information is known.
 KNOWN_PEERS=[
-"192.168.0.1",
-"core-testnet1.stellar.org",
-"core-testnet2.stellar.org:11290",
-"2001:0db8:0100:f101:0210:a4ff:fee3:9566"
+    "192.168.0.1",
+    "core-testnet1.stellar.org",
+    "core-testnet2.stellar.org:11290",
+    "2001:0db8:0100:f101:0210:a4ff:fee3:9566"
 ]
 
 # ☀️ list of history archives maintained by this domain
 HISTORY=[
-"http://history.stellar.org/prd/core-live/core_live_001/",
-"http://history.stellar.org/prd/core-live/core_live_002/",
-"http://history.stellar.org/prd/core-live/core_live_003/"
+    "http://history.stellar.org/prd/core-live/core_live_001/",
+    "http://history.stellar.org/prd/core-live/core_live_002/",
+    "http://history.stellar.org/prd/core-live/core_live_003/"
 ]
 
 # 💧 Organization Details 💧
 [DOCUMENTATION]
-ORG_NAME="StellarAnchor"
+ORG_NAME="AzaniaAnchor LLC"
 ORG_DBA="Organization DBA"
 ORG_URL="https://www.domain.com"
 ORG_LOGO="https://www.domain.com/awesomelogo.png"
 ORG_DESCRIPTION="Description of issuer"
-ORG_PHYSICAL_ADDRESS="123 Sesame Street, New York, NY 12345, United States"
+ORG_PHYSICAL_ADDRESS="123 East 44th Street, New York, NY 12345, United States"
 ORG_PHYSICAL_ADDRESS_ATTESTATION="https://www.domain.com/address_attestation.jpg"
 ORG_PHONE_NUMBER="1 (123)-456-7890"
 ORG_PHONE_NUMBER_ATTESTATION="https://www.domain.com/phone_attestation.jpg"
@@ -68,63 +71,36 @@ ORG_OFFICIAL_EMAIL="support@domain.com"
 
 # 💧 PRINCIPALS 💧  - more info
 [[PRINCIPALS]]
-name="Jane Jedidiah Johnson"
-email="jane@domain.com"
-keybase="crypto_jane"
-twitter="crypto_jane"
-github="crypto_jane"
+name="OneConnect FinTech"
+email="aubrey@aftarobot.com"
+keybase="oneconnect_fintech"
+twitter="oneconnect_fintech"
+github="https://github.com/malengatiger"
 id_photo_hash="be688838ca8686e5c90689bf2ab585cef1137c999b48c70b92f67a5c34dc15697b5d11c982ed6d71be1e1e7f7b4e0733884aa97c3f7a339a8ed03577cf74be09"
 verification_photo_hash="016ba8c4cfde65af99cb5fa8b8a37e2eb73f481b3ae34991666df2e04feb6c038666ebd1ec2b6f623967756033c702dde5f423f7d47ab6ed1827ff53783731f7"
 
 
 #   🛎 🛎 This section allows an anchor to declare currencies it currently issues.
 #   Can be used by wallets and clients to trust anchors by domain name
-[[CURRENCIES]]
-code="USD"
-issuer="GDFN7ELA5333B6RAZE6KC46LLLWLDHE6M6CFTOR5EJGSYUZ3JQSP5MKS"
-display_decimals=2 # Specifies how many decimal places should be displayed by clients to end users.
-
-[[CURRENCIES]]
-code="EUR"
-issuer="GDFN7ELA5333B6RAZE6KC46LLLWLDHE6M6CFTOR5EJGSYUZ3JQSP5MKS"
-display_decimals=2 # Specifies how many decimal places should be displayed by clients to end users.
-
-[[CURRENCIES]]
-code="CHF"
-issuer="GDFN7ELA5333B6RAZE6KC46LLLWLDHE6M6CFTOR5EJGSYUZ3JQSP5MKS"
-display_decimals=2 # Specifies how many decimal places should be displayed by clients to end users.
-
-[[CURRENCIES]]
-code="CNY"
-issuer="GDFN7ELA5333B6RAZE6KC46LLLWLDHE6M6CFTOR5EJGSYUZ3JQSP5MKS"
-display_decimals=2 # Specifies how many decimal places should be displayed by clients to end users.
-
-[[CURRENCIES]]
-code="ZAR"
-issuer="GDFN7ELA5333B6RAZE6KC46LLLWLDHE6M6CFTOR5EJGSYUZ3JQSP5MKS"
-display_decimals=2 # Specifies how many decimal places should be displayed by clients to end users.
-
-[[CURRENCIES]]
-code="GBP"
-issuer="GDFN7ELA5333B6RAZE6KC46LLLWLDHE6M6CFTOR5EJGSYUZ3JQSP5MKS"
-display_decimals=2 # Specifies how many decimal places should be displayed by clients to end users.
-
 #[[CURRENCIES]]
-#code="BTC"
-#issuer="GAOO3LWBC4XF6VWRP5ESJ6IBHAISVJMSBTALHOQM2EZG7Q477UWA6L7U"
-#display_decimals=7
-#anchor_asset_type="crypto"
-#anchor_asset="BTC"
-#redemption_instructions="Use SEP6 with our federation server"
-#collateral_addresses=["2C1mCx3ukix1KfegAY5zgQJV7sanAciZpv"]
-#collateral_address_signatures=["304502206e21798a42fae0e854281abd38bacd1aeed3ee3738d9e1446618c4571d10"]
-#
-#
-#[[CURRENCIES]]
-#code="ETH"
-#issuer="GD5T6IPRNCKFOHQWT264YPKOZAWUMMZOLZBJ6BNQMUGPWGRLBK3U7ZNP"
+#code="USDC"
+#issuer="GB4BROL3S4I65TASHO3FT2HW2J4EJ6D2G5WQYVPLSOBCCEADQOJMXHB4"
+#anchor_asset_type="fiat"
 #display_decimals=2 # Specifies how many decimal places should be displayed by clients to end users.
 #
+#[[CURRENCIES]]
+#code="EURT"
+#issuer="GB4BROL3S4I65TASHO3FT2HW2J4EJ6D2G5WQYVPLSOBCCEADQOJMXHB4"
+#anchor_asset_type="fiat"
+#display_decimals=2 # Specifies how many decimal places should be displayed by clients to end users.
+
+[[CURRENCIES]]
+code="ZARK"
+issuer="GB5SIWE6MKKYF3NTQQ6OZMRZHESOVPVYUJDGNHLUYXQ554HM2HTFFGNK"
+anchor_asset_type="fiat"
+display_decimals=2 # Specifies how many decimal places should be displayed by clients to end users.
+
+
 ## asset with meta info
 #[[CURRENCIES]]
 #code="GOAT"

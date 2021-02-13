@@ -71,8 +71,10 @@ public class DemoDataGenerator {
     private NetworkUtil networkUtil;
     @Value("${bfnUrl}")
     private String bfnUrl;
+
     @Value("${bfnCustomerUrl}")
     private String bfnCustomerUrl;
+
     private String seed;
 
     String concat = E.FERN.concat(E.FIRE.concat(E.FIRE.concat(E.FIRE)));

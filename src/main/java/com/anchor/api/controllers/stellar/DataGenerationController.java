@@ -47,17 +47,18 @@ public class DataGenerationController {
     private NetworkUtil networkUtil;
     @Autowired
     private TOMLService tomlService;
+    //
     @Value("${status}")
     private String status;
     @Value("${bfnUrl}")
     private String bfnUrl;
 
 
-    @GetMapping(value = "/generateAnchor", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Anchor generateAnchor(@RequestParam String anchorName, @RequestParam String fundingSeed,
+    @GetMapping(value = "/createNewAnchor", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Anchor createNewAnchor(@RequestParam String anchorName, @RequestParam String fundingSeed,
                                  @RequestHeader("Authorization") String token) throws Exception {
         LOGGER.info("\uD83D\uDD35 \uD83D\uDD35 \uD83D\uDD35 " +
-                "DataGenerationController:generateAnchor ... \uD83D\uDD35: "+ anchorName);
+                "DataGenerationController:createNewAnchor ... \uD83D\uDD35: "+ anchorName);
         Anchor anchor;
 
         if (token != null) {
