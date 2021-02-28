@@ -34,11 +34,23 @@ public class BFNAuthenticationFilter extends OncePerRequestFilter {
 
         String url = httpServletRequest.getRequestURL().toString();
         LOGGER.info(E.BELL + "Authenticating this url: " + E.BELL + " " + url);
+        Enumeration<String> mm = httpServletRequest.getHeaderNames();
+        while (mm.hasMoreElements()) {
+            String name = mm.nextElement();
+            String val = httpServletRequest.getHeader(name);
+            LOGGER.info(E.PEAR + E.PEAR + "Header: " + name + " - " + val);
+
+        }
 
         if (url.contains("getNetworkNodes")
                 || url.contains("generate")
+                || url.contains("ping")
+                || url.contains("graphql")
+                || url.contains("getMomoApiKey")
                 || url.contains("uploadAnchorTOML")
-                || url.contains("uploadStellarTOML")) {
+                || url.contains("momoRequestToPay")
+                || url.contains("uploadStellarTOML")
+                || url.contains("getBlueSnapToken") ) {
 
             LOGGER.info(E.ANGRY + "this request is not subject to authentication: "
                     + E.HAND2 + url);

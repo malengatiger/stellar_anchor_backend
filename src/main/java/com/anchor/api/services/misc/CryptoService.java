@@ -168,6 +168,7 @@ public class CryptoService {
             throw new Exception(E.NOT_OK + "KMS Blob for downloading is fucking NULL? WTF?");
         }
         blob.downloadTo(destFilePath);
+        LOGGER.info(E.LEAF+E.LEAF + "Encrypted seed file downloaded: " + destFilePath.toAbsolutePath());
     }
 
     @NotNull

@@ -1,6 +1,5 @@
 package com.anchor.api.util;
 
-import com.anchor.api.controllers.stellar.AnchorController;
 import com.anchor.api.data.PaymentRequest;
 import com.anchor.api.data.anchor.*;
 import com.anchor.api.data.models.NetworkOperatorDTO;
@@ -246,7 +245,7 @@ public class DemoDataGenerator {
     private void sendPaymentAndSaveOnFuckingDatabase(LoanApplication application, Client client, String clientSeed,
                                                      LoanPayment payment) throws Exception {
 
-        if (!isWithinBalance(payment)) {
+        if (accountIsWithinBalance(payment)) {
             return;
         }
         PaymentRequest request = new PaymentRequest();
@@ -257,6 +256,9 @@ public class DemoDataGenerator {
         request.setAssetCode(application.getAssetCode());
         request.setDate(new DateTime().toDateTimeISO().toString());
         request.setDestinationAccount(payment.getAgentAccount());
+        request.setAgentId(application.getAgentId());
+        request.setClientId(application.getClientId());
+        request.setLoanId(application.getLoanId());
 
         PaymentRequest response = stellarPaymentService.sendPayment(request);
 
@@ -315,7 +317,7 @@ public class DemoDataGenerator {
         }
     }
 
-    private boolean isWithinBalance(LoanPayment loanPayment) throws Exception {
+    private boolean accountIsWithinBalance(LoanPayment loanPayment) throws Exception {
         // todo - check account balance for this asset before attempting payment
         AccountResponse accountResponse = accountService.getAccountUsingSeed(loanPayment.getClientSeed());
         AccountResponse.Balance balance = null;
@@ -341,17 +343,17 @@ public class DemoDataGenerator {
                     .concat(" \uD83C\uDF4E balance: ".concat(balance.getBalance().concat(" \uD83C\uDF4E loan amount: ")
                             .concat(loanPayment.getAmount())));
             LOGGER.info(msg);
-            return false;
+            return true;
         } else {
             LOGGER.info("LoanPayment is less than the account balance. returning TRUE");
-            return true;
+            return false;
         }
     }
 
     private void sendAndSave(LoanApplication application, Client client, String clientSeed, LoanPayment payment)
             throws Exception {
 
-        if (!isWithinBalance(payment)) {
+        if (accountIsWithinBalance(payment)) {
             return;
         }
         PaymentRequest request = new PaymentRequest();
@@ -361,6 +363,9 @@ public class DemoDataGenerator {
         request.setAnchorId(anchor.getAnchorId());
         request.setAssetCode(application.getAssetCode());
         request.setDate(new DateTime().toDateTimeISO().toString());
+        request.setAgentId(application.getAgentId());
+        request.setClientId(application.getClientId());
+        request.setLoanId(application.getLoanId());
         //
         request.setDestinationAccount(payment.getAgentAccount());
         stellarPaymentService.sendPayment(request);
@@ -462,6 +467,8 @@ public class DemoDataGenerator {
                 paymentRequest.setDate(new DateTime().toDateTimeISO().toString());
                 paymentRequest.setDestinationAccount(agent.getStellarAccountId());
                 paymentRequest.setAmount(getRandomAgentAmount());
+                paymentRequest.setAgentId(agent.getAgentId());
+
                 try {
                     stellarPaymentService.sendPayment(paymentRequest);
                     cnt++;

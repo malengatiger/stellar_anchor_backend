@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
 
@@ -42,11 +43,24 @@ public class NetService {
     @Value("${ozowApiKey}")
     private String apiKey;
 
+//    @Value("${bluesnapUsername}")
+//    private String bluespanUsername;
+//
+//    @Value("${bluesnapPassword}")
+//    private String bluespanPassword;
+//
+//    @Value("${bluespanURL}")
+//    private String bluespanURL;
+
+
     @Autowired
     private HashCheckGenerator hashCheckGenerator;
 
     public static final MediaType JSON_MEDIA_TYPE
             = MediaType.parse("application/json; charset=utf-8");
+    public static final MediaType XML_MEDIA_TYPE
+            = MediaType.parse("application/xml; charset=utf-8");
+
 
     public String post(String url, String json) throws Exception {
         LOGGER.info(E.DICE.concat(E.DICE).concat(" ... Posting to: "

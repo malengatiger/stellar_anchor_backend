@@ -127,7 +127,11 @@ public class AgentService {
         request.setAssetCode(application.getAssetCode());
         request.setDate(new DateTime().toDateTimeISO().toString());
         request.setDestinationAccount(application.getClientAccount());
+        request.setAgentId(application.getAgentId());
+        request.setClientId(application.getClientId());
+        request.setLoanId(application.getLoanId());
         PaymentRequest response = stellarPaymentService.sendPayment(request);
+        LOGGER.info(E.LEAF+E.LEAF+"RESPONSE from calling stellarPaymentService.sendPayment(request) "+E.RED_TRIANGLE + G.toJson(response));
 
         application.setPaid(false);
         application.setApprovedByAgent(true);

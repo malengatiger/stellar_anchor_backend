@@ -235,7 +235,7 @@ public class AccountService {
 
     public AccountResponseBag createAndFundUserAccount(final String startingXLMBalance,
                                                        final String startingFiatBalance, final String fiatLimit) throws Exception {
-        LOGGER.info(E.PEAR.concat(E.PEAR) + "\uD83D\uDC99 ... ... ... ... createAndFundAgentAccount starting "
+        LOGGER.info(E.PEAR.concat(E.PEAR) + "\uD83D\uDC99 ... ... ... ... createAndFundUserAccount starting "
                 + "....... startingXLMBalance: " + startingXLMBalance + " startingFiatBalance:" + startingFiatBalance
                 + " fiatLimit: " + fiatLimit);
         setServerAndNetwork();
@@ -308,7 +308,7 @@ public class AccountService {
         LOGGER.info(E.PEAR.concat(E.PEAR)
                 .concat(("addTrustLinesAndOriginalBalances: limit: "
                         + limit + " startingFiatBalance: " + startingFiatBalance
-                        + "Building transaction with trustLine operations ... FIAT ASSETS: " + assetBags.size())
+                        + "  \uD83C\uDF45 Building transaction with trustLine operations ... FIAT ASSETS: " + assetBags.size())
                         .concat(" " + E.RED_DOT + E.RED_DOT)));
         final AccountResponse account = server.accounts().account(userKeyPair.getAccountId());
         final Transaction.Builder trustLineTxBuilder = new Transaction.Builder(account, network);

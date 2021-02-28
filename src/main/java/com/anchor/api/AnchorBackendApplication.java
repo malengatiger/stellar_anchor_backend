@@ -4,11 +4,9 @@ import com.anchor.api.controllers.payments.OzowController;
 import com.anchor.api.controllers.payments.PayPalController;
 import com.anchor.api.controllers.payments.PayfastController;
 import com.anchor.api.services.misc.SchedulerToo;
-import com.anchor.api.services.payments.InterLedgerService;
-import com.anchor.api.services.payments.StellarPaymentService;
+import com.anchor.api.services.payments.*;
 import com.anchor.api.services.pubsub.PublisherService;
 import com.anchor.api.services.pubsub.SubscriberService;
-import com.anchor.api.services.payments.RipplePaymentService;
 import com.anchor.api.controllers.stellar.AnchorController;
 import com.anchor.api.services.stellar.AccountService;
 import com.anchor.api.services.stellar.AgentService;
@@ -17,7 +15,7 @@ import com.anchor.api.services.misc.FirebaseService;
 import com.anchor.api.util.E;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import io.xpring.ilp.model.AccountBalance;
+//import io.xpring.ilp.model.AccountBalance;
 import org.jetbrains.annotations.NotNull;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -131,6 +129,12 @@ public class AnchorBackendApplication implements ApplicationListener<Application
     @Autowired
     private InterLedgerService ilpService;
 
+    @Autowired
+    private BlueSnapService blueSnapService;
+
+    @Autowired
+    private MOMOService momoService;
+
 
     @Override
     public void onApplicationEvent(@NotNull ApplicationReadyEvent event) {
@@ -177,6 +181,18 @@ public class AnchorBackendApplication implements ApplicationListener<Application
                             .concat(method.getName()).concat(" - " + E.RED_APPLE)));
             }
             LOGGER.info("\n\n");
+            for (Method method : blueSnapService.getClass().getMethods()) {
+                if (isValid(method.getName()))
+                    LOGGER.info(E.FERN.concat(E.FERN).concat("BlueSnapService method: "
+                            .concat(method.getName()).concat(" - " + E.RED_APPLE)));
+            }
+            LOGGER.info("\n\n");
+            for (Method method : momoService.getClass().getMethods()) {
+                if (isValid(method.getName()))
+                    LOGGER.info(E.FERN.concat(E.FERN).concat("MOMOService method: "
+                            .concat(method.getName()).concat(" - " + E.RED_APPLE)));
+            }
+            LOGGER.info("\n\n");
             AnchorController controller = context.getBean(AnchorController.class);
             Map<String, Object> tom = controller.getWellKnownStellarToml();
             LOGGER.info(E.SKULL.concat(E.SKULL)
@@ -193,7 +209,7 @@ public class AnchorBackendApplication implements ApplicationListener<Application
             LOGGER.info("\uD83C\uDF38 \uD83C\uDF38 \uD83C\uDF38 onApplicationEvent: calling Publisher Service ");
             String msg = E.PEAR.concat(E.PEAR).concat("Network Payment Services started and ready to serve ".concat(E.CAT)
                     .concat(new Date().toString().concat(" ".concat(E.BLUE_BIRD.concat(E.BLUE_BIRD)))));
-
+            LOGGER.info(msg);
             for (Method method : stellarPaymentService.getClass().getMethods()) {
                 if (isValid(method.getName()))
                     LOGGER.info(E.FLOWER_YELLOW.concat(E.FLOWER_YELLOW).concat("StellarPaymentService method: "
@@ -204,16 +220,26 @@ public class AnchorBackendApplication implements ApplicationListener<Application
                     LOGGER.info(E.FLOWER_YELLOW.concat(E.FLOWER_YELLOW).concat("RipplePaymentService method: "
                             .concat(method.getName()).concat(" - " + E.RED_APPLE)));
             }
-            LOGGER.info("\n\n");
+
             for (Method method : publisherService.getClass().getMethods()) {
                 if (isValid(method.getName()))
                     LOGGER.info(E.FLOWER_PINK.concat(E.FLOWER_PINK).concat("PublisherService method: "
                             .concat(method.getName()).concat(" - " + E.RED_APPLE)));
             }
+            for (Method method : momoService.getClass().getMethods()) {
+                if (isValid(method.getName()))
+                    LOGGER.info(E.LEAF.concat(E.LEAF).concat("MOMOService method: "
+                            .concat(method.getName()).concat(" - " + E.RED_APPLE)));
+            }
+            for (Method method : blueSnapService.getClass().getMethods()) {
+                if (isValid(method.getName()))
+                    LOGGER.info(E.GREEN_APPLE.concat(E.GREEN_APPLE).concat("BlueSpanService method: "
+                            .concat(method.getName()).concat(" - " + E.RED_APPLE)));
+            }
 
 
-            AccountBalance balance = ilpService.testILP();
-            LOGGER.info("\uD83E\uDD6C\uD83E\uDD6C\uD83E\uDD6C\uD83E\uDD6C AccountBalance from ILP: ".concat(G.toJson(balance)));
+//            AccountBalance balance = ilpService.testILP();
+//            LOGGER.info("\uD83E\uDD6C\uD83E\uDD6C\uD83E\uDD6C\uD83E\uDD6C AccountBalance from ILP: ".concat(G.toJson(balance)));
 //            publisherService.publish(msg, "ozow-success");
         } catch (Exception e) {
             LOGGER.info("\uD83D\uDC7F \uD83D\uDC4E\uD83C\uDFFD  \uD83D\uDC4E\uD83C\uDFFD \uD83D\uDC7D\uD83D\uDC7D\uD83D\uDC7D\uD83D\uDC7D PUBLISH FAILED: " + e.getMessage()
@@ -245,7 +271,7 @@ public class AnchorBackendApplication implements ApplicationListener<Application
     }
 
     @Component
-    public class Configurer implements
+    public static class Configurer implements
             WebServerFactoryCustomizer<TomcatServletWebServerFactory> {
 
         @Override
